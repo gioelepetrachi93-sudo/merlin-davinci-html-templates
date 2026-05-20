@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <title>Merlin – Verify your account</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #d6d2c4;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .card {
+      width: 393px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+      background: #f8f1da;
+    }
+
+    /* Header */
+    .header {
+      height: 164px;
+      position: relative;
+      overflow: hidden;
+      background: #6020fc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .merlin-bg-logo {
+      position: absolute;
+      z-index: 1;
+
+      width: 370px;
+      height: auto;
+
+      left: 50%;
+      top: 50%;
+
+      transform: translate(-53.5%, -50%);
+      transform-origin: center center;
+
+      display: block;
+    }
+
+    .merlin-logo {
+      position: absolute;
+      z-index: 10;
+
+      width: 120px;
+      height: 32px;
+
+      left: calc(50% - 120px / 2 - 0.5px);
+      top: calc(50% - 32px / 2);
+
+      display: block;
+    }
+
+    /* Body */
+    .body {
+      background: #f8f1da;
+      padding: 28px 20px 28px;
+    }
+
+    .body h2 {
+      width: 353px;
+      height: 36px;
+
+      color: #091464;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 800;
+      font-size: 32px;
+      line-height: 36px;
+      letter-spacing: 0;
+
+      margin-bottom: 14px;
+      white-space: nowrap;
+    }
+
+    .body p.subtitle {
+      width: 353px;
+
+      color: #091464;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 160%;
+      letter-spacing: 0;
+
+      margin-bottom: 28px;
+    }
+
+    .body p.subtitle strong,
+    .masked-email {
+      color: #091464;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 800;
+    }
+
+    /* OTP input - kept as separated numeric boxes */
+    .otp-wrapper {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .otp-wrapper input {
+      width: 46px;
+      height: 56px;
+      text-align: center;
+
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 24px;
+
+      color: #091464;
+      background: #faf8f3;
+      border: 1.5px solid #ccc;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      caret-color: transparent;
+    }
+
+    .otp-wrapper input:focus {
+      border-color: #571CFF;
+      box-shadow: 0 0 0 3px rgba(87, 28, 255, 0.15);
+    }
+
+    .otp-wrapper input.error {
+      border-color: #c0392b;
+      box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
+    }
+
+    /* Resend */
+    .resend {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+
+      width: 100%;
+      height: 24px;
+
+      color: #64748B;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+
+      margin: 16px 0 32px;
+      text-align: center;
+    }
+
+    .resend a {
+      color: #571CFF;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 20px;
+      text-decoration-line: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* Button */
+    .btn {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+
+      width: 100%;
+      min-width: 40px;
+      height: 40px;
+      padding: 8px 16px;
+
+      border: none;
+      border-radius: 24px;
+
+      background: #571CFF;
+      opacity: 0.5;
+      color: #FFFFFF;
+
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 24px;
+
+      cursor: not-allowed;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn.is-active {
+      opacity: 1;
+      cursor: pointer;
+    }
+
+    .btn.is-active:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+    }
+
+    /* Footer / Terms */
+    .footer {
+      margin-top: 24px;
+      color: #170F30;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .footer .terms-text {
+      width: 353px;
+
+      color: #170F30;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 20px;
+      letter-spacing: 0;
+    }
+
+    .footer .terms-text a {
+      color: #571CFF;
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* SMS fallback */
+    .footer .sms-fallback {
+      width: 353px;
+      height: 20px;
+
+      margin-top: 40px;
+
+      color: #091464;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 20px;
+
+      text-align: center;
+    }
+
+    .footer .sms-fallback a {
+      color: #571CFF;
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .merlin-note {
+      width: 353px;
+      margin-top: 120px;
+      padding-top: 0;
+      border-top: none;
+
+      color: #170F30;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 16px;
+      letter-spacing: 0;
+    }
+
+    .merlin-note strong {
+      color: #170F30;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 500;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="card">
+
+    <div class="header merlin-header">
+      <svg
+        class="merlin-bg-logo"
+        width="378"
+        height="176"
+        viewBox="0 0 378 176"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          d="M370.171 148.701C380.068 118.24 386.581 61.2927 340.218 46.2282C293.854 31.1637 257.54 63.1799 204.117 104.886L243.375 -15.9368C263.76 -78.6771 241.16 -100.505 216.777 -108.427C192.394 -116.35 170.108 -106.331 141.058 -85.0304L-16.6941 33.8237L-0.23429 -16.8344L-78.8416 -42.3754L-113.346 63.8173C-133.731 126.558 -111.131 148.385 -86.7478 156.308C-62.365 164.23 -32.1088 156.801 -3.05901 135.5L143.034 25.4111L107.253 135.534C86.867 198.275 109.468 220.102 133.85 228.025C158.233 235.947 178.627 225.313 207.677 204.013L287.172 144.103C275.079 178.598 250.947 265.871 308.047 284.423C338.252 294.238 368.771 289.468 373.579 286.806C340.006 258.999 354.494 197.32 370.159 148.737L370.171 148.701Z"
+          fill="#091464"
+        />
+      </svg>
+
+      <svg
+        class="merlin-logo"
+        width="120"
+        height="32"
+        viewBox="0 0 120 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="Merlin"
+        role="img"
+      >
+        <path
+          d="M21.8838 3.09766C24.0356 3.09766 26.4062 4.2498 26.4062 9.7666V20.3906C29.589 15.693 31.6574 12.208 35.749 12.208C39.8405 12.2081 40.7978 16.9056 40.7979 19.584V19.5869C40.8075 23.8557 41.2502 29.1365 44.6514 30.4805C44.3354 30.8169 42.0232 31.9844 39.3584 31.9844C34.3197 31.984 33.9821 24.4193 34.0527 21.3633L29.2617 28.1826C27.4954 30.6273 26.1429 31.9999 23.9912 32C21.8394 32 19.4688 30.8479 19.4688 25.3311V15.6484L10.6631 28.1787C8.89681 30.6233 6.67412 31.9969 4.52246 31.9971C2.37067 31.9971 3.58377e-05 30.8448 0 25.3281V15.9902H6.9375V20.4443L16.4473 6.91504C18.2135 4.47057 19.7323 3.09782 21.8838 3.09766ZM53.3682 12.1436C56.3035 12.1436 58.542 13.0946 60.2666 14.6689C62.5436 16.7522 63.6071 20.0804 63.5332 23.7764H50.1719C50.5766 25.933 51.7498 27.251 53.8438 27.251C55.0543 27.2508 55.9344 26.7742 56.4482 25.8623H63.1631C62.7584 27.5455 61.4386 29.1901 59.6016 30.3613C57.8769 31.4589 56.0044 31.9326 53.6182 31.9326C47.4905 31.9325 43.3799 27.7631 43.3799 22.0576L43.3857 22.0547C43.3857 16.4227 47.4619 12.1436 53.3682 12.1436ZM88.1338 31.4141H81.0137V5.26758H88.1338V31.4141ZM97.8848 31.4141H90.9473V12.7646H97.8848V31.4141ZM113.429 12.1797C117.761 12.1797 120 15.0693 120 19.3477V31.4141H113.062V21.0273C113.062 19.0881 112.257 17.8076 110.458 17.8076C108.66 17.8077 107.632 19.3439 107.632 21.3564V31.4141H100.694V12.7646H107.301V15.3252H107.41C108.916 13.2773 110.824 12.1798 113.429 12.1797ZM78.0137 12.3613C78.5629 12.3613 78.933 12.4351 79.1514 12.5439V18.4316H79.0029C74.9276 17.7374 72.5449 19.5649 72.5449 23.7695V31.4111H65.6074V12.7617H72.2139V15.5771L72.2168 15.5811H72.3262C73.8323 13.242 75.6309 12.3614 78.0137 12.3613ZM53.5186 16.7871C51.611 16.7873 50.5448 18.0674 50.1787 20.1152H56.6377C56.3454 18.032 55.1693 16.7871 53.5186 16.7871ZM94.7275 0C94.7275 2.90872 97.0944 5.26745 100.014 5.26758V5.8916C97.0945 5.89173 94.7276 8.24957 94.7275 11.1582H94.1016C94.1015 8.24949 91.7338 5.8916 88.8145 5.8916V5.26758C91.7338 5.26758 94.1016 2.9088 94.1016 0H94.7275Z"
+          fill="#FAF1D9"
+        />
+      </svg>
+    </div>
+
+    <div class="body">
+      <h2>Verify your account</h2>
+
+      <p class="subtitle">
+        Please enter the code we sent to
+        <strong id="masked-email" class="masked-email">joelangston@gmail.com</strong>
+        to verify your email and access your Legoland and all other Merlin tickets.
+      </p>
+
+      <div class="otp-wrapper" id="otp-wrapper">
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+      </div>
+
+      <p class="resend">
+        <span>Didn’t receive a code?</span>
+        <a href="#">Resend</a>
+      </p>
+
+      <button class="btn" id="continue-btn" onclick="handleContinue()">
+        Continue
+      </button>
+
+      <div class="footer">
+        <p class="terms-text">
+          By proceeding, you are indicating that you have read and agree to our
+          <a href="#">Terms of use</a> &amp; <a href="#">Privacy policy</a>
+        </p>
+
+        <p class="sms-fallback">
+          Unable to use email? <a href="#">Send an SMS</a>
+        </p>
+
+        <div class="merlin-note">
+          <strong>Merlin Entertainments</strong> is the magic behind your favorite
+          attractions. We’re here to make sure your experience is seamless, safe,
+          and, most importantly, made for play.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const inputs = Array.from(document.querySelectorAll('#otp-wrapper input'));
+    const btn = document.getElementById('continue-btn');
+
+    function maskEmail(email) {
+      if (!email || !email.includes('@')) return email;
+
+      const [localPart, domain] = email.split('@');
+      const firstChar = localPart.charAt(0);
+      const visibleDomainEnd = domain.slice(-6);
+
+      return `${firstChar}******@****${visibleDomainEnd}`;
+    }
+
+    const emailEl = document.getElementById('masked-email');
+
+    if (emailEl) {
+      emailEl.textContent = maskEmail(emailEl.textContent.trim());
+    }
+
+    function getOtpCode() {
+      return inputs.map(input => input.value).join('');
+    }
+
+    function updateContinueButtonState() {
+      const isComplete = getOtpCode().length === inputs.length;
+
+      btn.classList.toggle('is-active', isComplete);
+      btn.disabled = !isComplete;
+    }
+
+    inputs.forEach((input, i) => {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && i > 0) {
+          inputs[i - 1].focus();
+        }
+      });
+
+      input.addEventListener('input', () => {
+        input.classList.remove('error');
+
+        const val = input.value.replace(/\D/g, '');
+        input.value = val ? val[0] : '';
+
+        if (val && i < inputs.length - 1) {
+          inputs[i + 1].focus();
+        }
+
+        updateContinueButtonState();
+      });
+
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+
+        const pasted = e.clipboardData.getData('text').replace(/\D/g, '');
+
+        pasted.split('').forEach((char, j) => {
+          if (inputs[i + j]) {
+            inputs[i + j].value = char;
+            inputs[i + j].classList.remove('error');
+          }
+        });
+
+        const next = Math.min(i + pasted.length, inputs.length - 1);
+        inputs[next].focus();
+
+        updateContinueButtonState();
+      });
+    });
+
+    function handleContinue() {
+      const code = getOtpCode();
+
+      if (code.length < inputs.length) {
+        inputs.forEach(input => {
+          if (!input.value) input.classList.add('error');
+        });
+
+        const firstEmpty = inputs.find(input => !input.value);
+        if (firstEmpty) firstEmpty.focus();
+
+        return;
+      }
+
+      btn.textContent = 'Continue';
+    }
+
+    updateContinueButtonState();
+  </script>
+</body>
+</html>
