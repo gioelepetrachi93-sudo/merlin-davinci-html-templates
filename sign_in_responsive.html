@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <title>Merlin – Sign in</title>
+
+  <style>
+    :root {
+      --merlin-purple: #6020fc;
+      --merlin-action-purple: #571CFF;
+      --merlin-dark-blue: #091464;
+      --merlin-cream: #f8f1da;
+      --merlin-logo-cream: #FAF1D9;
+      --merlin-text-dark: #170F30;
+      --merlin-muted: #64748B;
+      --merlin-border: #d5c9b0;
+      --merlin-error: #c0392b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--merlin-cream);
+      color: var(--merlin-dark-blue);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    .merlin-shell {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      grid-template-columns: minmax(420px, 1fr) minmax(480px, 1fr);
+      background: var(--merlin-cream);
+      overflow: hidden;
+    }
+
+    /* LEFT / BRAND PANEL */
+    .merlin-brand {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      background: var(--merlin-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .merlin-bg-logo-wrap {
+      position: absolute;
+      z-index: 1;
+
+      width: min(72%, 900px);
+      height: min(74%, 720px);
+
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .merlin-bg-logo {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .merlin-logo {
+      position: relative;
+      z-index: 10;
+      width: clamp(150px, 18vw, 220px);
+      height: auto;
+      display: block;
+    }
+
+    /* RIGHT / FORM PANEL */
+    .merlin-form-panel {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: var(--merlin-cream);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 64px clamp(48px, 7vw, 96px);
+    }
+
+    .merlin-form-inner {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .title {
+      color: var(--merlin-dark-blue);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 800;
+      font-size: clamp(40px, 4vw, 56px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+
+    .subtitle {
+      color: var(--merlin-dark-blue);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 18px;
+      line-height: 160%;
+      letter-spacing: 0;
+      margin-bottom: 36px;
+    }
+
+    .form {
+      width: 100%;
+    }
+
+    .label {
+      display: block;
+      color: var(--merlin-dark-blue);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 20px;
+      margin-bottom: 8px;
+    }
+
+    .email-input {
+      width: 100%;
+      height: 52px;
+      border: 1.5px solid var(--merlin-border);
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 0 16px;
+      color: var(--merlin-dark-blue);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 24px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .email-input::placeholder {
+      color: var(--merlin-muted);
+      font-weight: 400;
+    }
+
+    .email-input:focus {
+      border-color: var(--merlin-action-purple);
+      box-shadow: 0 0 0 3px rgba(87, 28, 255, 0.15);
+    }
+
+    .field-error {
+      min-height: 18px;
+      margin-top: 6px;
+      color: var(--merlin-error);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 500;
+    }
+
+    .flow-error {
+      margin-top: 12px;
+      color: var(--merlin-error);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 18px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .btn {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-width: 40px;
+      height: 48px;
+      padding: 8px 16px;
+      margin-top: 16px;
+      border: none;
+      border-radius: 24px;
+      background: var(--merlin-action-purple);
+      opacity: 0.5;
+      color: #ffffff;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 24px;
+      cursor: not-allowed;
+      transition: opacity 0.2s, transform 0.1s, background 0.2s;
+    }
+
+    .btn.is-active {
+      opacity: 1;
+      cursor: pointer;
+    }
+
+    .btn.is-active:hover {
+      background: #4d18e6;
+    }
+
+    .btn.is-active:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+    }
+
+    .terms {
+      width: 100%;
+      margin-top: 24px;
+      color: var(--merlin-text-dark);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 20px;
+    }
+
+    .terms a {
+      color: var(--merlin-action-purple);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .merlin-note {
+      width: 100%;
+      margin-top: 96px;
+      color: var(--merlin-text-dark);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    .merlin-note strong {
+      color: var(--merlin-text-dark);
+      font-weight: 400;
+    }
+
+    /* TABLET / MOBILE */
+    @media (max-width: 900px) {
+      .merlin-shell {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: auto;
+      }
+
+      .merlin-brand {
+        min-height: clamp(220px, 36vh, 320px);
+        height: clamp(220px, 36vh, 320px);
+        flex: 0 0 clamp(220px, 36vh, 320px);
+        overflow: hidden;
+      }
+
+      .merlin-bg-logo-wrap {
+        width: calc(100% - 32px);
+        height: calc(100% - 32px);
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .merlin-logo {
+        width: 120px;
+        height: 32px;
+      }
+
+      .merlin-form-panel {
+        min-height: auto;
+        flex: 1 1 auto;
+        padding: 28px 20px 28px;
+        justify-content: flex-start;
+      }
+
+      .merlin-form-inner {
+        max-width: 393px;
+        margin: 0 auto;
+      }
+
+      .title {
+        font-size: 32px;
+        line-height: 36px;
+        letter-spacing: -0.02em;
+        margin-bottom: 14px;
+        white-space: nowrap;
+      }
+
+      .subtitle {
+        font-size: 16px;
+        line-height: 160%;
+        margin-bottom: 28px;
+      }
+
+      .btn {
+        height: 40px;
+      }
+
+      .merlin-note {
+        margin-top: 120px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .merlin-form-inner {
+        max-width: 100%;
+      }
+
+      .title,
+      .subtitle,
+      .form,
+      .terms,
+      .merlin-note {
+        width: 100%;
+      }
+
+      .title {
+        font-size: 30px;
+        line-height: 34px;
+      }
+
+      .merlin-note {
+        margin-top: 96px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="merlin-shell" data-screen="sign-in">
+    <aside class="merlin-brand" aria-hidden="true">
+      <div class="merlin-bg-logo-wrap">
+        <svg
+          class="merlin-bg-logo"
+          viewBox="-114 -110 490 398"
+          preserveAspectRatio="xMidYMid meet"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M370.171 148.701C380.068 118.24 386.581 61.2927 340.218 46.2282C293.854 31.1637 257.54 63.1799 204.117 104.886L243.375 -15.9368C263.76 -78.6771 241.16 -100.505 216.777 -108.427C192.394 -116.35 170.108 -106.331 141.058 -85.0304L-16.6941 33.8237L-0.23429 -16.8344L-78.8416 -42.3754L-113.346 63.8173C-133.731 126.558 -111.131 148.385 -86.7478 156.308C-62.365 164.23 -32.1088 156.801 -3.05901 135.5L143.034 25.4111L107.253 135.534C86.867 198.275 109.468 220.102 133.85 228.025C158.233 235.947 178.627 225.313 207.677 204.013L287.172 144.103C275.079 178.598 250.947 265.871 308.047 284.423C338.252 294.238 368.771 289.468 373.579 286.806C340.006 258.999 354.494 197.32 370.159 148.737L370.171 148.701Z"
+            fill="#091464"
+          />
+        </svg>
+      </div>
+
+      <svg
+        class="merlin-logo"
+        width="120"
+        height="32"
+        viewBox="0 0 120 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="Merlin"
+        role="img"
+      >
+        <path
+          d="M21.8838 3.09766C24.0356 3.09766 26.4062 4.2498 26.4062 9.7666V20.3906C29.589 15.693 31.6574 12.208 35.749 12.208C39.8405 12.2081 40.7978 16.9056 40.7979 19.584V19.5869C40.8075 23.8557 41.2502 29.1365 44.6514 30.4805C44.3354 30.8169 42.0232 31.9844 39.3584 31.9844C34.3197 31.984 33.9821 24.4193 34.0527 21.3633L29.2617 28.1826C27.4954 30.6273 26.1429 31.9999 23.9912 32C21.8394 32 19.4688 30.8479 19.4688 25.3311V15.6484L10.6631 28.1787C8.89681 30.6233 6.67412 31.9969 4.52246 31.9971C2.37067 31.9971 3.58377e-05 30.8448 0 25.3281V15.9902H6.9375V20.4443L16.4473 6.91504C18.2135 4.47057 19.7323 3.09782 21.8838 3.09766ZM53.3682 12.1436C56.3035 12.1436 58.542 13.0946 60.2666 14.6689C62.5436 16.7522 63.6071 20.0804 63.5332 23.7764H50.1719C50.5766 25.933 51.7498 27.251 53.8438 27.251C55.0543 27.2508 55.9344 26.7742 56.4482 25.8623H63.1631C62.7584 27.5455 61.4386 29.1901 59.6016 30.3613C57.8769 31.4589 56.0044 31.9326 53.6182 31.9326C47.4905 31.9325 43.3799 27.7631 43.3799 22.0576L43.3857 22.0547C43.3857 16.4227 47.4619 12.1436 53.3682 12.1436ZM88.1338 31.4141H81.0137V5.26758H88.1338V31.4141ZM97.8848 31.4141H90.9473V12.7646H97.8848V31.4141ZM113.429 12.1797C117.761 12.1797 120 15.0693 120 19.3477V31.4141H113.062V21.0273C113.062 19.0881 112.257 17.8076 110.458 17.8076C108.66 17.8077 107.632 19.3439 107.632 21.3564V31.4141H100.694V12.7646H107.301V15.3252H107.41C108.916 13.2773 110.824 12.1798 113.429 12.1797ZM78.0137 12.3613C78.5629 12.3613 78.933 12.4351 79.1514 12.5439V18.4316H79.0029C74.9276 17.7374 72.5449 19.5649 72.5449 23.7695V31.4111H65.6074V12.7617H72.2139V15.5771L72.2168 15.5811H72.3262C73.8323 13.242 75.6309 12.3614 78.0137 12.3613ZM53.5186 16.7871C51.611 16.7873 50.5448 18.0674 50.1787 20.1152H56.6377C56.3454 18.032 55.1693 16.7871 53.5186 16.7871ZM94.7275 0C94.7275 2.90872 97.0944 5.26745 100.014 5.26758V5.8916C97.0945 5.89173 94.7276 8.24957 94.7275 11.1582H94.1016C94.1015 8.24949 91.7338 5.8916 88.8145 5.8916V5.26758C91.7338 5.26758 94.1016 2.9088 94.1016 0H94.7275Z"
+          fill="#FAF1D9"
+        />
+      </svg>
+    </aside>
+
+    <section class="merlin-form-panel">
+      <div class="merlin-form-inner">
+        <h1 class="title">Join the fun!</h1>
+
+        <p class="subtitle">
+          Share your name and email so we can find your spot in the adventure.
+        </p>
+
+        <form id="loginForm" class="form">
+          <label for="userEmail" class="label">Email</label>
+
+          <input
+            class="email-input"
+            type="email"
+            id="userEmail"
+            name="user.email"
+            data-id="user.email"
+            placeholder="Insert your email address"
+            autocomplete="email"
+            inputmode="email"
+            required
+          />
+
+          <div
+            data-skcomponent="skerrormessage"
+            data-skerrorid="user.email"
+            class="field-error"
+          ></div>
+
+          <button
+            type="submit"
+            id="btnContinue"
+            data-id="btnContinue"
+            data-skcomponent="skbutton"
+            data-skbuttontype="next-event"
+            data-skbuttonvalue="submit"
+            class="btn"
+            disabled
+          >
+            Continue
+          </button>
+
+          <button
+            hidden
+            type="button"
+            data-skcomponent="skbutton"
+            data-skbuttontype="next-event"
+            data-skbuttonvalue="link-field-register"
+            aria-hidden="true"
+          >
+            Register
+          </button>
+        </form>
+
+        <div
+          data-skcomponent="skerror"
+          data-id="feedback"
+          class="flow-error"
+        ></div>
+
+        <div class="terms">
+          By proceeding, you are indicating that you have read and agree to our
+          <a
+            href="{{global.variables.termsUrl}}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Terms of use
+          </a>
+          &amp;
+          <a
+            href="{{global.variables.privacyUrl}}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Privacy policy
+          </a>.
+        </div>
+
+        <div class="merlin-note">
+          <strong>Merlin Entertainments</strong> is the magic behind your favorite
+          attractions. We’re here to make sure your experience is seamless, safe,
+          and, most importantly, made for play.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const NEXT_PAGE_URL = 'complete_profile.html';
+    const IS_LOCAL_PREVIEW =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('userEmail');
+    const btn = document.getElementById('btnContinue');
+
+    function updateContinueButtonState() {
+      const isValid = emailInput && emailInput.checkValidity();
+
+      btn.classList.toggle('is-active', isValid);
+      btn.disabled = !isValid;
+    }
+
+    function saveEmailForNextStep() {
+      if (!emailInput) return;
+
+      const email = emailInput.value.trim();
+
+      if (email) {
+        sessionStorage.setItem('merlin_user_email', email);
+      }
+    }
+
+    emailInput.addEventListener('input', function () {
+      saveEmailForNextStep();
+      updateContinueButtonState();
+    });
+
+    loginForm.addEventListener('submit', function (event) {
+      saveEmailForNextStep();
+
+      if (IS_LOCAL_PREVIEW) {
+        event.preventDefault();
+
+        if (!emailInput.checkValidity()) {
+          emailInput.focus();
+          return;
+        }
+
+        window.location.href = NEXT_PAGE_URL;
+      }
+    });
+
+    updateContinueButtonState();
+  </script>
+</body>
+</html>
