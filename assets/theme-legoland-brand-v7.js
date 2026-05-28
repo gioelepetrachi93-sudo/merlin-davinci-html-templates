@@ -36,16 +36,19 @@
     return new URLSearchParams(window.location.search).get("from");
   }
 
-  function shouldApply() {
-    const from = getFromParam();
+function shouldApply() {
+  const from = getFromParam();
+  const validThemeCodes = ["000", "001", "002", "003"];
 
-    if (from === LEGOLAND_CODE) {
-      sessionStorage.setItem("merlin_theme_code", LEGOLAND_CODE);
-      return true;
-    }
-
-    return sessionStorage.getItem("merlin_theme_code") === LEGOLAND_CODE;
+  // If the URL explicitly contains a theme code, it always wins over sessionStorage.
+  if (validThemeCodes.includes(from)) {
+    sessionStorage.setItem("merlin_theme_code", from);
+    return from === LEGOLAND_CODE;
   }
+
+  // If there is no URL parameter, keep the theme across the flow.
+  return sessionStorage.getItem("merlin_theme_code") === LEGOLAND_CODE;
+}
 
   function injectStyle() {
     let style = document.getElementById(STYLE_ID);
