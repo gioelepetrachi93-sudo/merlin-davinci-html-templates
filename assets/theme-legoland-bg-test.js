@@ -1,38 +1,50 @@
 (function () {
   const LEGOLAND_CODE = "001";
   const LEGOLAND_BG = "#FFCF00";
-  const STYLE_ID = "merlin-legoland-bg-test-style";
+  const STYLE_ID = "merlin-legoland-bg-persistent-style";
+
+  let isApplying = false;
 
   function getFromParam() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("from");
+    return new URLSearchParams(window.location.search).get("from");
   }
 
   function shouldApplyLegolandTheme() {
-    return getFromParam() === LEGOLAND_CODE;
+    const fromUrl = getFromParam();
+
+    if (fromUrl === LEGOLAND_CODE) {
+      sessionStorage.setItem("merlin_theme_code", LEGOLAND_CODE);
+      return true;
+    }
+
+    return sessionStorage.getItem("merlin_theme_code") === LEGOLAND_CODE;
   }
 
   function injectStyle() {
-    if (document.getElementById(STYLE_ID)) return;
+    let style = document.getElementById(STYLE_ID);
 
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
+    if (!style) {
+      style = document.createElement("style");
+      style.id = STYLE_ID;
+      document.head.appendChild(style);
+    }
 
     style.textContent = `
-      html,
-      body {
+      html[data-theme="001"],
+      html[data-theme="001"] body {
         background: ${LEGOLAND_BG} !important;
         background-color: ${LEGOLAND_BG} !important;
       }
 
-      html[data-theme="001"],
-      html[data-theme="001"] body,
       html[data-theme="001"] body > div,
       html[data-theme="001"] main,
       html[data-theme="001"] section,
       html[data-theme="001"] [id="root"],
+      html[data-theme="001"] [id="app"],
       html[data-theme="001"] [class*="root"],
       html[data-theme="001"] [class*="Root"],
+      html[data-theme="001"] [class*="app"],
+      html[data-theme="001"] [class*="App"],
       html[data-theme="001"] [class*="page"],
       html[data-theme="001"] [class*="Page"],
       html[data-theme="001"] [class*="screen"],
@@ -43,6 +55,8 @@
       html[data-theme="001"] [class*="Container"],
       html[data-theme="001"] [class*="wrapper"],
       html[data-theme="001"] [class*="Wrapper"],
+      html[data-theme="001"] [class*="content"],
+      html[data-theme="001"] [class*="Content"],
       html[data-theme="001"] .sk-container,
       html[data-theme="001"] .sk-page,
       html[data-theme="001"] .sk-wrapper,
@@ -51,65 +65,83 @@
         background-color: ${LEGOLAND_BG} !important;
       }
     `;
-
-    document.head.appendChild(style);
   }
 
-  function applyInlineBackground() {
-    document.documentElement.setAttribute("data-theme", "001");
-    document.documentElement.style.setProperty("background", LEGOLAND_BG, "important");
-    document.documentElement.style.setProperty("background-color", LEGOLAND_BG, "important");
+  function forceBackgroundOnElement(element) {
+    if (!element || !element.style) return;
 
-    if (document.body) {
-      document.body.style.setProperty("background", LEGOLAND_BG, "important");
-      document.body.style.setProperty("background-color", LEGOLAND_BG, "important");
+    element.style.setProperty("background", LEGOLAND_BG, "important");
+    element.style.setProperty("background-color", LEGOLAND_BG, "important");
+  }
 
-      Array.from(document.body.querySelectorAll("*")).forEach(function (element) {
-        const computed = window.getComputedStyle(element);
-        const bg = computed.backgroundColor;
+  function getLargeVisibleElements() {
+    return Array.from(document.querySelectorAll("body, body *")).filter(function (element) {
+      const rect = element.getBoundingClientRect();
 
-        if (
-          bg === "rgb(255, 255, 255)" ||
-          bg === "rgba(0, 0, 0, 0)" ||
-          bg === "transparent"
-        ) {
-          element.style.setProperty("background-color", LEGOLAND_BG, "important");
-        }
-      });
-    }
+      return (
+        rect.width >= window.innerWidth * 0.7 &&
+        rect.height >= window.innerHeight * 0.4
+      );
+    });
   }
 
   function applyLegolandBackground() {
-    const from = getFromParam();
+    if (!shouldApplyLegolandTheme()) return;
+    if (isApplying) return;
 
-    console.log("[Merlin Theme BG Test] URL:", window.location.href);
-    console.log("[Merlin Theme BG Test] from:", from);
+    isApplying = true;
 
-    if (!shouldApplyLegolandTheme()) {
-      console.log("[Merlin Theme BG Test] LEGOLAND theme not applied");
-      return;
+    try {
+      document.documentElement.setAttribute("data-theme", LEGOLAND_CODE);
+
+      injectStyle();
+
+      forceBackgroundOnElement(document.documentElement);
+      forceBackgroundOnElement(document.body);
+
+      const directContainers = [
+        ...document.querySelectorAll(
+          'body > div, main, section, [id="root"], [id="app"], [class*="root"], [class*="Root"], [class*="page"], [class*="Page"], [class*="screen"], [class*="Screen"], [class*="layout"], [class*="Layout"], [class*="container"], [class*="Container"], [class*="wrapper"], [class*="Wrapper"]'
+        )
+      ];
+
+      directContainers.forEach(forceBackgroundOnElement);
+      getLargeVisibleElements().forEach(forceBackgroundOnElement);
+    } finally {
+      isApplying = false;
     }
+  }
 
-    console.log("[Merlin Theme BG Test] Applying persistent LEGOLAND background:", LEGOLAND_BG);
+  function observeDavinciDomChanges() {
+    const target = document.documentElement;
 
-    injectStyle();
-    applyInlineBackground();
+    const observer = new MutationObserver(function () {
+      window.requestAnimationFrame(applyLegolandBackground);
+    });
+
+    observer.observe(target, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style"]
+    });
   }
 
   function init() {
-    applyLegolandBackground();
+    console.log("[Merlin Theme] persistent LEGOLAND script loaded");
+    console.log("[Merlin Theme] from:", getFromParam());
 
+    applyLegolandBackground();
+    observeDavinciDomChanges();
+
+    setTimeout(applyLegolandBackground, 100);
     setTimeout(applyLegolandBackground, 300);
     setTimeout(applyLegolandBackground, 800);
     setTimeout(applyLegolandBackground, 1500);
     setTimeout(applyLegolandBackground, 3000);
-    setTimeout(applyLegolandBackground, 5000);
 
-    const interval = setInterval(applyLegolandBackground, 1000);
-
-    setTimeout(function () {
-      clearInterval(interval);
-    }, 10000);
+    // Temporary aggressive re-apply for DaVinci async rendering.
+    setInterval(applyLegolandBackground, 500);
   }
 
   if (document.readyState === "loading") {
