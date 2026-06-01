@@ -8,7 +8,8 @@
 
   const ASSET_VERSION = "v=1";
   const PAGE_BACKGROUND = "#FFF8E2";
-  const DESKTOP_SIDE_PANEL_MIN_HEIGHT = 260;
+  const MOBILE_HEADER_HEIGHT = "180px";
+  const DESKTOP_SIDE_PANEL_MIN_WIDTH = 760;
 
   const THEMES = {
     "001": {
@@ -16,7 +17,6 @@
       name: "Alton Towers",
       background: "#283269",
       logoFile: "001-alton-towers.svg",
-      logoSizingMode: "height",
       logoWidth: "auto",
       logoHeight: "145px",
       logoMaxWidth: "210px",
@@ -38,7 +38,6 @@
       name: "LEGOLAND",
       background: "#FFCF00",
       logoFile: "002-legoland.svg",
-      logoSizingMode: "width",
       logoWidth: "230px",
       logoHeight: "auto",
       logoMaxWidth: "78%",
@@ -56,7 +55,6 @@
       name: "Warwick Castle",
       background: "#00415F",
       logoFile: "003-warwick-castle.svg",
-      logoSizingMode: "width",
       logoWidth: "230px",
       logoHeight: "auto",
       logoMaxWidth: "80%",
@@ -74,7 +72,6 @@
       name: "Gruffalo Blackpool",
       background: "#4A82BC",
       logoFile: "004-gruffalo-blackpool.svg",
-      logoSizingMode: "width",
       logoWidth: "230px",
       logoHeight: "auto",
       logoMaxWidth: "80%",
@@ -92,7 +89,6 @@
       name: "Cadbury World",
       background: "#462F92",
       logoFile: "005-cadbury-world.svg",
-      logoSizingMode: "width",
       logoWidth: "230px",
       logoHeight: "auto",
       logoMaxWidth: "80%",
@@ -110,7 +106,6 @@
       name: "Sea Life",
       background: "#282B91",
       logoFile: "006-sea-life.svg",
-      logoSizingMode: "width",
       logoWidth: "230px",
       logoHeight: "auto",
       logoMaxWidth: "80%",
@@ -128,7 +123,6 @@
       name: "The Dungeons",
       background: "#000000",
       logoFile: "007-the-dungeons.svg",
-      logoSizingMode: "width",
       logoWidth: "230px",
       logoHeight: "auto",
       logoMaxWidth: "80%",
@@ -146,7 +140,6 @@
       name: "Chessington",
       background: "#00A13A",
       logoFile: "008-chessington.svg",
-      logoSizingMode: "width",
       logoWidth: "240px",
       logoHeight: "auto",
       logoMaxWidth: "80%",
@@ -164,7 +157,6 @@
       name: "Thorpe Park",
       background: "#FFFFFF",
       logoFile: "009-thorpe-park.svg",
-      logoSizingMode: "width",
       logoWidth: "250px",
       logoHeight: "auto",
       logoMaxWidth: "84%",
@@ -208,7 +200,7 @@
     try {
       sessionStorage.setItem(SESSION_KEY, code);
     } catch (error) {
-      // sessionStorage can be unavailable in some embedded contexts.
+      // sessionStorage can be unavailable in embedded auth contexts.
     }
   }
 
@@ -301,10 +293,18 @@
   }
 
   function isDesktopSidePanel(hero) {
-    if (!hero) return false;
+    const body = document.querySelector(".mv-body");
 
-    const rect = hero.getBoundingClientRect();
-    return rect.height > DESKTOP_SIDE_PANEL_MIN_HEIGHT;
+    if (!hero || !body) return false;
+
+    const heroRect = hero.getBoundingClientRect();
+    const bodyRect = body.getBoundingClientRect();
+
+    return (
+      window.innerWidth >= DESKTOP_SIDE_PANEL_MIN_WIDTH &&
+      bodyRect.left >= heroRect.right - 8 &&
+      Math.abs(bodyRect.top - heroRect.top) < 140
+    );
   }
 
   function getResponsiveValue(theme, desktopKey, mobileKey, fallback) {
@@ -339,7 +339,6 @@
         inset: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        display: block !important;
         pointer-events: none !important;
         z-index: 20 !important;
       }
@@ -368,12 +367,16 @@
   }
 
   function applyPageBackgrounds(pageBackground) {
-    setImportant(document.documentElement, "background-color", pageBackground);
-    setImportant(document.body, "background-color", pageBackground);
-
-    setImportant(document.querySelector(".merlin-verify"), "background-color", pageBackground);
-    setImportant(document.querySelector(".mv-shell"), "background-color", pageBackground);
-    setImportant(document.querySelector(".mv-body"), "background-color", pageBackground);
+    [
+      document.documentElement,
+      document.body,
+      document.querySelector(".merlin-verify"),
+      document.querySelector(".mv-shell"),
+      document.querySelector(".mv-body")
+    ].forEach(function (element) {
+      setImportant(element, "background", pageBackground);
+      setImportant(element, "background-color", pageBackground);
+    });
   }
 
   function hideNativeHeroAssets() {
@@ -430,6 +433,7 @@
     const brandDom = ensureBrandDom(hero);
     const desktopMode = isDesktopSidePanel(hero);
     const logoUrl = getLogoUrl(theme);
+    const mobileHeaderHeight = theme.mobileLayerHeight || MOBILE_HEADER_HEIGHT;
 
     const logoWidth = desktopMode
       ? theme.logoWidth || "auto"
@@ -462,13 +466,13 @@
     setImportant(hero, "position", "relative");
     setImportant(hero, "overflow", "hidden");
     setImportant(hero, "padding", "0");
+    setImportant(hero, "background", "transparent");
     setImportant(hero, "background-color", "transparent");
 
     setImportant(brandDom.wrapper, "position", "absolute");
     setImportant(brandDom.wrapper, "inset", "0");
     setImportant(brandDom.wrapper, "width", "100%");
     setImportant(brandDom.wrapper, "height", "100%");
-    setImportant(brandDom.wrapper, "display", "block");
     setImportant(brandDom.wrapper, "pointer-events", "none");
     setImportant(brandDom.wrapper, "z-index", "20");
 
@@ -476,6 +480,7 @@
     setImportant(brandDom.layer, "top", "0");
     setImportant(brandDom.layer, "left", "0");
     setImportant(brandDom.layer, "right", "0");
+    setImportant(brandDom.layer, "background", theme.background);
     setImportant(brandDom.layer, "background-color", theme.background);
     setImportant(brandDom.layer, "display", "flex");
     setImportant(brandDom.layer, "align-items", "center");
@@ -485,13 +490,21 @@
     setImportant(brandDom.layer, "overflow", "hidden");
 
     if (desktopMode) {
+      removeInlineProperty(hero, "height");
+      removeInlineProperty(hero, "min-height");
+      removeInlineProperty(hero, "max-height");
+
       setImportant(brandDom.layer, "bottom", "0");
       setImportant(brandDom.layer, "height", "100%");
       setImportant(brandDom.layer, "max-height", "none");
     } else {
+      setImportant(hero, "height", mobileHeaderHeight);
+      setImportant(hero, "min-height", mobileHeaderHeight);
+      setImportant(hero, "max-height", mobileHeaderHeight);
+
       removeInlineProperty(brandDom.layer, "bottom");
-      setImportant(brandDom.layer, "height", theme.mobileLayerHeight || "180px");
-      setImportant(brandDom.layer, "max-height", "100%");
+      setImportant(brandDom.layer, "height", mobileHeaderHeight);
+      setImportant(brandDom.layer, "max-height", mobileHeaderHeight);
     }
 
     setImportant(brandDom.stage, "width", stageWidth);
@@ -595,6 +608,7 @@
         background: theme.background,
         logoUrl: result.logoUrl,
         from: getFromParam(),
+        viewportWidth: window.innerWidth,
         heroHeight: Math.round(hero.getBoundingClientRect().height)
       });
     }
