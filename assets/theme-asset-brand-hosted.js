@@ -17,7 +17,9 @@
       logoWidth: "clamp(140px, 22vw, 242px)",
       logoMaxHeight: "170px",
       mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "130px"
+      mobileLogoMaxHeight: "130px",
+      logoOffsetY: "22px",
+      mobileLogoOffsetY: "24px"
     },
 
     "002": {
@@ -28,7 +30,9 @@
       logoWidth: "clamp(105px, 16vw, 210px)",
       logoMaxHeight: "120px",
       mobileLogoWidth: "min(70%, 160px)",
-      mobileLogoMaxHeight: "110px"
+      mobileLogoMaxHeight: "110px",
+      logoOffsetY: "0px",
+      mobileLogoOffsetY: "0px"
     },
 
     "003": {
@@ -39,7 +43,9 @@
       logoWidth: "clamp(140px, 22vw, 242px)",
       logoMaxHeight: "170px",
       mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "130px"
+      mobileLogoMaxHeight: "130px",
+      logoOffsetY: "0px",
+      mobileLogoOffsetY: "0px"
     },
 
     "004": {
@@ -50,7 +56,9 @@
       logoWidth: "clamp(140px, 22vw, 242px)",
       logoMaxHeight: "180px",
       mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "140px"
+      mobileLogoMaxHeight: "140px",
+      logoOffsetY: "0px",
+      mobileLogoOffsetY: "0px"
     },
 
     "005": {
@@ -61,7 +69,9 @@
       logoWidth: "clamp(140px, 22vw, 242px)",
       logoMaxHeight: "180px",
       mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "140px"
+      mobileLogoMaxHeight: "140px",
+      logoOffsetY: "0px",
+      mobileLogoOffsetY: "0px"
     },
 
     "006": {
@@ -72,7 +82,9 @@
       logoWidth: "clamp(140px, 22vw, 242px)",
       logoMaxHeight: "140px",
       mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "120px"
+      mobileLogoMaxHeight: "120px",
+      logoOffsetY: "0px",
+      mobileLogoOffsetY: "0px"
     },
 
     "007": {
@@ -83,7 +95,9 @@
       logoWidth: "clamp(140px, 22vw, 242px)",
       logoMaxHeight: "170px",
       mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "130px"
+      mobileLogoMaxHeight: "130px",
+      logoOffsetY: "0px",
+      mobileLogoOffsetY: "0px"
     },
 
     "008": {
@@ -94,7 +108,9 @@
       logoWidth: "clamp(150px, 22vw, 242px)",
       logoMaxHeight: "190px",
       mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "150px"
+      mobileLogoMaxHeight: "150px",
+      logoOffsetY: "0px",
+      mobileLogoOffsetY: "0px"
     },
 
     "009": {
@@ -105,7 +121,9 @@
       logoWidth: "clamp(180px, 24vw, 247px)",
       logoMaxHeight: "120px",
       mobileLogoWidth: "min(75%, 200px)",
-      mobileLogoMaxHeight: "100px"
+      mobileLogoMaxHeight: "100px",
+      logoOffsetY: "0px",
+      mobileLogoOffsetY: "0px"
     }
   };
 
@@ -127,6 +145,14 @@
 
   function getFromParam() {
     return new URLSearchParams(window.location.search).get("from");
+  }
+
+  function getLogoOffsetY(theme) {
+    return theme.logoOffsetY || "0px";
+  }
+
+  function getMobileLogoOffsetY(theme) {
+    return theme.mobileLogoOffsetY || theme.logoOffsetY || "0px";
   }
 
   function resolveThemeCode() {
@@ -206,7 +232,7 @@
         top: 50% !important;
         right: auto !important;
         bottom: auto !important;
-        transform: translate(-50%, -50%) !important;
+        transform: translate(-50%, calc(-50% + ${getLogoOffsetY(theme)})) !important;
 
         margin: 0 !important;
         z-index: 10 !important;
@@ -228,7 +254,7 @@
           top: 50% !important;
           right: auto !important;
           bottom: auto !important;
-          transform: translate(-50%, -50%) !important;
+          transform: translate(-50%, calc(-50% + ${getMobileLogoOffsetY(theme)})) !important;
 
           margin: 0 !important;
         }
@@ -346,6 +372,8 @@
         name: theme.name,
         background: theme.background,
         logoUrl: getLogoUrl(theme),
+        logoOffsetY: getLogoOffsetY(theme),
+        mobileLogoOffsetY: getMobileLogoOffsetY(theme),
         from: getFromParam()
       });
     }
