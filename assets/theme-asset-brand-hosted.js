@@ -181,6 +181,14 @@
         background-color: ${theme.background} !important;
       }
 
+      html[data-theme="${theme.code}"] .mv-hero {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+        padding: 0 !important;
+      }
+
       html[data-theme="${theme.code}"] .mv-hero-bg {
         display: none !important;
         visibility: hidden !important;
@@ -194,14 +202,28 @@
         max-width: 75% !important;
         max-height: ${theme.logoMaxHeight || "170px"} !important;
         object-fit: contain !important;
-        position: relative !important;
+        position: static !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+        transform: none !important;
+        margin: auto !important;
         z-index: 10 !important;
       }
 
       @media (max-width: 900px) {
+        html[data-theme="${theme.code}"] .mv-hero {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 0 !important;
+        }
+
         html[data-theme="${theme.code}"] .mv-hero-logo-asset-brand {
           width: ${theme.mobileLogoWidth || "min(70%, 180px)"} !important;
           max-height: ${theme.mobileLogoMaxHeight || "130px"} !important;
+          margin: auto !important;
         }
       }
     `;
