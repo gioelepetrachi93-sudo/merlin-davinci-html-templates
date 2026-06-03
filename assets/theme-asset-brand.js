@@ -7,6 +7,9 @@
     "https://cdn.jsdelivr.net/gh/gioelepetrachi93-sudo/merlin-davinci-html-templates@main/assets/brand-logos/";
 
   const ASSET_VERSION = "v=1";
+  const PAGE_BACKGROUND = "#FFF8E2";
+  const MOBILE_HEADER_HEIGHT = "140px";
+  const DESKTOP_BREAKPOINT = 900;
 
   const THEMES = {
     "001": {
@@ -14,10 +17,20 @@
       name: "Alton Towers",
       background: "#283269",
       logoFile: "001-alton-towers.svg",
-      logoWidth: "clamp(140px, 22vw, 242px)",
-      logoMaxHeight: "170px",
-      mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "130px"
+      logoWidth: "auto",
+      logoHeight: "175px",
+      logoMaxWidth: "250px",
+      logoMaxHeight: "190px",
+      logoScale: "1",
+      mobileLogoWidth: "auto",
+      mobileLogoHeight: "115px",
+      mobileLogoMaxWidth: "150px",
+      mobileLogoMaxHeight: "125px",
+      mobileLogoScale: "1",
+      stageWidth: "300px",
+      stageHeight: "300px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "140px"
     },
 
     "002": {
@@ -25,10 +38,20 @@
       name: "LEGOLAND",
       background: "#FFCF00",
       logoFile: "002-legoland.svg",
-      logoWidth: "clamp(105px, 16vw, 210px)",
-      logoMaxHeight: "120px",
-      mobileLogoWidth: "min(70%, 160px)",
-      mobileLogoMaxHeight: "110px"
+      logoWidth: "300px",
+      logoHeight: "auto",
+      logoMaxWidth: "none",
+      logoMaxHeight: "145px",
+      logoScale: "1",
+      mobileLogoWidth: "170px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "76%",
+      mobileLogoMaxHeight: "110px",
+      mobileLogoScale: "1",
+      stageWidth: "320px",
+      stageHeight: "220px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "140px"
     },
 
     "003": {
@@ -36,10 +59,20 @@
       name: "Warwick Castle",
       background: "#00415F",
       logoFile: "003-warwick-castle.svg",
-      logoWidth: "clamp(140px, 22vw, 242px)",
-      logoMaxHeight: "170px",
-      mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "130px"
+      logoWidth: "230px",
+      logoHeight: "auto",
+      logoMaxWidth: "80%",
+      logoMaxHeight: "145px",
+      logoScale: "1",
+      mobileLogoWidth: "180px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "78%",
+      mobileLogoMaxHeight: "125px",
+      mobileLogoScale: "1",
+      stageWidth: "240px",
+      stageHeight: "240px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "140px"
     },
 
     "004": {
@@ -47,10 +80,20 @@
       name: "Gruffalo Blackpool",
       background: "#4A82BC",
       logoFile: "004-gruffalo-blackpool.svg",
-      logoWidth: "clamp(140px, 22vw, 242px)",
-      logoMaxHeight: "180px",
-      mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "140px"
+      logoWidth: "420px",
+      logoHeight: "auto",
+      logoMaxWidth: "none",
+      logoMaxHeight: "240px",
+      logoScale: "1",
+      mobileLogoWidth: "180px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "78%",
+      mobileLogoMaxHeight: "130px",
+      mobileLogoScale: "1",
+      stageWidth: "460px",
+      stageHeight: "300px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "140px"
     },
 
     "005": {
@@ -58,10 +101,20 @@
       name: "Cadbury World",
       background: "#462F92",
       logoFile: "005-cadbury-world.svg",
-      logoWidth: "clamp(140px, 22vw, 242px)",
-      logoMaxHeight: "180px",
-      mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "140px"
+      logoWidth: "300px",
+      logoHeight: "auto",
+      logoMaxWidth: "none",
+      logoMaxHeight: "170px",
+      logoScale: "1",
+      mobileLogoWidth: "180px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "78%",
+      mobileLogoMaxHeight: "130px",
+      mobileLogoScale: "1",
+      stageWidth: "340px",
+      stageHeight: "230px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "140px"
     },
 
     "006": {
@@ -69,10 +122,20 @@
       name: "Sea Life",
       background: "#282B91",
       logoFile: "006-sea-life.svg",
-      logoWidth: "clamp(140px, 22vw, 242px)",
-      logoMaxHeight: "140px",
-      mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "120px"
+      logoWidth: "230px",
+      logoHeight: "auto",
+      logoMaxWidth: "80%",
+      logoMaxHeight: "130px",
+      logoScale: "1",
+      mobileLogoWidth: "180px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "78%",
+      mobileLogoMaxHeight: "110px",
+      mobileLogoScale: "1",
+      stageWidth: "240px",
+      stageHeight: "240px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "140px"
     },
 
     "007": {
@@ -80,10 +143,20 @@
       name: "The Dungeons",
       background: "#000000",
       logoFile: "007-the-dungeons.svg",
-      logoWidth: "clamp(140px, 22vw, 242px)",
-      logoMaxHeight: "170px",
-      mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "130px"
+      logoWidth: "700px",
+      logoHeight: "auto",
+      logoMaxWidth: "none",
+      logoMaxHeight: "none",
+      logoScale: "1.05",
+      mobileLogoWidth: "285px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "none",
+      mobileLogoMaxHeight: "none",
+      mobileLogoScale: "1",
+      stageWidth: "760px",
+      stageHeight: "420px",
+      mobileStageWidth: "320px",
+      mobileStageHeight: "140px"
     },
 
     "008": {
@@ -91,10 +164,20 @@
       name: "Chessington",
       background: "#00A13A",
       logoFile: "008-chessington.svg",
-      logoWidth: "clamp(150px, 22vw, 242px)",
-      logoMaxHeight: "190px",
-      mobileLogoWidth: "min(70%, 180px)",
-      mobileLogoMaxHeight: "150px"
+      logoWidth: "360px",
+      logoHeight: "auto",
+      logoMaxWidth: "none",
+      logoMaxHeight: "200px",
+      logoScale: "1",
+      mobileLogoWidth: "135px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "none",
+      mobileLogoMaxHeight: "100px",
+      mobileLogoScale: "1",
+      stageWidth: "400px",
+      stageHeight: "260px",
+      mobileStageWidth: "145px",
+      mobileStageHeight: "140px"
     },
 
     "009": {
@@ -102,24 +185,32 @@
       name: "Thorpe Park",
       background: "#FFFFFF",
       logoFile: "009-thorpe-park.svg",
-      logoWidth: "clamp(180px, 24vw, 247px)",
-      logoMaxHeight: "120px",
-      mobileLogoWidth: "min(75%, 200px)",
-      mobileLogoMaxHeight: "100px"
+      logoWidth: "310px",
+      logoHeight: "auto",
+      logoMaxWidth: "none",
+      logoMaxHeight: "145px",
+      logoScale: "1",
+      mobileLogoWidth: "190px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "none",
+      mobileLogoMaxHeight: "95px",
+      mobileLogoScale: "1",
+      stageWidth: "350px",
+      stageHeight: "220px",
+      mobileStageWidth: "210px",
+      mobileStageHeight: "140px"
     }
   };
 
   const VALID_THEME_CODES = [DEFAULT_THEME_CODE].concat(Object.keys(THEMES));
 
   let isApplyingTheme = false;
+  let isApplyScheduled = false;
   let lastAppliedThemeCode = null;
+  let lastAppliedMode = null;
 
-  const ORIGINALS = {
-    logoHtml: null,
-    heroBgDisplay: null,
-    heroBgVisibility: null,
-    heroBgOpacity: null
-  };
+  const ORIGINAL_STYLES = new WeakMap();
+  const TRACKED_ELEMENTS = new Set();
 
   function getLogoUrl(theme) {
     return CDN_BASE + theme.logoFile + "?" + ASSET_VERSION;
@@ -129,37 +220,104 @@
     return new URLSearchParams(window.location.search).get("from");
   }
 
+  function getStoredThemeCode() {
+    try {
+      return sessionStorage.getItem(SESSION_KEY);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function setStoredThemeCode(code) {
+    try {
+      sessionStorage.setItem(SESSION_KEY, code);
+    } catch (error) {}
+  }
+
   function resolveThemeCode() {
     const from = getFromParam();
 
     if (VALID_THEME_CODES.includes(from)) {
-      sessionStorage.setItem(SESSION_KEY, from);
+      setStoredThemeCode(from);
       return from;
     }
 
-    return sessionStorage.getItem(SESSION_KEY) || DEFAULT_THEME_CODE;
+    return getStoredThemeCode() || DEFAULT_THEME_CODE;
   }
 
-  function captureOriginalMerlinDom() {
-    const currentLogo = document.querySelector(".mv-hero-logo");
-    const heroBg = document.querySelector(".mv-hero-bg");
+  function rememberStyle(element, property) {
+    if (!element || !element.style) return;
+
+    let record = ORIGINAL_STYLES.get(element);
+
+    if (!record) {
+      record = {};
+      ORIGINAL_STYLES.set(element, record);
+      TRACKED_ELEMENTS.add(element);
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(record, property)) {
+      record[property] = {
+        value: element.style.getPropertyValue(property),
+        priority: element.style.getPropertyPriority(property)
+      };
+    }
+  }
+
+  function setImportant(element, property, value) {
+    if (!element || !element.style || value === undefined || value === null) return;
+
+    rememberStyle(element, property);
 
     if (
-      currentLogo &&
-      !currentLogo.classList.contains("mv-hero-logo-asset-brand") &&
-      !ORIGINALS.logoHtml
+      element.style.getPropertyValue(property) !== String(value) ||
+      element.style.getPropertyPriority(property) !== "important"
     ) {
-      ORIGINALS.logoHtml = currentLogo.outerHTML;
-    }
-
-    if (heroBg && ORIGINALS.heroBgDisplay === null) {
-      ORIGINALS.heroBgDisplay = heroBg.style.display || "";
-      ORIGINALS.heroBgVisibility = heroBg.style.visibility || "";
-      ORIGINALS.heroBgOpacity = heroBg.style.opacity || "";
+      element.style.setProperty(property, String(value), "important");
     }
   }
 
-  function injectStyle(theme) {
+  function removeInlineProperty(element, property) {
+    if (!element || !element.style) return;
+
+    rememberStyle(element, property);
+
+    if (element.style.getPropertyValue(property)) {
+      element.style.removeProperty(property);
+    }
+  }
+
+  function restoreTrackedStyles() {
+    TRACKED_ELEMENTS.forEach(function (element) {
+      const record = ORIGINAL_STYLES.get(element);
+
+      if (!element || !element.style || !record) return;
+
+      Object.keys(record).forEach(function (property) {
+        const original = record[property];
+
+        if (original.value) {
+          element.style.setProperty(property, original.value, original.priority);
+        } else {
+          element.style.removeProperty(property);
+        }
+      });
+    });
+
+    TRACKED_ELEMENTS.clear();
+  }
+
+  function isDesktopLayout() {
+    return window.innerWidth >= DESKTOP_BREAKPOINT;
+  }
+
+  function getResponsiveValue(theme, desktopKey, mobileKey, fallback) {
+    return isDesktopLayout()
+      ? theme[desktopKey] || fallback
+      : theme[mobileKey] || theme[desktopKey] || fallback;
+  }
+
+  function injectBaseStyle() {
     let style = document.getElementById(STYLE_ID);
 
     if (!style) {
@@ -169,40 +327,40 @@
     }
 
     style.textContent = `
-      html[data-theme="${theme.code}"],
-      html[data-theme="${theme.code}"] body {
-        background: ${theme.background} !important;
-        background-color: ${theme.background} !important;
+      html[data-theme]:not([data-theme="000"]) .mv-hero {
+        position: relative !important;
+        overflow: hidden !important;
+        padding: 0 !important;
       }
 
-      html[data-theme="${theme.code}"] .merlin-verify,
-      html[data-theme="${theme.code}"] .mv-hero {
-        background: ${theme.background} !important;
-        background-color: ${theme.background} !important;
-      }
-
-      html[data-theme="${theme.code}"] .mv-hero-bg {
+      html[data-theme]:not([data-theme="000"]) .mv-hero-bg,
+      html[data-theme]:not([data-theme="000"]) .mv-hero-logo {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
       }
 
-      html[data-theme="${theme.code}"] .mv-hero-logo-asset-brand {
-        display: block !important;
-        width: ${theme.logoWidth || "clamp(120px, 18vw, 242px)"} !important;
-        height: auto !important;
-        max-width: 75% !important;
-        max-height: ${theme.logoMaxHeight || "170px"} !important;
-        object-fit: contain !important;
-        position: relative !important;
-        z-index: 10 !important;
+      html[data-theme]:not([data-theme="000"]) .mv-hero-brand-wrapper {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        pointer-events: none !important;
+        z-index: 20 !important;
       }
 
-      @media (max-width: 900px) {
-        html[data-theme="${theme.code}"] .mv-hero-logo-asset-brand {
-          width: ${theme.mobileLogoWidth || "min(70%, 180px)"} !important;
-          max-height: ${theme.mobileLogoMaxHeight || "130px"} !important;
-        }
+      html[data-theme]:not([data-theme="000"]) .mv-hero-brand-stage,
+      html[data-theme]:not([data-theme="000"]) .mv-hero-brand-layer {
+        box-sizing: border-box !important;
+      }
+
+      html[data-theme]:not([data-theme="000"]) .mv-hero-brand-img {
+        display: block !important;
+        object-fit: contain !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        transform-origin: center center !important;
       }
     `;
   }
@@ -215,113 +373,230 @@
     }
   }
 
-  function forceBackground(element, color) {
-    if (!element || !element.style) return;
-
-    element.style.setProperty("background", color, "important");
-    element.style.setProperty("background-color", color, "important");
-  }
-
-  function clearForcedBackground(element) {
-    if (!element || !element.style) return;
-
-    element.style.removeProperty("background");
-    element.style.removeProperty("background-color");
-  }
-
-  function hideMerlinBackgroundSvg() {
-    document.querySelectorAll(".mv-hero-bg").forEach(function (element) {
-      element.style.setProperty("display", "none", "important");
-      element.style.setProperty("visibility", "hidden", "important");
-      element.style.setProperty("opacity", "0", "important");
+  function applyPageBackgrounds() {
+    [
+      document.documentElement,
+      document.body,
+      document.querySelector(".merlin-verify"),
+      document.querySelector(".mv-shell"),
+      document.querySelector(".mv-body")
+    ].forEach(function (element) {
+      setImportant(element, "background", PAGE_BACKGROUND);
+      setImportant(element, "background-color", PAGE_BACKGROUND);
     });
   }
 
-  function restoreMerlinBackgroundSvg() {
-    document.querySelectorAll(".mv-hero-bg").forEach(function (element) {
-      element.style.display = ORIGINALS.heroBgDisplay || "";
-      element.style.visibility = ORIGINALS.heroBgVisibility || "";
-      element.style.opacity = ORIGINALS.heroBgOpacity || "";
+  function hideNativeHeroAssets() {
+    document.querySelectorAll(".mv-hero-bg, .mv-hero-logo").forEach(function (element) {
+      setImportant(element, "display", "none");
+      setImportant(element, "visibility", "hidden");
+      setImportant(element, "opacity", "0");
     });
   }
 
-  function replaceMerlinLogo(theme) {
-    const currentLogo = document.querySelector(".mv-hero-logo");
+  function ensureBrandDom(hero) {
+    let wrapper = hero.querySelector(".mv-hero-brand-wrapper");
 
-    if (!currentLogo) return;
-
-    const currentBrandCode = currentLogo.getAttribute("data-asset-brand-code");
-
-    if (currentBrandCode === theme.code) return;
-
-    const img = document.createElement("img");
-    img.src = getLogoUrl(theme);
-    img.alt = theme.name;
-    img.className = "mv-hero-logo mv-hero-logo-asset-brand";
-    img.setAttribute("role", "img");
-    img.setAttribute("aria-label", theme.name);
-    img.setAttribute("data-asset-brand-code", theme.code);
-
-    currentLogo.replaceWith(img);
-  }
-
-  function restoreMerlinLogo() {
-    const currentLogo = document.querySelector(".mv-hero-logo");
-
-    if (!currentLogo) return;
-
-    if (
-      currentLogo.classList.contains("mv-hero-logo-asset-brand") &&
-      ORIGINALS.logoHtml
-    ) {
-      currentLogo.outerHTML = ORIGINALS.logoHtml;
+    if (!wrapper) {
+      wrapper = document.createElement("div");
+      wrapper.className = "mv-hero-brand-wrapper";
+      hero.appendChild(wrapper);
     }
+
+    let layer = wrapper.querySelector(".mv-hero-brand-layer");
+
+    if (!layer) {
+      layer = document.createElement("div");
+      layer.className = "mv-hero-brand-layer";
+      wrapper.appendChild(layer);
+    }
+
+    let stage = layer.querySelector(".mv-hero-brand-stage");
+
+    if (!stage) {
+      stage = document.createElement("div");
+      stage.className = "mv-hero-brand-stage";
+      layer.appendChild(stage);
+    }
+
+    let image = stage.querySelector(".mv-hero-brand-img");
+
+    if (!image) {
+      image = document.createElement("img");
+      image.className = "mv-hero-brand-img";
+      image.setAttribute("role", "img");
+      stage.appendChild(image);
+    }
+
+    return {
+      wrapper: wrapper,
+      layer: layer,
+      stage: stage,
+      image: image
+    };
+  }
+
+  function configureLayout(hero, theme) {
+    const shell = document.querySelector(".mv-shell");
+    const brandDom = ensureBrandDom(hero);
+    const desktopMode = isDesktopLayout();
+    const logoUrl = getLogoUrl(theme);
+
+    const stageWidth = getResponsiveValue(theme, "stageWidth", "mobileStageWidth", "240px");
+    const stageHeight = getResponsiveValue(theme, "stageHeight", "mobileStageHeight", "240px");
+    const logoWidth = getResponsiveValue(theme, "logoWidth", "mobileLogoWidth", "auto");
+    const logoHeight = getResponsiveValue(theme, "logoHeight", "mobileLogoHeight", "auto");
+    const logoMaxWidth = getResponsiveValue(theme, "logoMaxWidth", "mobileLogoMaxWidth", "80%");
+    const logoMaxHeight = getResponsiveValue(theme, "logoMaxHeight", "mobileLogoMaxHeight", "150px");
+    const logoOffsetY = getResponsiveValue(theme, "logoOffsetY", "mobileLogoOffsetY", "0px");
+    const logoScale = getResponsiveValue(theme, "logoScale", "mobileLogoScale", "1");
+
+    applyPageBackgrounds();
+
+    setImportant(hero, "position", "relative");
+    setImportant(hero, "overflow", "hidden");
+    setImportant(hero, "padding", "0");
+    setImportant(hero, "background", "transparent");
+    setImportant(hero, "background-color", "transparent");
+
+    setImportant(brandDom.wrapper, "position", "absolute");
+    setImportant(brandDom.wrapper, "inset", "0");
+    setImportant(brandDom.wrapper, "width", "100%");
+    setImportant(brandDom.wrapper, "height", "100%");
+    setImportant(brandDom.wrapper, "pointer-events", "none");
+    setImportant(brandDom.wrapper, "z-index", "20");
+
+    setImportant(brandDom.layer, "position", "absolute");
+    setImportant(brandDom.layer, "top", "0");
+    setImportant(brandDom.layer, "left", "0");
+    setImportant(brandDom.layer, "right", "0");
+    setImportant(brandDom.layer, "display", "flex");
+    setImportant(brandDom.layer, "align-items", "center");
+    setImportant(brandDom.layer, "justify-content", "center");
+    setImportant(brandDom.layer, "overflow", "hidden");
+    setImportant(brandDom.layer, "background", theme.background);
+    setImportant(brandDom.layer, "background-color", theme.background);
+
+    setImportant(brandDom.stage, "display", "flex");
+    setImportant(brandDom.stage, "align-items", "center");
+    setImportant(brandDom.stage, "justify-content", "center");
+    setImportant(brandDom.stage, "position", "relative");
+    setImportant(brandDom.stage, "overflow", "visible");
+    setImportant(brandDom.stage, "margin", "0 auto");
+    setImportant(brandDom.stage, "width", stageWidth);
+    setImportant(brandDom.stage, "height", stageHeight);
+    setImportant(brandDom.stage, "max-width", "100%");
+    setImportant(brandDom.stage, "max-height", "100%");
+
+    if (brandDom.image.src !== logoUrl) {
+      brandDom.image.src = logoUrl;
+    }
+
+    brandDom.image.alt = theme.name;
+    brandDom.image.setAttribute("aria-label", theme.name);
+    brandDom.image.setAttribute("data-asset-brand-code", theme.code);
+
+    setImportant(brandDom.image, "display", "block");
+    setImportant(brandDom.image, "width", logoWidth);
+    setImportant(brandDom.image, "height", logoHeight);
+    setImportant(brandDom.image, "max-width", logoMaxWidth);
+    setImportant(brandDom.image, "max-height", logoMaxHeight);
+    setImportant(brandDom.image, "object-fit", "contain");
+    setImportant(brandDom.image, "position", "static");
+    setImportant(brandDom.image, "margin", "0");
+    setImportant(brandDom.image, "padding", "0");
+    setImportant(brandDom.image, "border", "0");
+    setImportant(brandDom.image, "transform", "translateY(" + logoOffsetY + ") scale(" + logoScale + ")");
+    setImportant(brandDom.image, "transform-origin", "center center");
+
+    if (desktopMode) {
+      removeInlineProperty(shell, "display");
+      removeInlineProperty(shell, "grid-template-rows");
+      removeInlineProperty(shell, "grid-template-columns");
+      removeInlineProperty(shell, "row-gap");
+      removeInlineProperty(shell, "gap");
+      removeInlineProperty(shell, "align-content");
+      removeInlineProperty(shell, "justify-content");
+
+      removeInlineProperty(hero, "height");
+      removeInlineProperty(hero, "min-height");
+      removeInlineProperty(hero, "max-height");
+
+      setImportant(brandDom.layer, "bottom", "0");
+      setImportant(brandDom.layer, "height", "100%");
+      setImportant(brandDom.layer, "max-height", "none");
+    } else {
+      setImportant(shell, "display", "grid");
+      setImportant(shell, "grid-template-rows", MOBILE_HEADER_HEIGHT + " auto");
+      setImportant(shell, "grid-template-columns", "1fr");
+      setImportant(shell, "row-gap", "0px");
+      setImportant(shell, "gap", "0px");
+      setImportant(shell, "align-content", "start");
+      setImportant(shell, "justify-content", "start");
+
+      setImportant(hero, "height", MOBILE_HEADER_HEIGHT);
+      setImportant(hero, "min-height", MOBILE_HEADER_HEIGHT);
+      setImportant(hero, "max-height", MOBILE_HEADER_HEIGHT);
+
+      removeInlineProperty(brandDom.layer, "bottom");
+      setImportant(brandDom.layer, "height", MOBILE_HEADER_HEIGHT);
+      setImportant(brandDom.layer, "max-height", MOBILE_HEADER_HEIGHT);
+    }
+
+    return {
+      mode: desktopMode ? "desktop" : "mobile",
+      logoUrl: logoUrl
+    };
+  }
+
+  function removeBrandDom() {
+    document.querySelectorAll(".mv-hero-brand-wrapper").forEach(function (element) {
+      element.remove();
+    });
   }
 
   function resetToMerlinDefault() {
     document.documentElement.setAttribute("data-theme", DEFAULT_THEME_CODE);
 
     removeInjectedStyle();
-
-    clearForcedBackground(document.documentElement);
-    clearForcedBackground(document.body);
-    clearForcedBackground(document.querySelector(".merlin-verify"));
-    clearForcedBackground(document.querySelector(".mv-hero"));
-
-    restoreMerlinBackgroundSvg();
-    restoreMerlinLogo();
+    removeBrandDom();
+    restoreTrackedStyles();
 
     if (lastAppliedThemeCode !== DEFAULT_THEME_CODE) {
       console.log("[Merlin Asset Brand] Reset to Merlin default");
     }
 
     lastAppliedThemeCode = DEFAULT_THEME_CODE;
+    lastAppliedMode = null;
   }
 
   function applyAssetTheme(theme) {
+    const hero = document.querySelector(".mv-hero");
+
+    if (!hero) return;
+
     document.documentElement.setAttribute("data-theme", theme.code);
 
-    injectStyle(theme);
+    injectBaseStyle();
+    hideNativeHeroAssets();
 
-    forceBackground(document.documentElement, theme.background);
-    forceBackground(document.body, theme.background);
-    forceBackground(document.querySelector(".merlin-verify"), theme.background);
-    forceBackground(document.querySelector(".mv-hero"), theme.background);
+    const result = configureLayout(hero, theme);
 
-    hideMerlinBackgroundSvg();
-    replaceMerlinLogo(theme);
-
-    if (lastAppliedThemeCode !== theme.code) {
+    if (lastAppliedThemeCode !== theme.code || lastAppliedMode !== result.mode) {
       console.log("[Merlin Asset Brand] Theme applied", {
         code: theme.code,
         name: theme.name,
+        mode: result.mode,
         background: theme.background,
-        logoUrl: getLogoUrl(theme),
-        from: getFromParam()
+        logoUrl: result.logoUrl,
+        from: getFromParam(),
+        viewportWidth: window.innerWidth,
+        heroHeight: Math.round(hero.getBoundingClientRect().height)
       });
     }
 
     lastAppliedThemeCode = theme.code;
+    lastAppliedMode = result.mode;
   }
 
   function applyTheme() {
@@ -330,8 +605,6 @@
     isApplyingTheme = true;
 
     try {
-      captureOriginalMerlinDom();
-
       const themeCode = resolveThemeCode();
 
       if (themeCode === DEFAULT_THEME_CODE || !THEMES[themeCode]) {
@@ -345,9 +618,20 @@
     }
   }
 
+  function scheduleApplyTheme() {
+    if (isApplyScheduled) return;
+
+    isApplyScheduled = true;
+
+    window.requestAnimationFrame(function () {
+      isApplyScheduled = false;
+      applyTheme();
+    });
+  }
+
   function observeDavinciDomChanges() {
     const observer = new MutationObserver(function () {
-      window.requestAnimationFrame(applyTheme);
+      scheduleApplyTheme();
     });
 
     observer.observe(document.documentElement, {
@@ -364,6 +648,8 @@
 
     applyTheme();
     observeDavinciDomChanges();
+
+    window.addEventListener("resize", scheduleApplyTheme);
 
     setTimeout(applyTheme, 100);
     setTimeout(applyTheme, 300);
