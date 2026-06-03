@@ -18,36 +18,42 @@
       background: "#283269",
       logoFile: "001-alton-towers.svg",
       logoWidth: "auto",
-      logoHeight: "145px",
-      logoMaxWidth: "210px",
-      logoMaxHeight: "160px",
+      logoHeight: "175px",
+      logoMaxWidth: "250px",
+      logoMaxHeight: "190px",
+      logoScale: "1",
       mobileLogoWidth: "auto",
       mobileLogoHeight: "115px",
       mobileLogoMaxWidth: "150px",
       mobileLogoMaxHeight: "125px",
-      stageWidth: "240px",
-      stageHeight: "240px",
+      mobileLogoScale: "1",
+      stageWidth: "300px",
+      stageHeight: "300px",
       mobileStageWidth: "180px",
       mobileStageHeight: "180px"
     },
+
     "002": {
-        code: "002",
-        name: "LEGOLAND",
-        background: "#FFCF00",
-        logoFile: "002-legoland.svg",
-        logoWidth: "300px",
-        logoHeight: "auto",
-        logoMaxWidth: "none",
-        logoMaxHeight: "145px",
-        mobileLogoWidth: "170px",
-        mobileLogoHeight: "auto",
-        mobileLogoMaxWidth: "76%",
-        mobileLogoMaxHeight: "110px",
-        stageWidth: "320px",
-        stageHeight: "220px",
-        mobileStageWidth: "180px",
-        mobileStageHeight: "180px"
+      code: "002",
+      name: "LEGOLAND",
+      background: "#FFCF00",
+      logoFile: "002-legoland.svg",
+      logoWidth: "300px",
+      logoHeight: "auto",
+      logoMaxWidth: "none",
+      logoMaxHeight: "145px",
+      logoScale: "1",
+      mobileLogoWidth: "170px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "76%",
+      mobileLogoMaxHeight: "110px",
+      mobileLogoScale: "1",
+      stageWidth: "320px",
+      stageHeight: "220px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "180px"
     },
+
     "003": {
       code: "003",
       name: "Warwick Castle",
@@ -57,39 +63,60 @@
       logoHeight: "auto",
       logoMaxWidth: "80%",
       logoMaxHeight: "145px",
+      logoScale: "1",
       mobileLogoWidth: "180px",
       mobileLogoHeight: "auto",
       mobileLogoMaxWidth: "78%",
-      mobileLogoMaxHeight: "125px"
+      mobileLogoMaxHeight: "125px",
+      mobileLogoScale: "1",
+      stageWidth: "240px",
+      stageHeight: "240px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "180px"
     },
+
     "004": {
       code: "004",
       name: "Gruffalo Blackpool",
       background: "#4A82BC",
       logoFile: "004-gruffalo-blackpool.svg",
-      logoWidth: "230px",
+      logoWidth: "420px",
       logoHeight: "auto",
-      logoMaxWidth: "80%",
-      logoMaxHeight: "150px",
+      logoMaxWidth: "none",
+      logoMaxHeight: "240px",
+      logoScale: "1",
       mobileLogoWidth: "180px",
       mobileLogoHeight: "auto",
       mobileLogoMaxWidth: "78%",
-      mobileLogoMaxHeight: "130px"
+      mobileLogoMaxHeight: "130px",
+      mobileLogoScale: "1",
+      stageWidth: "460px",
+      stageHeight: "300px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "180px"
     },
+
     "005": {
       code: "005",
       name: "Cadbury World",
       background: "#462F92",
       logoFile: "005-cadbury-world.svg",
-      logoWidth: "230px",
+      logoWidth: "300px",
       logoHeight: "auto",
-      logoMaxWidth: "80%",
-      logoMaxHeight: "150px",
+      logoMaxWidth: "none",
+      logoMaxHeight: "170px",
+      logoScale: "1",
       mobileLogoWidth: "180px",
       mobileLogoHeight: "auto",
       mobileLogoMaxWidth: "78%",
-      mobileLogoMaxHeight: "130px"
+      mobileLogoMaxHeight: "130px",
+      mobileLogoScale: "1",
+      stageWidth: "340px",
+      stageHeight: "230px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "180px"
     },
+
     "006": {
       code: "006",
       name: "Sea Life",
@@ -99,52 +126,79 @@
       logoHeight: "auto",
       logoMaxWidth: "80%",
       logoMaxHeight: "130px",
+      logoScale: "1",
       mobileLogoWidth: "180px",
       mobileLogoHeight: "auto",
       mobileLogoMaxWidth: "78%",
-      mobileLogoMaxHeight: "110px"
+      mobileLogoMaxHeight: "110px",
+      mobileLogoScale: "1",
+      stageWidth: "240px",
+      stageHeight: "240px",
+      mobileStageWidth: "180px",
+      mobileStageHeight: "180px"
     },
+
     "007": {
       code: "007",
       name: "The Dungeons",
       background: "#000000",
       logoFile: "007-the-dungeons.svg",
-      logoWidth: "230px",
+      logoWidth: "700px",
       logoHeight: "auto",
-      logoMaxWidth: "80%",
-      logoMaxHeight: "145px",
-      mobileLogoWidth: "180px",
+      logoMaxWidth: "none",
+      logoMaxHeight: "none",
+      logoScale: "1.05",
+      mobileLogoWidth: "285px",
       mobileLogoHeight: "auto",
-      mobileLogoMaxWidth: "78%",
-      mobileLogoMaxHeight: "125px"
+      mobileLogoMaxWidth: "none",
+      mobileLogoMaxHeight: "none",
+      mobileLogoScale: "1",
+      stageWidth: "760px",
+      stageHeight: "420px",
+      mobileStageWidth: "320px",
+      mobileStageHeight: "180px"
     },
+
     "008": {
       code: "008",
       name: "Chessington",
       background: "#00A13A",
       logoFile: "008-chessington.svg",
-      logoWidth: "240px",
+      logoWidth: "360px",
       logoHeight: "auto",
-      logoMaxWidth: "80%",
-      logoMaxHeight: "155px",
-      mobileLogoWidth: "185px",
+      logoMaxWidth: "none",
+      logoMaxHeight: "200px",
+      logoScale: "1",
+      mobileLogoWidth: "135px",
       mobileLogoHeight: "auto",
-      mobileLogoMaxWidth: "78%",
-      mobileLogoMaxHeight: "135px"
+      mobileLogoMaxWidth: "none",
+      mobileLogoMaxHeight: "100px",
+      mobileLogoScale: "1",
+      stageWidth: "400px",
+      stageHeight: "260px",
+      mobileStageWidth: "145px",
+      mobileStageHeight: "180px"
     },
+
     "009": {
       code: "009",
       name: "Thorpe Park",
       background: "#FFFFFF",
       logoFile: "009-thorpe-park.svg",
-      logoWidth: "250px",
+      logoWidth: "310px",
       logoHeight: "auto",
-      logoMaxWidth: "84%",
-      logoMaxHeight: "120px",
-      mobileLogoWidth: "200px",
+      logoMaxWidth: "none",
+      logoMaxHeight: "145px",
+      logoScale: "1",
+      mobileLogoWidth: "190px",
       mobileLogoHeight: "auto",
-      mobileLogoMaxWidth: "80%",
-      mobileLogoMaxHeight: "100px"
+      mobileLogoMaxWidth: "none",
+      mobileLogoMaxHeight: "95px",
+      mobileLogoScale: "1",
+      stageWidth: "350px",
+      stageHeight: "220px",
+      mobileStageWidth: "210px",
+      mobileStageHeight: "180px"
     }
   };
 
@@ -155,6 +209,9 @@
   let lastAppliedThemeCode = null;
   let lastAppliedMode = null;
 
+  const ORIGINAL_STYLES = new WeakMap();
+  const TRACKED_ELEMENTS = new Set();
+
   function getLogoUrl(theme) {
     return CDN_BASE + theme.logoFile + "?" + ASSET_VERSION;
   }
@@ -163,38 +220,98 @@
     return new URLSearchParams(window.location.search).get("from");
   }
 
+  function getStoredThemeCode() {
+    try {
+      return sessionStorage.getItem(SESSION_KEY);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function setStoredThemeCode(code) {
+    try {
+      sessionStorage.setItem(SESSION_KEY, code);
+    } catch (error) {}
+  }
+
   function resolveThemeCode() {
     const from = getFromParam();
 
     if (VALID_THEME_CODES.includes(from)) {
-      try {
-        sessionStorage.setItem(SESSION_KEY, from);
-      } catch (error) {}
+      setStoredThemeCode(from);
       return from;
     }
 
-    try {
-      return sessionStorage.getItem(SESSION_KEY) || DEFAULT_THEME_CODE;
-    } catch (error) {
-      return DEFAULT_THEME_CODE;
+    return getStoredThemeCode() || DEFAULT_THEME_CODE;
+  }
+
+  function rememberStyle(element, property) {
+    if (!element || !element.style) return;
+
+    let record = ORIGINAL_STYLES.get(element);
+
+    if (!record) {
+      record = {};
+      ORIGINAL_STYLES.set(element, record);
+      TRACKED_ELEMENTS.add(element);
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(record, property)) {
+      record[property] = {
+        value: element.style.getPropertyValue(property),
+        priority: element.style.getPropertyPriority(property)
+      };
     }
   }
 
   function setImportant(element, property, value) {
-    if (!element || !element.style) return;
-    element.style.setProperty(property, value, "important");
+    if (!element || !element.style || value === undefined || value === null) return;
+
+    rememberStyle(element, property);
+
+    if (
+      element.style.getPropertyValue(property) !== String(value) ||
+      element.style.getPropertyPriority(property) !== "important"
+    ) {
+      element.style.setProperty(property, String(value), "important");
+    }
   }
 
   function removeInlineProperty(element, property) {
     if (!element || !element.style) return;
-    element.style.removeProperty(property);
+
+    rememberStyle(element, property);
+
+    if (element.style.getPropertyValue(property)) {
+      element.style.removeProperty(property);
+    }
+  }
+
+  function restoreTrackedStyles() {
+    TRACKED_ELEMENTS.forEach(function (element) {
+      const record = ORIGINAL_STYLES.get(element);
+
+      if (!element || !element.style || !record) return;
+
+      Object.keys(record).forEach(function (property) {
+        const original = record[property];
+
+        if (original.value) {
+          element.style.setProperty(property, original.value, original.priority);
+        } else {
+          element.style.removeProperty(property);
+        }
+      });
+    });
+
+    TRACKED_ELEMENTS.clear();
   }
 
   function isDesktopLayout() {
     return window.innerWidth >= DESKTOP_BREAKPOINT;
   }
 
-  function getValue(theme, desktopKey, mobileKey, fallback) {
+  function getResponsiveValue(theme, desktopKey, mobileKey, fallback) {
     return isDesktopLayout()
       ? theme[desktopKey] || fallback
       : theme[mobileKey] || theme[desktopKey] || fallback;
@@ -232,19 +349,49 @@
         z-index: 20 !important;
       }
 
+      html[data-theme]:not([data-theme="000"]) .mv-hero-brand-stage,
+      html[data-theme]:not([data-theme="000"]) .mv-hero-brand-layer {
+        box-sizing: border-box !important;
+      }
+
       html[data-theme]:not([data-theme="000"]) .mv-hero-brand-img {
         display: block !important;
         object-fit: contain !important;
         margin: 0 !important;
         padding: 0 !important;
         border: 0 !important;
+        transform-origin: center center !important;
       }
     `;
   }
 
   function removeInjectedStyle() {
     const style = document.getElementById(STYLE_ID);
-    if (style) style.remove();
+
+    if (style) {
+      style.remove();
+    }
+  }
+
+  function applyPageBackgrounds() {
+    [
+      document.documentElement,
+      document.body,
+      document.querySelector(".merlin-verify"),
+      document.querySelector(".mv-shell"),
+      document.querySelector(".mv-body")
+    ].forEach(function (element) {
+      setImportant(element, "background", PAGE_BACKGROUND);
+      setImportant(element, "background-color", PAGE_BACKGROUND);
+    });
+  }
+
+  function hideNativeHeroAssets() {
+    document.querySelectorAll(".mv-hero-bg, .mv-hero-logo").forEach(function (element) {
+      setImportant(element, "display", "none");
+      setImportant(element, "visibility", "hidden");
+      setImportant(element, "opacity", "0");
+    });
   }
 
   function ensureBrandDom(hero) {
@@ -281,28 +428,12 @@
       stage.appendChild(image);
     }
 
-    return { wrapper, layer, stage, image };
-  }
-
-  function applyPageBackgrounds() {
-    [
-      document.documentElement,
-      document.body,
-      document.querySelector(".merlin-verify"),
-      document.querySelector(".mv-shell"),
-      document.querySelector(".mv-body")
-    ].forEach(function (element) {
-      setImportant(element, "background", PAGE_BACKGROUND);
-      setImportant(element, "background-color", PAGE_BACKGROUND);
-    });
-  }
-
-  function hideNativeHeroAssets() {
-    document.querySelectorAll(".mv-hero-bg, .mv-hero-logo").forEach(function (element) {
-      setImportant(element, "display", "none");
-      setImportant(element, "visibility", "hidden");
-      setImportant(element, "opacity", "0");
-    });
+    return {
+      wrapper: wrapper,
+      layer: layer,
+      stage: stage,
+      image: image
+    };
   }
 
   function configureLayout(hero, theme) {
@@ -310,6 +441,15 @@
     const brandDom = ensureBrandDom(hero);
     const desktopMode = isDesktopLayout();
     const logoUrl = getLogoUrl(theme);
+
+    const stageWidth = getResponsiveValue(theme, "stageWidth", "mobileStageWidth", "240px");
+    const stageHeight = getResponsiveValue(theme, "stageHeight", "mobileStageHeight", "240px");
+    const logoWidth = getResponsiveValue(theme, "logoWidth", "mobileLogoWidth", "auto");
+    const logoHeight = getResponsiveValue(theme, "logoHeight", "mobileLogoHeight", "auto");
+    const logoMaxWidth = getResponsiveValue(theme, "logoMaxWidth", "mobileLogoMaxWidth", "80%");
+    const logoMaxHeight = getResponsiveValue(theme, "logoMaxHeight", "mobileLogoMaxHeight", "150px");
+    const logoOffsetY = getResponsiveValue(theme, "logoOffsetY", "mobileLogoOffsetY", "0px");
+    const logoScale = getResponsiveValue(theme, "logoScale", "mobileLogoScale", "1");
 
     applyPageBackgrounds();
 
@@ -340,11 +480,13 @@
     setImportant(brandDom.stage, "display", "flex");
     setImportant(brandDom.stage, "align-items", "center");
     setImportant(brandDom.stage, "justify-content", "center");
-    setImportant(brandDom.stage, "max-width", "100%");
-    setImportant(brandDom.stage, "max-height", "100%");
     setImportant(brandDom.stage, "position", "relative");
     setImportant(brandDom.stage, "overflow", "visible");
     setImportant(brandDom.stage, "margin", "0 auto");
+    setImportant(brandDom.stage, "width", stageWidth);
+    setImportant(brandDom.stage, "height", stageHeight);
+    setImportant(brandDom.stage, "max-width", "100%");
+    setImportant(brandDom.stage, "max-height", "100%");
 
     if (brandDom.image.src !== logoUrl) {
       brandDom.image.src = logoUrl;
@@ -355,12 +497,17 @@
     brandDom.image.setAttribute("data-asset-brand-code", theme.code);
 
     setImportant(brandDom.image, "display", "block");
+    setImportant(brandDom.image, "width", logoWidth);
+    setImportant(brandDom.image, "height", logoHeight);
+    setImportant(brandDom.image, "max-width", logoMaxWidth);
+    setImportant(brandDom.image, "max-height", logoMaxHeight);
     setImportant(brandDom.image, "object-fit", "contain");
     setImportant(brandDom.image, "position", "static");
     setImportant(brandDom.image, "margin", "0");
     setImportant(brandDom.image, "padding", "0");
     setImportant(brandDom.image, "border", "0");
-    setImportant(brandDom.image, "transform", "translateY(0px)");
+    setImportant(brandDom.image, "transform", "translateY(" + logoOffsetY + ") scale(" + logoScale + ")");
+    setImportant(brandDom.image, "transform-origin", "center center");
 
     if (desktopMode) {
       removeInlineProperty(shell, "display");
@@ -378,14 +525,6 @@
       setImportant(brandDom.layer, "bottom", "0");
       setImportant(brandDom.layer, "height", "100%");
       setImportant(brandDom.layer, "max-height", "none");
-
-      setImportant(brandDom.stage, "width", theme.stageWidth || "240px");
-      setImportant(brandDom.stage, "height", theme.stageHeight || "240px");
-
-      setImportant(brandDom.image, "width", theme.logoWidth || "auto");
-      setImportant(brandDom.image, "height", theme.logoHeight || "auto");
-      setImportant(brandDom.image, "max-width", theme.logoMaxWidth || "80%");
-      setImportant(brandDom.image, "max-height", theme.logoMaxHeight || "150px");
     } else {
       setImportant(shell, "display", "grid");
       setImportant(shell, "grid-template-rows", MOBILE_HEADER_HEIGHT + " auto");
@@ -402,19 +541,11 @@
       removeInlineProperty(brandDom.layer, "bottom");
       setImportant(brandDom.layer, "height", MOBILE_HEADER_HEIGHT);
       setImportant(brandDom.layer, "max-height", MOBILE_HEADER_HEIGHT);
-
-      setImportant(brandDom.stage, "width", theme.mobileStageWidth || "180px");
-      setImportant(brandDom.stage, "height", theme.mobileStageHeight || "180px");
-
-      setImportant(brandDom.image, "width", theme.mobileLogoWidth || theme.logoWidth || "auto");
-      setImportant(brandDom.image, "height", theme.mobileLogoHeight || theme.logoHeight || "auto");
-      setImportant(brandDom.image, "max-width", theme.mobileLogoMaxWidth || theme.logoMaxWidth || "80%");
-      setImportant(brandDom.image, "max-height", theme.mobileLogoMaxHeight || theme.logoMaxHeight || "125px");
     }
 
     return {
       mode: desktopMode ? "desktop" : "mobile",
-      logoUrl
+      logoUrl: logoUrl
     };
   }
 
@@ -426,8 +557,10 @@
 
   function resetToMerlinDefault() {
     document.documentElement.setAttribute("data-theme", DEFAULT_THEME_CODE);
+
     removeInjectedStyle();
     removeBrandDom();
+    restoreTrackedStyles();
 
     if (lastAppliedThemeCode !== DEFAULT_THEME_CODE) {
       console.log("[Merlin Asset Brand] Reset to Merlin default");
