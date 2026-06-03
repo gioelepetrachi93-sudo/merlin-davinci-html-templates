@@ -8,7 +8,7 @@
 
   const ASSET_VERSION = "v=1";
   const PAGE_BACKGROUND = "#FFF8E2";
-  const MOBILE_HEADER_HEIGHT = "180px";
+  const MOBILE_HEADER_HEIGHT = "140px";
   const DESKTOP_BREAKPOINT = 900;
 
   const THEMES = {
@@ -30,7 +30,7 @@
       stageWidth: "300px",
       stageHeight: "300px",
       mobileStageWidth: "180px",
-      mobileStageHeight: "180px"
+      mobileStageHeight: "140px"
     },
 
     "002": {
@@ -51,7 +51,7 @@
       stageWidth: "320px",
       stageHeight: "220px",
       mobileStageWidth: "180px",
-      mobileStageHeight: "180px"
+      mobileStageHeight: "140px"
     },
 
     "003": {
@@ -72,7 +72,7 @@
       stageWidth: "240px",
       stageHeight: "240px",
       mobileStageWidth: "180px",
-      mobileStageHeight: "180px"
+      mobileStageHeight: "140px"
     },
 
     "004": {
@@ -93,7 +93,7 @@
       stageWidth: "460px",
       stageHeight: "300px",
       mobileStageWidth: "180px",
-      mobileStageHeight: "180px"
+      mobileStageHeight: "140px"
     },
 
     "005": {
@@ -114,7 +114,7 @@
       stageWidth: "340px",
       stageHeight: "230px",
       mobileStageWidth: "180px",
-      mobileStageHeight: "180px"
+      mobileStageHeight: "140px"
     },
 
     "006": {
@@ -135,7 +135,7 @@
       stageWidth: "240px",
       stageHeight: "240px",
       mobileStageWidth: "180px",
-      mobileStageHeight: "180px"
+      mobileStageHeight: "140px"
     },
 
     "007": {
@@ -156,7 +156,7 @@
       stageWidth: "760px",
       stageHeight: "420px",
       mobileStageWidth: "320px",
-      mobileStageHeight: "180px"
+      mobileStageHeight: "140px"
     },
 
     "008": {
@@ -177,7 +177,7 @@
       stageWidth: "400px",
       stageHeight: "260px",
       mobileStageWidth: "145px",
-      mobileStageHeight: "180px"
+      mobileStageHeight: "140px"
     },
 
     "009": {
@@ -198,7 +198,7 @@
       stageWidth: "350px",
       stageHeight: "220px",
       mobileStageWidth: "210px",
-      mobileStageHeight: "180px"
+      mobileStageHeight: "140px"
     }
   };
 
