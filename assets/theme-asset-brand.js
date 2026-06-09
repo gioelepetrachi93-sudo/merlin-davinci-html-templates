@@ -352,12 +352,44 @@
         --mr-ink: ${BASE_TEXT} !important;
       }
 
-      .merlin-register .mr-shell > .mr-body,
-      main.merlin-register .mr-body,
-      section.mr-body {
+      .merlin-register {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+      }
+
+      .merlin-register .mr-shell {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+        align-items: stretch !important;
+      }
+
+      .merlin-register .mr-hero {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+      }
+
+      .merlin-register .mr-body {
+        height: 100vh !important;
+        min-height: 0 !important;
+        max-height: 100vh !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
         background: ${PAGE_BACKGROUND} !important;
         background-color: ${PAGE_BACKGROUND} !important;
         color: ${BASE_TEXT} !important;
+      }
+
+      .merlin-register .mr-hero .mv-hero-brand-wrapper,
+      .merlin-register .mr-hero .mv-hero-brand-layer {
+        height: 100% !important;
+        min-height: 100% !important;
+        max-height: none !important;
       }
 
       .merlin-register .mr-body h1,
@@ -448,7 +480,16 @@
     `;
   }
 
+  function clearRegistrationScrollState() {
+    [document.documentElement, document.body].forEach(function (element) {
+      removeInlineProperty(element, "height");
+      removeInlineProperty(element, "overflow");
+    });
+  }
+
   function applyPageBackgrounds() {
+    clearRegistrationScrollState();
+
     [
       document.documentElement,
       document.body,
@@ -464,7 +505,20 @@
   function applyRegistrationBackgrounds() {
     [
       document.documentElement,
-      document.body,
+      document.body
+    ].forEach(function (element) {
+      setImportant(element, "height", "100%");
+      setImportant(element, "overflow", "hidden");
+      setImportant(element, "background", PAGE_BACKGROUND);
+      setImportant(element, "background-color", PAGE_BACKGROUND);
+      setImportant(element, "color", BASE_TEXT);
+      setImportant(element, "color-scheme", "light");
+      setImportant(element, "--mr-cream-soft", PAGE_BACKGROUND);
+      setImportant(element, "--mr-cream", PAGE_BACKGROUND);
+      setImportant(element, "--mr-ink", BASE_TEXT);
+    });
+
+    [
       document.querySelector(".reactSingularKey_CC_main_generic")
     ].forEach(function (element) {
       setImportant(element, "background", PAGE_BACKGROUND);
@@ -480,18 +534,40 @@
       document.querySelector(".merlin-register"),
       document.querySelector(".mr-shell")
     ].forEach(function (element) {
+      if (!element) return;
+
       removeInlineProperty(element, "background");
       removeInlineProperty(element, "background-color");
+      setImportant(element, "height", "100vh");
+      setImportant(element, "min-height", "100vh");
+      setImportant(element, "max-height", "100vh");
+      setImportant(element, "overflow", "hidden");
       setImportant(element, "color-scheme", "light");
       setImportant(element, "--mr-cream-soft", PAGE_BACKGROUND);
       setImportant(element, "--mr-cream", PAGE_BACKGROUND);
       setImportant(element, "--mr-ink", BASE_TEXT);
     });
 
+    const shell = document.querySelector(".mr-shell");
+    const hero = document.querySelector(".mr-hero");
     const body = document.querySelector(".mr-body");
+
+    setImportant(shell, "align-items", "stretch");
+
+    if (hero) {
+      setImportant(hero, "height", "100vh");
+      setImportant(hero, "min-height", "100vh");
+      setImportant(hero, "max-height", "100vh");
+      setImportant(hero, "overflow", "hidden");
+    }
 
     if (!body) return;
 
+    setImportant(body, "height", "100vh");
+    setImportant(body, "min-height", "0");
+    setImportant(body, "max-height", "100vh");
+    setImportant(body, "overflow-y", "auto");
+    setImportant(body, "overflow-x", "hidden");
     setImportant(body, "background", PAGE_BACKGROUND);
     setImportant(body, "background-color", PAGE_BACKGROUND);
     setImportant(body, "color", BASE_TEXT);
@@ -665,8 +741,17 @@
     setImportant(brandDom.image, "transform-origin", "center center");
 
     if (isRegistrationHero) {
+      setImportant(hero, "height", "100vh");
+      setImportant(hero, "min-height", "100vh");
+      setImportant(hero, "max-height", "100vh");
+
+      setImportant(brandDom.wrapper, "height", "100%");
+      setImportant(brandDom.wrapper, "min-height", "100%");
+      setImportant(brandDom.wrapper, "max-height", "none");
+
       setImportant(brandDom.layer, "bottom", "0");
       setImportant(brandDom.layer, "height", "100%");
+      setImportant(brandDom.layer, "min-height", "100%");
       setImportant(brandDom.layer, "max-height", "none");
 
       return {
