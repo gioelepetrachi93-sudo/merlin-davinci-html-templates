@@ -17,6 +17,8 @@
   const OTP_MAX_INVALID_ATTEMPTS = 3;
   const OTP_LOCK_SECONDS = 60;
   const OTP_LOCK_MESSAGE_ID = "merlin-otp-lock-message";
+  const PASSCODE_LOCK_MESSAGE_ID = "merlin-passcode-lock-message";
+  const PASSCODE_LOCK_SECONDS_ID = "merlin-passcode-lock-seconds";
 
   const THEMES = {
     "001": {
@@ -223,10 +225,21 @@
   let otpLockTimer = null;
   let otpClickHandlerInstalled = false;
 
+  let passcodeInvalidAttempts = 0;
+  let passcodeLockedUntil = 0;
+  let passcodeSubmitSequence = 0;
+  let passcodeCountedSequence = 0;
+  let passcodeLockTimer = null;
+  let passcodeClickHandlerInstalled = false;
+  let passcodeLastErrorElement = null;
+  let passcodeLastRenderedSecond = null;
+
   const ORIGINAL_STYLES = new WeakMap();
   const TRACKED_ELEMENTS = new Set();
   const OTP_DISABLED_STATE = new WeakMap();
   const OTP_DISABLED_ELEMENTS = new Set();
+  const PASSCODE_DISABLED_STATE = new WeakMap();
+  const PASSCODE_DISABLED_ELEMENTS = new Set();
 
   function getLogoUrl(theme) {
     return CDN_BASE + theme.logoFile + "?" + ASSET_VERSION;
@@ -350,7 +363,7 @@
 
     if (!root) return null;
 
-    return Array.from(root.querySelectorAll("button")).find(function (element) {
+    return Array.from(root.querySelectorAll("button, [role='button']")).find(function (element) {
       return normalizeText(element.textContent).includes("continue");
     });
   }
@@ -360,8 +373,9 @@
 
     if (!root) return null;
 
-    return Array.from(root.querySelectorAll("a, button")).find(function (element) {
-      return normalizeText(element.textContent).includes("resend");
+    return Array.from(root.querySelectorAll("a, button, [role='button']")).find(function (element) {
+      const text = normalizeText(element.textContent);
+      return text.includes("resend") || text.includes("send another");
     });
   }
 
@@ -580,6 +594,331 @@
     }
 
     updateOtpLockUi();
+  }
+
+  function normalizePasscodeText(text) {
+    return String(text || "")
+      .replace(/[’‘]/g, "'")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function getPasscodeRoot() {
+    return document.querySelector(".mv-body") || document.querySelector(".merlin-verify") || document.body;
+  }
+
+  function isPasscodeElementVisible(element) {
+    if (!element) return false;
+
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+
+    return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+  }
+
+  function findPasscodeContinueButton() {
+    return Array.from(getPasscodeRoot().querySelectorAll("button, [role='button']")).find(function (element) {
+      return normalizePasscodeText(element.textContent).includes("continue");
+    });
+  }
+
+  function findPasscodeResendAction() {
+    return Array.from(getPasscodeRoot().querySelectorAll("a, button, [role='button']")).find(function (element) {
+      const text = normalizePasscodeText(element.textContent);
+      return text.includes("resend") || text.includes("send another");
+    });
+  }
+
+  function isInvalidPasscodeText(text) {
+    const value = normalizePasscodeText(text);
+
+    const mentionsOtp =
+      value.includes("code") ||
+      value.includes("passcode") ||
+      value.includes("one-time");
+
+    const saysInvalid =
+      value.includes("invalid") ||
+      value.includes("isn't valid") ||
+      value.includes("is not valid") ||
+      value.includes("not valid") ||
+      value.includes("try again");
+
+    return mentionsOtp && saysInvalid;
+  }
+
+  function findPasscodeInvalidError() {
+    const error = Array.from(getPasscodeRoot().querySelectorAll("*"))
+      .filter(isPasscodeElementVisible)
+      .find(function (element) {
+        if (
+          element.id === PASSCODE_LOCK_MESSAGE_ID ||
+          element.closest("#" + PASSCODE_LOCK_MESSAGE_ID)
+        ) {
+          return false;
+        }
+
+        if (!isInvalidPasscodeText(element.textContent)) return false;
+
+        return !Array.from(element.children || []).some(function (child) {
+          return isInvalidPasscodeText(child.textContent);
+        });
+      });
+
+    if (error) {
+      passcodeLastErrorElement = error;
+    }
+
+    return error || (isPasscodeElementVisible(passcodeLastErrorElement) ? passcodeLastErrorElement : null);
+  }
+
+  function rememberPasscodeDisabledState(element) {
+    if (!element || PASSCODE_DISABLED_STATE.has(element)) return;
+
+    PASSCODE_DISABLED_STATE.set(element, {
+      disabled: "disabled" in element ? element.disabled : null,
+      ariaDisabled: element.getAttribute("aria-disabled"),
+      pointerEvents: element.style.getPropertyValue("pointer-events"),
+      pointerEventsPriority: element.style.getPropertyPriority("pointer-events"),
+      opacity: element.style.getPropertyValue("opacity"),
+      opacityPriority: element.style.getPropertyPriority("opacity")
+    });
+
+    PASSCODE_DISABLED_ELEMENTS.add(element);
+  }
+
+  function restorePasscodeDisabledState(element) {
+    const state = PASSCODE_DISABLED_STATE.get(element);
+
+    if (!element || !state) return;
+
+    if (state.disabled !== null && "disabled" in element) {
+      element.disabled = state.disabled;
+    }
+
+    if (state.ariaDisabled === null) {
+      element.removeAttribute("aria-disabled");
+    } else {
+      element.setAttribute("aria-disabled", state.ariaDisabled);
+    }
+
+    if (state.pointerEvents) {
+      element.style.setProperty("pointer-events", state.pointerEvents, state.pointerEventsPriority);
+    } else {
+      element.style.removeProperty("pointer-events");
+    }
+
+    if (state.opacity) {
+      element.style.setProperty("opacity", state.opacity, state.opacityPriority);
+    } else {
+      element.style.removeProperty("opacity");
+    }
+
+    PASSCODE_DISABLED_STATE.delete(element);
+    PASSCODE_DISABLED_ELEMENTS.delete(element);
+  }
+
+  function setPasscodeControlDisabled(element, disabled) {
+    if (!element) return;
+
+    if (disabled) {
+      rememberPasscodeDisabledState(element);
+
+      if ("disabled" in element) {
+        element.disabled = true;
+      }
+
+      element.setAttribute("aria-disabled", "true");
+      element.style.setProperty("pointer-events", "none", "important");
+      element.style.setProperty("opacity", "0.45", "important");
+      return;
+    }
+
+    restorePasscodeDisabledState(element);
+  }
+
+  function getPasscodeErrorBlock(errorElement) {
+    if (!errorElement) return null;
+
+    const parent = errorElement.parentElement;
+
+    if (
+      parent &&
+      parent !== getPasscodeRoot() &&
+      parent.children.length <= 3 &&
+      isInvalidPasscodeText(parent.textContent)
+    ) {
+      return parent;
+    }
+
+    return errorElement;
+  }
+
+  function removePasscodeLockMessage() {
+    const message = document.getElementById(PASSCODE_LOCK_MESSAGE_ID);
+
+    if (message) {
+      message.remove();
+    }
+  }
+
+  function getPasscodeLockMessage(errorElement) {
+    let message = document.getElementById(PASSCODE_LOCK_MESSAGE_ID);
+
+    if (!message) {
+      message = document.createElement("div");
+      message.id = PASSCODE_LOCK_MESSAGE_ID;
+      message.innerHTML =
+        'Too many attempts. Try again in <span id="' + PASSCODE_LOCK_SECONDS_ID + '"></span>s.';
+    }
+
+    const errorBlock = getPasscodeErrorBlock(errorElement);
+
+    if (errorBlock && message.previousElementSibling !== errorBlock) {
+      errorBlock.insertAdjacentElement("afterend", message);
+    } else if (!document.documentElement.contains(message)) {
+      getPasscodeRoot().prepend(message);
+    }
+
+    const styleSource = errorElement || errorBlock || message;
+    const computed = getComputedStyle(styleSource);
+
+    message.style.setProperty("position", "static", "important");
+    message.style.setProperty("display", "block", "important");
+    message.style.setProperty("visibility", "visible", "important");
+    message.style.setProperty("opacity", "1", "important");
+    message.style.setProperty("width", "100%", "important");
+    message.style.setProperty("box-sizing", "border-box", "important");
+    message.style.setProperty("margin", "4px 0 14px 0", "important");
+    message.style.setProperty("padding", "0", "important");
+    message.style.setProperty("font-size", computed.fontSize || "14px", "important");
+    message.style.setProperty("font-family", computed.fontFamily, "important");
+    message.style.setProperty("font-weight", "700", "important");
+    message.style.setProperty("line-height", computed.lineHeight || "18px", "important");
+    message.style.setProperty("color", computed.color || "#d93025", "important");
+    message.style.setProperty("text-align", "center", "important");
+    message.style.setProperty("background", "transparent", "important");
+    message.style.setProperty("pointer-events", "none", "important");
+
+    return message;
+  }
+
+  function updatePasscodeLockMessage(remainingSeconds, errorElement) {
+    const message = getPasscodeLockMessage(errorElement);
+    const seconds = message.querySelector("#" + PASSCODE_LOCK_SECONDS_ID);
+
+    if (seconds && passcodeLastRenderedSecond !== remainingSeconds) {
+      seconds.textContent = String(remainingSeconds);
+      passcodeLastRenderedSecond = remainingSeconds;
+    }
+  }
+
+  function updatePasscodeLockUi() {
+    const root = getPasscodeRoot();
+
+    if (!root) {
+      removePasscodeLockMessage();
+      return;
+    }
+
+    const now = Date.now();
+    const isLocked = passcodeLockedUntil > now;
+    const remainingSeconds = Math.max(0, Math.ceil((passcodeLockedUntil - now) / 1000));
+    const continueButton = findPasscodeContinueButton();
+    const resendAction = findPasscodeResendAction();
+    const errorElement = findPasscodeInvalidError();
+
+    setPasscodeControlDisabled(continueButton, isLocked);
+    setPasscodeControlDisabled(resendAction, isLocked);
+
+    if (isLocked) {
+      updatePasscodeLockMessage(remainingSeconds, errorElement);
+      return;
+    }
+
+    removePasscodeLockMessage();
+    passcodeLastRenderedSecond = null;
+
+    if (passcodeLockedUntil && !isLocked) {
+      passcodeInvalidAttempts = 0;
+      passcodeLockedUntil = 0;
+      passcodeSubmitSequence = 0;
+      passcodeCountedSequence = 0;
+      passcodeLastErrorElement = null;
+
+      PASSCODE_DISABLED_ELEMENTS.forEach(function (element) {
+        restorePasscodeDisabledState(element);
+      });
+    }
+  }
+
+  function lockPasscodeControls() {
+    passcodeLockedUntil = Date.now() + OTP_LOCK_SECONDS * 1000;
+    updatePasscodeLockUi();
+  }
+
+  function countPasscodeInvalidAttempt(sequence) {
+    if (sequence <= passcodeCountedSequence) return;
+
+    const errorElement = findPasscodeInvalidError();
+
+    if (!errorElement) return;
+
+    passcodeCountedSequence = sequence;
+    passcodeInvalidAttempts += 1;
+
+    if (passcodeInvalidAttempts >= OTP_MAX_INVALID_ATTEMPTS) {
+      lockPasscodeControls();
+      return;
+    }
+
+    updatePasscodeLockUi();
+  }
+
+  function handlePasscodeClick(event) {
+    const continueButton = findPasscodeContinueButton();
+    const resendAction = findPasscodeResendAction();
+    const isLocked = passcodeLockedUntil > Date.now();
+
+    if (isLocked && resendAction && resendAction.contains(event.target)) {
+      event.preventDefault();
+      event.stopPropagation();
+      updatePasscodeLockUi();
+      return;
+    }
+
+    if (!continueButton || !continueButton.contains(event.target)) return;
+
+    if (isLocked) {
+      event.preventDefault();
+      event.stopPropagation();
+      updatePasscodeLockUi();
+      return;
+    }
+
+    passcodeSubmitSequence += 1;
+
+    const sequence = passcodeSubmitSequence;
+
+    [400, 900, 1500, 2500].forEach(function (delay) {
+      setTimeout(function () {
+        countPasscodeInvalidAttempt(sequence);
+      }, delay);
+    });
+  }
+
+  function installPasscodeRetryLock() {
+    if (!passcodeClickHandlerInstalled) {
+      document.addEventListener("click", handlePasscodeClick, true);
+      passcodeClickHandlerInstalled = true;
+    }
+
+    if (!passcodeLockTimer) {
+      passcodeLockTimer = setInterval(updatePasscodeLockUi, 250);
+    }
+
+    updatePasscodeLockUi();
   }
 
   function installRegistrationCreamGuard() {
@@ -1286,6 +1625,7 @@
 
     installRegistrationCreamGuard();
     installOtpRetryLock();
+    installPasscodeRetryLock();
     injectBaseStyle();
     applyTheme();
     observeDavinciDomChanges();
