@@ -324,6 +324,47 @@
     return document.querySelector(".mv-hero") || document.querySelector(".mr-hero");
   }
 
+  function installRegistrationCreamGuard() {
+    if (window.__merlinRegistrationCreamGuardInstalled) return;
+
+    window.__merlinRegistrationCreamGuardInstalled = true;
+
+    const originalSetProperty = CSSStyleDeclaration.prototype.setProperty;
+    const darkValues = ["rgb(23, 17, 31)", "rgb(24, 20, 35)", "#17111f", "#181423"];
+
+    function isRegistrationBackgroundTarget(style) {
+      return [
+        document.documentElement,
+        document.body,
+        document.querySelector(".reactSingularKey_CC_main_generic"),
+        document.querySelector(".merlin-register"),
+        document.querySelector(".mr-shell"),
+        document.querySelector(".mr-body"),
+        document.querySelector(".mr-body-inner")
+      ].filter(Boolean).some(function (element) {
+        return element.style === style;
+      });
+    }
+
+    CSSStyleDeclaration.prototype.setProperty = function (name, value, priority) {
+      const property = String(name || "").toLowerCase();
+      const nextValue = String(value || "").toLowerCase();
+
+      if (
+        document.querySelector(".merlin-register .mr-body") &&
+        isRegistrationBackgroundTarget(this) &&
+        (property === "background" || property === "background-color") &&
+        darkValues.some(function (darkValue) {
+          return nextValue.includes(darkValue);
+        })
+      ) {
+        return originalSetProperty.call(this, name, PAGE_BACKGROUND, "important");
+      }
+
+      return originalSetProperty.call(this, name, value, priority);
+    };
+  }
+
   function injectBaseStyle() {
     let style = document.getElementById(STYLE_ID);
 
@@ -338,7 +379,8 @@
       body,
       .merlin-register,
       .merlin-register .mr-shell,
-      .merlin-register .mr-body {
+      .merlin-register .mr-body,
+      .merlin-register .mr-body-inner {
         color-scheme: light !important;
       }
 
@@ -346,15 +388,19 @@
       body,
       .merlin-register,
       .merlin-register .mr-shell,
-      .merlin-register .mr-body {
+      .merlin-register .mr-body,
+      .merlin-register .mr-body-inner {
         --mr-cream-soft: ${PAGE_BACKGROUND} !important;
         --mr-cream: ${PAGE_BACKGROUND} !important;
         --mr-ink: ${BASE_TEXT} !important;
       }
 
+      .merlin-register,
+      .merlin-register .mr-shell,
       .merlin-register .mr-shell > .mr-body,
       main.merlin-register .mr-body,
-      section.mr-body {
+      section.mr-body,
+      .merlin-register .mr-body-inner {
         background: ${PAGE_BACKGROUND} !important;
         background-color: ${PAGE_BACKGROUND} !important;
         color: ${BASE_TEXT} !important;
@@ -392,16 +438,20 @@
         body,
         .merlin-register,
         .merlin-register .mr-shell,
-        .merlin-register .mr-body {
+        .merlin-register .mr-body,
+        .merlin-register .mr-body-inner {
           color-scheme: light !important;
           --mr-cream-soft: ${PAGE_BACKGROUND} !important;
           --mr-cream: ${PAGE_BACKGROUND} !important;
           --mr-ink: ${BASE_TEXT} !important;
         }
 
+        .merlin-register,
+        .merlin-register .mr-shell,
         .merlin-register .mr-shell > .mr-body,
         main.merlin-register .mr-body,
-        section.mr-body {
+        section.mr-body,
+        .merlin-register .mr-body-inner {
           background: ${PAGE_BACKGROUND} !important;
           background-color: ${PAGE_BACKGROUND} !important;
           color: ${BASE_TEXT} !important;
@@ -448,6 +498,14 @@
     `;
   }
 
+  function removeInjectedStyle() {
+    const style = document.getElementById(STYLE_ID);
+
+    if (style) {
+      style.remove();
+    }
+  }
+
   function applyPageBackgrounds() {
     [
       document.documentElement,
@@ -462,11 +520,19 @@
   }
 
   function applyRegistrationBackgrounds() {
+    installRegistrationCreamGuard();
+
     [
       document.documentElement,
       document.body,
-      document.querySelector(".reactSingularKey_CC_main_generic")
+      document.querySelector(".reactSingularKey_CC_main_generic"),
+      document.querySelector(".merlin-register"),
+      document.querySelector(".mr-shell"),
+      document.querySelector(".mr-body"),
+      document.querySelector(".mr-body-inner")
     ].forEach(function (element) {
+      if (!element) return;
+
       setImportant(element, "background", PAGE_BACKGROUND);
       setImportant(element, "background-color", PAGE_BACKGROUND);
       setImportant(element, "color", BASE_TEXT);
@@ -476,43 +542,27 @@
       setImportant(element, "--mr-ink", BASE_TEXT);
     });
 
-    [
-      document.querySelector(".merlin-register"),
-      document.querySelector(".mr-shell")
-    ].forEach(function (element) {
-      removeInlineProperty(element, "background");
-      removeInlineProperty(element, "background-color");
-      setImportant(element, "color-scheme", "light");
-      setImportant(element, "--mr-cream-soft", PAGE_BACKGROUND);
-      setImportant(element, "--mr-cream", PAGE_BACKGROUND);
-      setImportant(element, "--mr-ink", BASE_TEXT);
-    });
-
-    const body = document.querySelector(".mr-body");
-
-    if (!body) return;
-
-    setImportant(body, "background", PAGE_BACKGROUND);
-    setImportant(body, "background-color", PAGE_BACKGROUND);
-    setImportant(body, "color", BASE_TEXT);
-    setImportant(body, "color-scheme", "light");
-    setImportant(body, "--mr-cream-soft", PAGE_BACKGROUND);
-    setImportant(body, "--mr-cream", PAGE_BACKGROUND);
-    setImportant(body, "--mr-ink", BASE_TEXT);
-
-    body
-      .querySelectorAll("h1, h2, h3, h4, h5, h6, p, label, span, small, strong, em, li, legend, div")
-      .forEach(function (element) {
-        if (element.closest("button, [role='button'], a")) return;
-        setImportant(element, "color", BASE_TEXT);
-      });
-
-    body.querySelectorAll("input, textarea, select").forEach(function (element) {
+    document.querySelectorAll(".mr-body input, .mr-body textarea, .mr-body select").forEach(function (element) {
       setImportant(element, "background", INPUT_BACKGROUND);
       setImportant(element, "background-color", INPUT_BACKGROUND);
       setImportant(element, "color", BASE_TEXT);
       setImportant(element, "border-color", INPUT_BORDER);
     });
+
+    const hero = document.querySelector(".mr-hero");
+    const layer = document.querySelector(".mr-hero .mv-hero-brand-layer");
+    const themeCode = resolveThemeCode();
+    const theme = THEMES[themeCode];
+
+    if (hero) {
+      setImportant(hero, "background", "transparent");
+      setImportant(hero, "background-color", "transparent");
+    }
+
+    if (layer && theme) {
+      setImportant(layer, "background", theme.background);
+      setImportant(layer, "background-color", theme.background);
+    }
   }
 
   function applyBaseBackgroundsForCurrentLayout() {
@@ -813,6 +863,7 @@
     console.log("[Merlin Asset Brand] loaded");
     console.log("[Merlin Asset Brand] URL from:", getFromParam());
 
+    installRegistrationCreamGuard();
     injectBaseStyle();
     applyTheme();
     observeDavinciDomChanges();
