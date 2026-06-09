@@ -8,7 +8,9 @@
 
   const ASSET_VERSION = "v=1";
   const PAGE_BACKGROUND = "#FFF8E2";
-  const REGISTRATION_BACKGROUND = "#17111f";
+  const BASE_TEXT = "#000B5E";
+  const INPUT_BACKGROUND = "#FFFFFF";
+  const INPUT_BORDER = "rgba(0, 11, 94, 0.25)";
   const MOBILE_HEADER_HEIGHT = "140px";
   const DESKTOP_BREAKPOINT = 900;
 
@@ -332,6 +334,11 @@
     }
 
     style.textContent = `
+      html,
+      body {
+        color-scheme: light !important;
+      }
+
       html[data-theme]:not([data-theme="000"]) .mv-hero,
       html[data-theme]:not([data-theme="000"]) .mr-hero {
         position: relative !important;
@@ -372,14 +379,6 @@
     `;
   }
 
-  function removeInjectedStyle() {
-    const style = document.getElementById(STYLE_ID);
-
-    if (style) {
-      style.remove();
-    }
-  }
-
   function applyPageBackgrounds() {
     [
       document.documentElement,
@@ -397,14 +396,51 @@
     [
       document.documentElement,
       document.body,
-      document.querySelector(".reactSingularKey_CC_main_generic"),
-      document.querySelector(".merlin-register"),
-      document.querySelector(".mr-shell"),
-      document.querySelector(".mr-body")
+      document.querySelector(".reactSingularKey_CC_main_generic")
     ].forEach(function (element) {
-      setImportant(element, "background", REGISTRATION_BACKGROUND);
-      setImportant(element, "background-color", REGISTRATION_BACKGROUND);
+      setImportant(element, "background", PAGE_BACKGROUND);
+      setImportant(element, "background-color", PAGE_BACKGROUND);
+      setImportant(element, "color", BASE_TEXT);
     });
+
+    [
+      document.querySelector(".merlin-register"),
+      document.querySelector(".mr-shell")
+    ].forEach(function (element) {
+      removeInlineProperty(element, "background");
+      removeInlineProperty(element, "background-color");
+    });
+
+    const body = document.querySelector(".mr-body");
+
+    if (!body) return;
+
+    setImportant(body, "background", PAGE_BACKGROUND);
+    setImportant(body, "background-color", PAGE_BACKGROUND);
+    setImportant(body, "color", BASE_TEXT);
+
+    body
+      .querySelectorAll("h1, h2, h3, h4, h5, h6, p, label, span, small, strong, em, li, legend, div")
+      .forEach(function (element) {
+        if (element.closest("button, [role='button'], a")) return;
+        setImportant(element, "color", BASE_TEXT);
+      });
+
+    body.querySelectorAll("input, textarea, select").forEach(function (element) {
+      setImportant(element, "background", INPUT_BACKGROUND);
+      setImportant(element, "background-color", INPUT_BACKGROUND);
+      setImportant(element, "color", BASE_TEXT);
+      setImportant(element, "border-color", INPUT_BORDER);
+    });
+  }
+
+  function applyBaseBackgroundsForCurrentLayout() {
+    if (document.querySelector(".mr-body")) {
+      applyRegistrationBackgrounds();
+      return;
+    }
+
+    applyPageBackgrounds();
   }
 
   function hideNativeHeroAssets(hero) {
@@ -607,9 +643,10 @@
   function resetToMerlinDefault() {
     document.documentElement.setAttribute("data-theme", DEFAULT_THEME_CODE);
 
-    removeInjectedStyle();
     removeBrandDom();
     restoreTrackedStyles();
+    injectBaseStyle();
+    applyBaseBackgroundsForCurrentLayout();
 
     if (lastAppliedThemeCode !== DEFAULT_THEME_CODE) {
       console.log("[Merlin Asset Brand] Reset to Merlin default");
@@ -695,6 +732,7 @@
     console.log("[Merlin Asset Brand] loaded");
     console.log("[Merlin Asset Brand] URL from:", getFromParam());
 
+    injectBaseStyle();
     applyTheme();
     observeDavinciDomChanges();
 
