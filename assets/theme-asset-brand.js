@@ -479,7 +479,7 @@
         width: 100% !important;
         height: 100% !important;
         pointer-events: none !important;
-        z-index: 20 !important;
+        z-index: 999 !important;
       }
 
       html[data-theme]:not([data-theme="000"]) .mv-hero-brand-stage,
@@ -539,6 +539,15 @@
       setImportant(element, "color-scheme", "light");
       setImportant(element, "--mr-cream-soft", PAGE_BACKGROUND);
       setImportant(element, "--mr-cream", PAGE_BACKGROUND);
+      setImportant(element, "--mr-ink", BASE_TEXT);
+    });
+
+    document.querySelectorAll(".mr-body, .mr-body *, .mr-body-inner, .mr-body-inner *").forEach(function (element) {
+      if (element.matches("button, [role='button']") || element.closest("button, [role='button']")) {
+        return;
+      }
+
+      setImportant(element, "color", BASE_TEXT);
       setImportant(element, "--mr-ink", BASE_TEXT);
     });
 
@@ -669,7 +678,7 @@
     setImportant(brandDom.wrapper, "width", "100%");
     setImportant(brandDom.wrapper, "height", "100%");
     setImportant(brandDom.wrapper, "pointer-events", "none");
-    setImportant(brandDom.wrapper, "z-index", "20");
+    setImportant(brandDom.wrapper, "z-index", "999");
 
     setImportant(brandDom.layer, "position", "absolute");
     setImportant(brandDom.layer, "top", "0");
@@ -765,6 +774,73 @@
     };
   }
 
+  function applyRegistrationHeroFallback(theme) {
+    const hero = document.querySelector(".mr-hero");
+
+    if (!hero || !theme) return;
+
+    const logoUrl = getLogoUrl(theme);
+    const brandDom = ensureBrandDom(hero);
+
+    hideNativeHeroAssets(hero);
+
+    if (brandDom.image.src !== logoUrl) {
+      brandDom.image.src = logoUrl;
+    }
+
+    brandDom.image.alt = theme.name;
+    brandDom.image.setAttribute("aria-label", theme.name);
+    brandDom.image.setAttribute("data-asset-brand-code", theme.code);
+
+    setImportant(hero, "position", "relative");
+    setImportant(hero, "overflow", "hidden");
+    setImportant(hero, "background", "transparent");
+    setImportant(hero, "background-color", "transparent");
+
+    setImportant(brandDom.wrapper, "position", "absolute");
+    setImportant(brandDom.wrapper, "inset", "0");
+    setImportant(brandDom.wrapper, "width", "100%");
+    setImportant(brandDom.wrapper, "height", "100%");
+    setImportant(brandDom.wrapper, "pointer-events", "none");
+    setImportant(brandDom.wrapper, "z-index", "999");
+
+    setImportant(brandDom.layer, "position", "absolute");
+    setImportant(brandDom.layer, "inset", "0");
+    setImportant(brandDom.layer, "display", "flex");
+    setImportant(brandDom.layer, "align-items", "center");
+    setImportant(brandDom.layer, "justify-content", "center");
+    setImportant(brandDom.layer, "overflow", "hidden");
+    setImportant(brandDom.layer, "background", theme.background);
+    setImportant(brandDom.layer, "background-color", theme.background);
+
+    setImportant(brandDom.stage, "width", getResponsiveValue(theme, "stageWidth", "mobileStageWidth", "240px"));
+    setImportant(brandDom.stage, "height", getResponsiveValue(theme, "stageHeight", "mobileStageHeight", "240px"));
+    setImportant(brandDom.stage, "display", "flex");
+    setImportant(brandDom.stage, "align-items", "center");
+    setImportant(brandDom.stage, "justify-content", "center");
+    setImportant(brandDom.stage, "position", "relative");
+    setImportant(brandDom.stage, "overflow", "visible");
+
+    setImportant(brandDom.image, "display", "block");
+    setImportant(brandDom.image, "width", getResponsiveValue(theme, "logoWidth", "mobileLogoWidth", "auto"));
+    setImportant(brandDom.image, "height", getResponsiveValue(theme, "logoHeight", "mobileLogoHeight", "auto"));
+    setImportant(brandDom.image, "max-width", getResponsiveValue(theme, "logoMaxWidth", "mobileLogoMaxWidth", "80%"));
+    setImportant(brandDom.image, "max-height", getResponsiveValue(theme, "logoMaxHeight", "mobileLogoMaxHeight", "150px"));
+    setImportant(brandDom.image, "object-fit", "contain");
+    setImportant(
+      brandDom.image,
+      "transform",
+      "translateY(" +
+        getResponsiveValue(theme, "logoOffsetY", "mobileLogoOffsetY", "0px") +
+        ") scale(" +
+        getResponsiveValue(theme, "logoScale", "mobileLogoScale", "1") +
+        ")"
+    );
+    setImportant(brandDom.image, "transform-origin", "center center");
+
+    applyRegistrationBackgrounds();
+  }
+
   function removeBrandDom() {
     document.querySelectorAll(".mv-hero-brand-wrapper").forEach(function (element) {
       element.remove();
@@ -774,6 +850,7 @@
   function resetToMerlinDefault() {
     document.documentElement.setAttribute("data-theme", DEFAULT_THEME_CODE);
 
+    removeInjectedStyle();
     removeBrandDom();
     restoreTrackedStyles();
     injectBaseStyle();
@@ -798,6 +875,8 @@
     hideNativeHeroAssets(hero);
 
     const result = configureLayout(hero, theme);
+
+    applyRegistrationHeroFallback(theme);
 
     if (lastAppliedThemeCode !== theme.code || lastAppliedMode !== result.mode) {
       console.log("[Merlin Asset Brand] Theme applied", {
