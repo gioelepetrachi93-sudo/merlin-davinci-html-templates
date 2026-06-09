@@ -506,7 +506,87 @@
     }
   }
 
+  function clearRegistrationDesktopScrollState() {
+    [
+      document.documentElement,
+      document.body,
+      document.querySelector(".merlin-register"),
+      document.querySelector(".mr-shell"),
+      document.querySelector(".mr-hero"),
+      document.querySelector(".mr-body"),
+      document.querySelector(".mr-hero .mv-hero-brand-wrapper"),
+      document.querySelector(".mr-hero .mv-hero-brand-layer")
+    ].forEach(function (element) {
+      if (!element) return;
+
+      [
+        "height",
+        "min-height",
+        "max-height",
+        "overflow",
+        "overflow-y",
+        "overflow-x",
+        "align-items"
+      ].forEach(function (property) {
+        removeInlineProperty(element, property);
+      });
+    });
+  }
+
+  function applyRegistrationDesktopScrollState() {
+    if (!document.querySelector(".mr-body")) return;
+
+    if (!isDesktopLayout()) {
+      clearRegistrationDesktopScrollState();
+      return;
+    }
+
+    const register = document.querySelector(".merlin-register");
+    const shell = document.querySelector(".mr-shell");
+    const hero = document.querySelector(".mr-hero");
+    const body = document.querySelector(".mr-body");
+    const wrapper = document.querySelector(".mr-hero .mv-hero-brand-wrapper");
+    const layer = document.querySelector(".mr-hero .mv-hero-brand-layer");
+
+    [document.documentElement, document.body].forEach(function (element) {
+      setImportant(element, "height", "100%");
+      setImportant(element, "overflow", "hidden");
+    });
+
+    [register, shell, hero].forEach(function (element) {
+      if (!element) return;
+
+      setImportant(element, "height", "100vh");
+      setImportant(element, "min-height", "100vh");
+      setImportant(element, "max-height", "100vh");
+      setImportant(element, "overflow", "hidden");
+    });
+
+    setImportant(shell, "align-items", "stretch");
+
+    if (body) {
+      setImportant(body, "height", "100vh");
+      setImportant(body, "min-height", "0");
+      setImportant(body, "max-height", "100vh");
+      setImportant(body, "overflow-y", "auto");
+      setImportant(body, "overflow-x", "hidden");
+      setImportant(body, "background", PAGE_BACKGROUND);
+      setImportant(body, "background-color", PAGE_BACKGROUND);
+      setImportant(body, "color", BASE_TEXT);
+    }
+
+    [wrapper, layer].forEach(function (element) {
+      if (!element) return;
+
+      setImportant(element, "height", "100%");
+      setImportant(element, "min-height", "100%");
+      setImportant(element, "max-height", "none");
+    });
+  }
+
   function applyPageBackgrounds() {
+    clearRegistrationDesktopScrollState();
+
     [
       document.documentElement,
       document.body,
@@ -572,6 +652,8 @@
       setImportant(layer, "background", theme.background);
       setImportant(layer, "background-color", theme.background);
     }
+
+    applyRegistrationDesktopScrollState();
   }
 
   function applyBaseBackgroundsForCurrentLayout() {
@@ -727,6 +809,8 @@
       setImportant(brandDom.layer, "bottom", "0");
       setImportant(brandDom.layer, "height", "100%");
       setImportant(brandDom.layer, "max-height", "none");
+
+      applyRegistrationDesktopScrollState();
 
       return {
         mode: desktopMode ? "registration-desktop" : "registration-mobile",
