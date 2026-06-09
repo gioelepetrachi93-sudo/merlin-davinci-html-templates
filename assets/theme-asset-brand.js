@@ -14,6 +14,10 @@
   const MOBILE_HEADER_HEIGHT = "140px";
   const DESKTOP_BREAKPOINT = 900;
 
+  const OTP_MAX_INVALID_ATTEMPTS = 3;
+  const OTP_LOCK_SECONDS = 60;
+  const OTP_LOCK_MESSAGE_ID = "merlin-otp-lock-message";
+
   const THEMES = {
     "001": {
       code: "001",
@@ -212,8 +216,17 @@
   let lastAppliedThemeCode = null;
   let lastAppliedMode = null;
 
+  let otpInvalidAttempts = 0;
+  let otpLockedUntil = 0;
+  let otpSubmitSequence = 0;
+  let otpCountedSequence = 0;
+  let otpLockTimer = null;
+  let otpClickHandlerInstalled = false;
+
   const ORIGINAL_STYLES = new WeakMap();
   const TRACKED_ELEMENTS = new Set();
+  const OTP_DISABLED_STATE = new WeakMap();
+  const OTP_DISABLED_ELEMENTS = new Set();
 
   function getLogoUrl(theme) {
     return CDN_BASE + theme.logoFile + "?" + ASSET_VERSION;
@@ -320,8 +333,253 @@
       : theme[mobileKey] || theme[desktopKey] || fallback;
   }
 
+  function normalizeText(text) {
+    return String(text || "").replace(/\s+/g, " ").trim().toLowerCase();
+  }
+
   function getHeroElement() {
     return document.querySelector(".mv-hero") || document.querySelector(".mr-hero");
+  }
+
+  function getOtpRoot() {
+    return document.querySelector(".mv-body") || document.querySelector(".merlin-verify");
+  }
+
+  function findOtpContinueButton() {
+    const root = getOtpRoot();
+
+    if (!root) return null;
+
+    return Array.from(root.querySelectorAll("button")).find(function (element) {
+      return normalizeText(element.textContent).includes("continue");
+    });
+  }
+
+  function findOtpResendAction() {
+    const root = getOtpRoot();
+
+    if (!root) return null;
+
+    return Array.from(root.querySelectorAll("a, button")).find(function (element) {
+      return normalizeText(element.textContent).includes("resend");
+    });
+  }
+
+  function findOtpInvalidError() {
+    const root = getOtpRoot();
+
+    if (!root) return null;
+
+    return Array.from(root.querySelectorAll("*")).find(function (element) {
+      return normalizeText(element.textContent) === "invalid verification code";
+    });
+  }
+
+  function rememberOtpDisabledState(element) {
+    if (!element || OTP_DISABLED_STATE.has(element)) return;
+
+    OTP_DISABLED_STATE.set(element, {
+      disabled: "disabled" in element ? element.disabled : null,
+      ariaDisabled: element.getAttribute("aria-disabled"),
+      pointerEvents: element.style.getPropertyValue("pointer-events"),
+      pointerEventsPriority: element.style.getPropertyPriority("pointer-events"),
+      opacity: element.style.getPropertyValue("opacity"),
+      opacityPriority: element.style.getPropertyPriority("opacity")
+    });
+
+    OTP_DISABLED_ELEMENTS.add(element);
+  }
+
+  function restoreOtpDisabledState(element) {
+    const state = OTP_DISABLED_STATE.get(element);
+
+    if (!element || !state) return;
+
+    if (state.disabled !== null && "disabled" in element) {
+      element.disabled = state.disabled;
+    }
+
+    if (state.ariaDisabled === null) {
+      element.removeAttribute("aria-disabled");
+    } else {
+      element.setAttribute("aria-disabled", state.ariaDisabled);
+    }
+
+    if (state.pointerEvents) {
+      element.style.setProperty("pointer-events", state.pointerEvents, state.pointerEventsPriority);
+    } else {
+      element.style.removeProperty("pointer-events");
+    }
+
+    if (state.opacity) {
+      element.style.setProperty("opacity", state.opacity, state.opacityPriority);
+    } else {
+      element.style.removeProperty("opacity");
+    }
+
+    OTP_DISABLED_STATE.delete(element);
+    OTP_DISABLED_ELEMENTS.delete(element);
+  }
+
+  function setOtpControlDisabled(element, disabled) {
+    if (!element) return;
+
+    if (disabled) {
+      rememberOtpDisabledState(element);
+
+      if ("disabled" in element) {
+        element.disabled = true;
+      }
+
+      element.setAttribute("aria-disabled", "true");
+      element.style.setProperty("pointer-events", "none", "important");
+      element.style.setProperty("opacity", "0.45", "important");
+      return;
+    }
+
+    restoreOtpDisabledState(element);
+  }
+
+  function removeOtpLockMessage() {
+    const message = document.getElementById(OTP_LOCK_MESSAGE_ID);
+
+    if (message) {
+      message.remove();
+    }
+  }
+
+  function getOtpLockMessage(errorElement) {
+    let message = document.getElementById(OTP_LOCK_MESSAGE_ID);
+
+    if (!message) {
+      message = document.createElement("div");
+      message.id = OTP_LOCK_MESSAGE_ID;
+      errorElement.insertAdjacentElement("afterend", message);
+    }
+
+    const computed = getComputedStyle(errorElement);
+
+    message.style.setProperty("margin-top", "-2px", "important");
+    message.style.setProperty("margin-bottom", "14px", "important");
+    message.style.setProperty("font-size", computed.fontSize, "important");
+    message.style.setProperty("font-family", computed.fontFamily, "important");
+    message.style.setProperty("font-weight", "700", "important");
+    message.style.setProperty("line-height", computed.lineHeight, "important");
+    message.style.setProperty("color", computed.color, "important");
+    message.style.setProperty("text-align", computed.textAlign || "center", "important");
+
+    return message;
+  }
+
+  function updateOtpLockUi() {
+    const root = getOtpRoot();
+
+    if (!root) {
+      removeOtpLockMessage();
+      return;
+    }
+
+    const now = Date.now();
+    const isLocked = otpLockedUntil > now;
+    const remainingSeconds = Math.max(0, Math.ceil((otpLockedUntil - now) / 1000));
+    const continueButton = findOtpContinueButton();
+    const resendAction = findOtpResendAction();
+    const errorElement = findOtpInvalidError();
+
+    setOtpControlDisabled(continueButton, isLocked);
+    setOtpControlDisabled(resendAction, isLocked);
+
+    if (isLocked && errorElement) {
+      const message = getOtpLockMessage(errorElement);
+      const nextText = "Too many attempts. Try again in " + remainingSeconds + "s.";
+
+      if (message.textContent !== nextText) {
+        message.textContent = nextText;
+      }
+
+      return;
+    }
+
+    removeOtpLockMessage();
+
+    if (otpLockedUntil && !isLocked) {
+      otpInvalidAttempts = 0;
+      otpLockedUntil = 0;
+      otpSubmitSequence = 0;
+      otpCountedSequence = 0;
+
+      OTP_DISABLED_ELEMENTS.forEach(function (element) {
+        restoreOtpDisabledState(element);
+      });
+    }
+  }
+
+  function lockOtpControls() {
+    otpLockedUntil = Date.now() + OTP_LOCK_SECONDS * 1000;
+    updateOtpLockUi();
+  }
+
+  function countOtpInvalidAttempt(sequence) {
+    if (sequence <= otpCountedSequence) return;
+
+    const errorElement = findOtpInvalidError();
+
+    if (!errorElement) return;
+
+    otpCountedSequence = sequence;
+    otpInvalidAttempts += 1;
+
+    if (otpInvalidAttempts >= OTP_MAX_INVALID_ATTEMPTS) {
+      lockOtpControls();
+      return;
+    }
+
+    updateOtpLockUi();
+  }
+
+  function handleOtpClick(event) {
+    const continueButton = findOtpContinueButton();
+    const resendAction = findOtpResendAction();
+    const isLocked = otpLockedUntil > Date.now();
+
+    if (isLocked && resendAction && resendAction.contains(event.target)) {
+      event.preventDefault();
+      event.stopPropagation();
+      updateOtpLockUi();
+      return;
+    }
+
+    if (!continueButton || !continueButton.contains(event.target)) return;
+
+    if (isLocked) {
+      event.preventDefault();
+      event.stopPropagation();
+      updateOtpLockUi();
+      return;
+    }
+
+    otpSubmitSequence += 1;
+
+    const sequence = otpSubmitSequence;
+
+    [700, 1300, 2200].forEach(function (delay) {
+      setTimeout(function () {
+        countOtpInvalidAttempt(sequence);
+      }, delay);
+    });
+  }
+
+  function installOtpRetryLock() {
+    if (!otpClickHandlerInstalled) {
+      document.addEventListener("click", handleOtpClick, true);
+      otpClickHandlerInstalled = true;
+    }
+
+    if (!otpLockTimer) {
+      otpLockTimer = setInterval(updateOtpLockUi, 250);
+    }
+
+    updateOtpLockUi();
   }
 
   function installRegistrationCreamGuard() {
@@ -1027,6 +1285,7 @@
     console.log("[Merlin Asset Brand] URL from:", getFromParam());
 
     installRegistrationCreamGuard();
+    installOtpRetryLock();
     injectBaseStyle();
     applyTheme();
     observeDavinciDomChanges();
