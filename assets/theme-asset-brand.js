@@ -311,6 +311,10 @@
     return window.innerWidth >= DESKTOP_BREAKPOINT;
   }
 
+  function getHeroElement() {
+    return document.querySelector(".mv-hero") || document.querySelector(".mr-hero");
+  }
+
   function getResponsiveValue(theme, desktopKey, mobileKey, fallback) {
     return isDesktopLayout()
       ? theme[desktopKey] || fallback
@@ -327,7 +331,8 @@
     }
 
     style.textContent = `
-      html[data-theme]:not([data-theme="000"]) .mv-hero {
+      html[data-theme]:not([data-theme="000"]) .mv-hero,
+      html[data-theme]:not([data-theme="000"]) .mr-hero {
         position: relative !important;
         overflow: hidden !important;
         padding: 0 !important;
@@ -340,7 +345,8 @@
         opacity: 0 !important;
       }
 
-      html[data-theme]:not([data-theme="000"]) aside.mv-hero svg:not(.mv-hero-brand-wrapper svg) {
+      html[data-theme]:not([data-theme="000"]) aside.mv-hero svg:not(.mv-hero-brand-wrapper svg),
+      html[data-theme]:not([data-theme="000"]) aside.mr-hero svg:not(.mv-hero-brand-wrapper svg) {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -385,7 +391,10 @@
       document.body,
       document.querySelector(".merlin-verify"),
       document.querySelector(".mv-shell"),
-      document.querySelector(".mv-body")
+      document.querySelector(".mv-body"),
+      document.querySelector(".merlin-register"),
+      document.querySelector(".mr-shell"),
+      document.querySelector(".mr-body")
     ].forEach(function (element) {
       setImportant(element, "background", PAGE_BACKGROUND);
       setImportant(element, "background-color", PAGE_BACKGROUND);
@@ -399,7 +408,7 @@
       setImportant(element, "opacity", "0");
     });
 
-    if (hero && hero.matches("aside.mv-hero")) {
+    if (hero && hero.matches("aside.mv-hero, aside.mr-hero")) {
       hero.querySelectorAll("svg").forEach(function (element) {
         if (element.closest(".mv-hero-brand-wrapper")) return;
 
@@ -476,6 +485,7 @@
     setImportant(hero, "padding", "0");
     setImportant(hero, "background", "transparent");
     setImportant(hero, "background-color", "transparent");
+    setImportant(hero, "background-image", "none");
 
     setImportant(brandDom.wrapper, "position", "absolute");
     setImportant(brandDom.wrapper, "inset", "0");
@@ -527,6 +537,17 @@
     setImportant(brandDom.image, "border", "0");
     setImportant(brandDom.image, "transform", "translateY(" + logoOffsetY + ") scale(" + logoScale + ")");
     setImportant(brandDom.image, "transform-origin", "center center");
+
+    if (hero.matches(".mr-hero")) {
+      setImportant(brandDom.layer, "bottom", "0");
+      setImportant(brandDom.layer, "height", "100%");
+      setImportant(brandDom.layer, "max-height", "none");
+
+      return {
+        mode: desktopMode ? "registration-desktop" : "registration-mobile",
+        logoUrl: logoUrl
+      };
+    }
 
     if (desktopMode) {
       removeInlineProperty(shell, "display");
@@ -590,7 +611,7 @@
   }
 
   function applyAssetTheme(theme) {
-    const hero = document.querySelector(".mv-hero");
+    const hero = getHeroElement();
 
     if (!hero) return;
 
