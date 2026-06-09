@@ -340,13 +340,19 @@
         opacity: 0 !important;
       }
 
+      html[data-theme]:not([data-theme="000"]) aside.mv-hero svg:not(.mv-hero-brand-wrapper svg) {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+      }
+
       html[data-theme]:not([data-theme="000"]) .mv-hero-brand-wrapper {
         position: absolute !important;
         inset: 0 !important;
         width: 100% !important;
         height: 100% !important;
         pointer-events: none !important;
-        z-index: 20 !important;
+        z-index: 999 !important;
       }
 
       html[data-theme]:not([data-theme="000"]) .mv-hero-brand-stage,
@@ -386,12 +392,24 @@
     });
   }
 
-  function hideNativeHeroAssets() {
+  function hideNativeHeroAssets(hero) {
     document.querySelectorAll(".mv-hero-bg, .mv-hero-logo").forEach(function (element) {
       setImportant(element, "display", "none");
       setImportant(element, "visibility", "hidden");
       setImportant(element, "opacity", "0");
     });
+
+    if (hero && hero.matches("aside.mv-hero")) {
+      hero.querySelectorAll("svg").forEach(function (element) {
+        if (element.closest(".mv-hero-brand-wrapper")) return;
+
+        setImportant(element, "display", "none");
+        setImportant(element, "visibility", "hidden");
+        setImportant(element, "opacity", "0");
+      });
+
+      setImportant(hero, "background-image", "none");
+    }
   }
 
   function ensureBrandDom(hero) {
@@ -464,7 +482,7 @@
     setImportant(brandDom.wrapper, "width", "100%");
     setImportant(brandDom.wrapper, "height", "100%");
     setImportant(brandDom.wrapper, "pointer-events", "none");
-    setImportant(brandDom.wrapper, "z-index", "20");
+    setImportant(brandDom.wrapper, "z-index", "999");
 
     setImportant(brandDom.layer, "position", "absolute");
     setImportant(brandDom.layer, "top", "0");
@@ -476,6 +494,7 @@
     setImportant(brandDom.layer, "overflow", "hidden");
     setImportant(brandDom.layer, "background", theme.background);
     setImportant(brandDom.layer, "background-color", theme.background);
+    setImportant(brandDom.layer, "z-index", "999");
 
     setImportant(brandDom.stage, "display", "flex");
     setImportant(brandDom.stage, "align-items", "center");
@@ -578,7 +597,7 @@
     document.documentElement.setAttribute("data-theme", theme.code);
 
     injectBaseStyle();
-    hideNativeHeroAssets();
+    hideNativeHeroAssets(hero);
 
     const result = configureLayout(hero, theme);
 
