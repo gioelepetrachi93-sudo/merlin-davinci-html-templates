@@ -335,8 +335,77 @@
 
     style.textContent = `
       html,
-      body {
+      body,
+      .merlin-register,
+      .merlin-register .mr-shell,
+      .merlin-register .mr-body {
         color-scheme: light !important;
+      }
+
+      html,
+      body,
+      .merlin-register,
+      .merlin-register .mr-shell,
+      .merlin-register .mr-body {
+        --mr-cream-soft: ${PAGE_BACKGROUND} !important;
+        --mr-cream: ${PAGE_BACKGROUND} !important;
+        --mr-ink: ${BASE_TEXT} !important;
+      }
+
+      .merlin-register .mr-shell > .mr-body,
+      main.merlin-register .mr-body,
+      section.mr-body {
+        background: ${PAGE_BACKGROUND} !important;
+        background-color: ${PAGE_BACKGROUND} !important;
+        color: ${BASE_TEXT} !important;
+      }
+
+      .merlin-register .mr-body h1,
+      .merlin-register .mr-body h2,
+      .merlin-register .mr-body h3,
+      .merlin-register .mr-body h4,
+      .merlin-register .mr-body h5,
+      .merlin-register .mr-body h6,
+      .merlin-register .mr-body p,
+      .merlin-register .mr-body label,
+      .merlin-register .mr-body span,
+      .merlin-register .mr-body small,
+      .merlin-register .mr-body strong,
+      .merlin-register .mr-body em,
+      .merlin-register .mr-body li,
+      .merlin-register .mr-body legend,
+      .merlin-register .mr-body div {
+        color: ${BASE_TEXT} !important;
+      }
+
+      .merlin-register .mr-body input,
+      .merlin-register .mr-body textarea,
+      .merlin-register .mr-body select {
+        background: ${INPUT_BACKGROUND} !important;
+        background-color: ${INPUT_BACKGROUND} !important;
+        color: ${BASE_TEXT} !important;
+        border-color: ${INPUT_BORDER} !important;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        html,
+        body,
+        .merlin-register,
+        .merlin-register .mr-shell,
+        .merlin-register .mr-body {
+          color-scheme: light !important;
+          --mr-cream-soft: ${PAGE_BACKGROUND} !important;
+          --mr-cream: ${PAGE_BACKGROUND} !important;
+          --mr-ink: ${BASE_TEXT} !important;
+        }
+
+        .merlin-register .mr-shell > .mr-body,
+        main.merlin-register .mr-body,
+        section.mr-body {
+          background: ${PAGE_BACKGROUND} !important;
+          background-color: ${PAGE_BACKGROUND} !important;
+          color: ${BASE_TEXT} !important;
+        }
       }
 
       html[data-theme]:not([data-theme="000"]) .mv-hero,
@@ -401,6 +470,10 @@
       setImportant(element, "background", PAGE_BACKGROUND);
       setImportant(element, "background-color", PAGE_BACKGROUND);
       setImportant(element, "color", BASE_TEXT);
+      setImportant(element, "color-scheme", "light");
+      setImportant(element, "--mr-cream-soft", PAGE_BACKGROUND);
+      setImportant(element, "--mr-cream", PAGE_BACKGROUND);
+      setImportant(element, "--mr-ink", BASE_TEXT);
     });
 
     [
@@ -409,6 +482,10 @@
     ].forEach(function (element) {
       removeInlineProperty(element, "background");
       removeInlineProperty(element, "background-color");
+      setImportant(element, "color-scheme", "light");
+      setImportant(element, "--mr-cream-soft", PAGE_BACKGROUND);
+      setImportant(element, "--mr-cream", PAGE_BACKGROUND);
+      setImportant(element, "--mr-ink", BASE_TEXT);
     });
 
     const body = document.querySelector(".mr-body");
@@ -418,6 +495,10 @@
     setImportant(body, "background", PAGE_BACKGROUND);
     setImportant(body, "background-color", PAGE_BACKGROUND);
     setImportant(body, "color", BASE_TEXT);
+    setImportant(body, "color-scheme", "light");
+    setImportant(body, "--mr-cream-soft", PAGE_BACKGROUND);
+    setImportant(body, "--mr-cream", PAGE_BACKGROUND);
+    setImportant(body, "--mr-ink", BASE_TEXT);
 
     body
       .querySelectorAll("h1, h2, h3, h4, h5, h6, p, label, span, small, strong, em, li, legend, div")
