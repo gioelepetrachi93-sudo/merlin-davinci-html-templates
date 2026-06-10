@@ -18,11 +18,13 @@
   const VERIFICATION_LOCK_SECONDS = 60;
   const VERIFICATION_LOCK_MESSAGE_ID = "merlin-verification-lock-message";
   const VERIFICATION_LOCK_SECONDS_ID = "merlin-verification-lock-seconds";
+  const VERIFICATION_STORAGE_PREFIX = "merlin_verification_lock_v1:";
   const LEGACY_LOCK_MESSAGE_IDS = [
     "merlin-otp-lock-message",
     "merlin-passcode-lock-message",
     "merlin-unified-otp-lock-message",
-    "merlin-registration-verify-lock-message"
+    "merlin-registration-verify-lock-message",
+    "merlin-persistent-verification-lock-message"
   ];
 
   const THEMES = {
@@ -405,6 +407,61 @@
     return null;
   }
 
+  function getVerificationStorageKey(mode) {
+    const params = new URLSearchParams(window.location.search);
+    const scope = [
+      window.location.origin,
+      window.location.pathname,
+      params.get("client_id") || "",
+      params.get("login_hint") || "",
+      params.get("from") || "",
+      mode || "unknown"
+    ].join("|");
+
+    return VERIFICATION_STORAGE_PREFIX + scope;
+  }
+
+  function readStoredVerificationState(mode) {
+    try {
+      return JSON.parse(sessionStorage.getItem(getVerificationStorageKey(mode)) || "null");
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function writeStoredVerificationState() {
+    if (!verificationMode) return;
+
+    try {
+      sessionStorage.setItem(
+        getVerificationStorageKey(verificationMode),
+        JSON.stringify({
+          attempts: verificationInvalidAttempts,
+          lockedUntil: verificationLockedUntil
+        })
+      );
+    } catch (error) {}
+  }
+
+  function clearStoredVerificationState(mode) {
+    try {
+      sessionStorage.removeItem(getVerificationStorageKey(mode || verificationMode));
+    } catch (error) {}
+  }
+
+  function loadStoredVerificationState(mode) {
+    const stored = readStoredVerificationState(mode);
+
+    verificationInvalidAttempts = Math.max(0, Number(stored && stored.attempts ? stored.attempts : 0));
+    verificationLockedUntil = Math.max(0, Number(stored && stored.lockedUntil ? stored.lockedUntil : 0));
+
+    if (verificationLockedUntil && verificationLockedUntil <= Date.now()) {
+      clearStoredVerificationState(mode);
+      verificationInvalidAttempts = 0;
+      verificationLockedUntil = 0;
+    }
+  }
+
   function removeLegacyVerificationLockMessages() {
     LEGACY_LOCK_MESSAGE_IDS.forEach(function (id) {
       const element = document.getElementById(id);
@@ -563,7 +620,7 @@
     }
   }
 
-  function resetVerificationLockState() {
+  function resetVerificationLockState(clearStorage) {
     verificationInvalidAttempts = 0;
     verificationLockedUntil = 0;
     verificationSubmitSequence = 0;
@@ -576,11 +633,15 @@
     VERIFICATION_DISABLED_ELEMENTS.forEach(function (element) {
       restoreVerificationDisabledState(element);
     });
+
+    if (clearStorage !== false) {
+      clearStoredVerificationState();
+    }
   }
 
   function resetVerificationLockIfExpired() {
     if (verificationLockedUntil && verificationLockedUntil <= Date.now()) {
-      resetVerificationLockState();
+      resetVerificationLockState(true);
       return true;
     }
 
@@ -590,12 +651,36 @@
   function syncVerificationMode() {
     const nextMode = detectVerificationMode();
 
-    if (verificationMode && nextMode && verificationMode !== nextMode) {
-      resetVerificationLockState();
+    if (verificationMode !== nextMode) {
+      VERIFICATION_DISABLED_ELEMENTS.forEach(function (element) {
+        restoreVerificationDisabledState(element);
+      });
+
+      removeVerificationLockMessage();
+
+      verificationSubmitSequence = 0;
+      verificationCountedSequence = 0;
+      verificationLastErrorElement = null;
+      verificationLastRenderedSecond = null;
+      verificationMode = nextMode;
+
+      if (verificationMode) {
+        loadStoredVerificationState(verificationMode);
+      } else {
+        verificationInvalidAttempts = 0;
+        verificationLockedUntil = 0;
+      }
     }
 
-    verificationMode = nextMode;
     return verificationMode;
+  }
+
+  function getVerificationInputAnchor() {
+    const input = getVisibleVerificationInputs()[0];
+
+    if (!input) return null;
+
+    return input.closest("div") || input;
   }
 
   function getVerificationErrorBlock(errorElement) {
@@ -626,15 +711,18 @@
     }
 
     const errorBlock = getVerificationErrorBlock(errorElement);
+    const inputAnchor = getVerificationInputAnchor();
 
     if (errorBlock && message.previousElementSibling !== errorBlock) {
       errorBlock.insertAdjacentElement("afterend", message);
+    } else if (!errorBlock && inputAnchor && !document.documentElement.contains(message)) {
+      inputAnchor.insertAdjacentElement("beforebegin", message);
     } else if (!document.documentElement.contains(message)) {
       getVerificationRoot().prepend(message);
     }
 
-    const styleSource = errorElement || errorBlock || message;
-    const computed = getComputedStyle(styleSource);
+    const styleSource = errorElement || errorBlock;
+    const computed = styleSource ? getComputedStyle(styleSource) : null;
 
     message.style.setProperty("position", "static", "important");
     message.style.setProperty("display", "block", "important");
@@ -644,11 +732,11 @@
     message.style.setProperty("box-sizing", "border-box", "important");
     message.style.setProperty("margin", "4px 0 14px 0", "important");
     message.style.setProperty("padding", "0", "important");
-    message.style.setProperty("font-size", computed.fontSize || "14px", "important");
-    message.style.setProperty("font-family", computed.fontFamily, "important");
+    message.style.setProperty("font-size", computed ? computed.fontSize : "14px", "important");
+    message.style.setProperty("font-family", computed ? computed.fontFamily : "inherit", "important");
     message.style.setProperty("font-weight", "700", "important");
-    message.style.setProperty("line-height", computed.lineHeight || "18px", "important");
-    message.style.setProperty("color", computed.color || "#d93025", "important");
+    message.style.setProperty("line-height", computed ? computed.lineHeight : "18px", "important");
+    message.style.setProperty("color", computed ? computed.color : "#d93025", "important");
     message.style.setProperty("text-align", "center", "important");
     message.style.setProperty("background", "transparent", "important");
     message.style.setProperty("pointer-events", "none", "important");
@@ -694,6 +782,7 @@
 
   function lockVerificationControls() {
     verificationLockedUntil = Date.now() + VERIFICATION_LOCK_SECONDS * 1000;
+    writeStoredVerificationState();
     updateVerificationLockUi();
   }
 
@@ -710,6 +799,7 @@
 
     verificationCountedSequence = sequence;
     verificationInvalidAttempts += 1;
+    writeStoredVerificationState();
 
     if (verificationInvalidAttempts >= VERIFICATION_MAX_INVALID_ATTEMPTS) {
       lockVerificationControls();
@@ -732,12 +822,12 @@
     const isLocked = verificationLockedUntil > Date.now();
 
     if (!isLocked && expired && resendAction && resendAction.contains(event.target)) {
-      resetVerificationLockState();
+      resetVerificationLockState(true);
       return;
     }
 
     if (!isLocked && resendAction && resendAction.contains(event.target)) {
-      resetVerificationLockState();
+      resetVerificationLockState(true);
       return;
     }
 
@@ -787,7 +877,7 @@
         verificationLockTimer = null;
       }
 
-      resetVerificationLockState();
+      resetVerificationLockState(false);
       removeLegacyVerificationLockMessages();
 
       console.log("[Merlin Asset Brand] Verification lock stopped");
