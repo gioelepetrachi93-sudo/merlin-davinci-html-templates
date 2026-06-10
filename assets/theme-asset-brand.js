@@ -358,7 +358,10 @@
   }
 
   function getVerificationRoot() {
-    return document.querySelector(".mv-body") || document.querySelector(".merlin-verify") || document.body;
+    return document.querySelector(".mv-body-inner") ||
+      document.querySelector(".mv-body") ||
+      document.querySelector(".merlin-verify") ||
+      document.body;
   }
 
   function isElementVisible(element) {
@@ -676,6 +679,11 @@
   }
 
   function getVerificationInputAnchor() {
+    const root = getVerificationRoot();
+    const codeInput = root.querySelector(".mv-code-input");
+
+    if (codeInput) return codeInput;
+
     const input = getVisibleVerificationInputs()[0];
 
     if (!input) return null;
@@ -683,22 +691,22 @@
     return input.closest("div") || input;
   }
 
-  function getVerificationErrorBlock(errorElement) {
-    if (!errorElement) return null;
+    function getVerificationErrorBlock(errorElement) {
+      if (!errorElement) return null;
 
-    const parent = errorElement.parentElement;
+      const parent = errorElement.parentElement;
 
-    if (
-      parent &&
-      parent !== getVerificationRoot() &&
-      parent.children.length <= 3 &&
-      isInvalidVerificationText(parent.textContent)
-    ) {
-      return parent;
+      if (
+        parent &&
+        parent !== getVerificationRoot() &&
+        parent.children.length <= 3 &&
+        isInvalidVerificationText(parent.textContent)
+      ) {
+        return parent;
+      }
+
+      return errorElement;
     }
-
-    return errorElement;
-  }
 
   function getVerificationLockMessage(errorElement) {
     let message = document.getElementById(VERIFICATION_LOCK_MESSAGE_ID);
@@ -706,9 +714,65 @@
     if (!message) {
       message = document.createElement("div");
       message.id = VERIFICATION_LOCK_MESSAGE_ID;
-      message.innerHTML =
-        'Too many attempts. Try again in <span id="' + VERIFICATION_LOCK_SECONDS_ID + '"></span>s.';
     }
+
+    const currentSeconds =
+      message.querySelector("#" + VERIFICATION_LOCK_SECONDS_ID)?.textContent || "";
+
+    if (!message.querySelector(".merlin-lock-error")) {
+      message.innerHTML =
+        '<div class="merlin-lock-error">Invalid verification code</div>' +
+        '<div class="merlin-lock-timer">Too many attempts. Try again in <span id="' +
+        VERIFICATION_LOCK_SECONDS_ID +
+        '">' +
+        currentSeconds +
+        "</span>s.</div>";
+    }
+
+    const errorBlock = getVerificationErrorBlock(errorElement);
+    const inputAnchor = getVerificationInputAnchor();
+    const root = getVerificationRoot();
+
+    if (errorBlock && message.previousElementSibling !== errorBlock) {
+      errorBlock.insertAdjacentElement("afterend", message);
+    } else if (!errorBlock && inputAnchor && message.nextElementSibling !== inputAnchor) {
+      inputAnchor.insertAdjacentElement("beforebegin", message);
+    } else if (!errorBlock && !inputAnchor && message.parentElement !== root) {
+      root.prepend(message);
+    }
+
+    message.style.setProperty("position", "static", "important");
+    message.style.setProperty("display", "block", "important");
+    message.style.setProperty("visibility", "visible", "important");
+    message.style.setProperty("opacity", "1", "important");
+    message.style.setProperty("width", "100%", "important");
+    message.style.setProperty("max-width", "100%", "important");
+    message.style.setProperty("box-sizing", "border-box", "important");
+    message.style.setProperty("margin", "0 0 12px 0", "important");
+    message.style.setProperty("padding", "0", "important");
+    message.style.setProperty("font-family", "inherit", "important");
+    message.style.setProperty("font-size", "13px", "important");
+    message.style.setProperty("line-height", "17px", "important");
+    message.style.setProperty("color", "#d93025", "important");
+    message.style.setProperty("text-align", "center", "important");
+    message.style.setProperty("background", "transparent", "important");
+    message.style.setProperty("pointer-events", "none", "important");
+
+    const errorLine = message.querySelector(".merlin-lock-error");
+    const timerLine = message.querySelector(".merlin-lock-timer");
+
+    if (errorLine) {
+      errorLine.style.setProperty("font-weight", "400", "important");
+      errorLine.style.setProperty("margin", "0 0 2px 0", "important");
+    }
+
+    if (timerLine) {
+      timerLine.style.setProperty("font-weight", "700", "important");
+      timerLine.style.setProperty("margin", "0", "important");
+    }
+
+    return message;
+  }
 
     const errorBlock = getVerificationErrorBlock(errorElement);
     const inputAnchor = getVerificationInputAnchor();
