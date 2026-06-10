@@ -14,11 +14,16 @@
   const MOBILE_HEADER_HEIGHT = "140px";
   const DESKTOP_BREAKPOINT = 900;
 
-  const OTP_MAX_INVALID_ATTEMPTS = 3;
-  const OTP_LOCK_SECONDS = 60;
-  const OTP_LOCK_MESSAGE_ID = "merlin-otp-lock-message";
-  const PASSCODE_LOCK_MESSAGE_ID = "merlin-passcode-lock-message";
-  const PASSCODE_LOCK_SECONDS_ID = "merlin-passcode-lock-seconds";
+  const VERIFICATION_MAX_INVALID_ATTEMPTS = 3;
+  const VERIFICATION_LOCK_SECONDS = 60;
+  const VERIFICATION_LOCK_MESSAGE_ID = "merlin-verification-lock-message";
+  const VERIFICATION_LOCK_SECONDS_ID = "merlin-verification-lock-seconds";
+  const LEGACY_LOCK_MESSAGE_IDS = [
+    "merlin-otp-lock-message",
+    "merlin-passcode-lock-message",
+    "merlin-unified-otp-lock-message",
+    "merlin-registration-verify-lock-message"
+  ];
 
   const THEMES = {
     "001": {
@@ -218,28 +223,20 @@
   let lastAppliedThemeCode = null;
   let lastAppliedMode = null;
 
-  let otpInvalidAttempts = 0;
-  let otpLockedUntil = 0;
-  let otpSubmitSequence = 0;
-  let otpCountedSequence = 0;
-  let otpLockTimer = null;
-  let otpClickHandlerInstalled = false;
-
-  let passcodeInvalidAttempts = 0;
-  let passcodeLockedUntil = 0;
-  let passcodeSubmitSequence = 0;
-  let passcodeCountedSequence = 0;
-  let passcodeLockTimer = null;
-  let passcodeClickHandlerInstalled = false;
-  let passcodeLastErrorElement = null;
-  let passcodeLastRenderedSecond = null;
+  let verificationMode = null;
+  let verificationInvalidAttempts = 0;
+  let verificationLockedUntil = 0;
+  let verificationSubmitSequence = 0;
+  let verificationCountedSequence = 0;
+  let verificationLockTimer = null;
+  let verificationClickHandlerInstalled = false;
+  let verificationLastErrorElement = null;
+  let verificationLastRenderedSecond = null;
 
   const ORIGINAL_STYLES = new WeakMap();
   const TRACKED_ELEMENTS = new Set();
-  const OTP_DISABLED_STATE = new WeakMap();
-  const OTP_DISABLED_ELEMENTS = new Set();
-  const PASSCODE_DISABLED_STATE = new WeakMap();
-  const PASSCODE_DISABLED_ELEMENTS = new Set();
+  const VERIFICATION_DISABLED_STATE = new WeakMap();
+  const VERIFICATION_DISABLED_ELEMENTS = new Set();
 
   function getLogoUrl(theme) {
     return CDN_BASE + theme.logoFile + "?" + ASSET_VERSION;
@@ -347,291 +344,103 @@
   }
 
   function normalizeText(text) {
-    return String(text || "").replace(/\s+/g, " ").trim().toLowerCase();
+    return String(text || "")
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
   }
 
   function getHeroElement() {
     return document.querySelector(".mv-hero") || document.querySelector(".mr-hero");
   }
 
-  function getOtpRoot() {
-    return document.querySelector(".mv-body") || document.querySelector(".merlin-verify");
-  }
-
-  function findOtpContinueButton() {
-    const root = getOtpRoot();
-
-    if (!root) return null;
-
-    return Array.from(root.querySelectorAll("button, [role='button']")).find(function (element) {
-      return normalizeText(element.textContent).includes("continue");
-    });
-  }
-
-  function findOtpResendAction() {
-    const root = getOtpRoot();
-
-    if (!root) return null;
-
-    return Array.from(root.querySelectorAll("a, button, [role='button']")).find(function (element) {
-      const text = normalizeText(element.textContent);
-      return text.includes("resend") || text.includes("send another");
-    });
-  }
-
-  function findOtpInvalidError() {
-    const root = getOtpRoot();
-
-    if (!root) return null;
-
-    return Array.from(root.querySelectorAll("*")).find(function (element) {
-      return normalizeText(element.textContent) === "invalid verification code";
-    });
-  }
-
-  function rememberOtpDisabledState(element) {
-    if (!element || OTP_DISABLED_STATE.has(element)) return;
-
-    OTP_DISABLED_STATE.set(element, {
-      disabled: "disabled" in element ? element.disabled : null,
-      ariaDisabled: element.getAttribute("aria-disabled"),
-      pointerEvents: element.style.getPropertyValue("pointer-events"),
-      pointerEventsPriority: element.style.getPropertyPriority("pointer-events"),
-      opacity: element.style.getPropertyValue("opacity"),
-      opacityPriority: element.style.getPropertyPriority("opacity")
-    });
-
-    OTP_DISABLED_ELEMENTS.add(element);
-  }
-
-  function restoreOtpDisabledState(element) {
-    const state = OTP_DISABLED_STATE.get(element);
-
-    if (!element || !state) return;
-
-    if (state.disabled !== null && "disabled" in element) {
-      element.disabled = state.disabled;
-    }
-
-    if (state.ariaDisabled === null) {
-      element.removeAttribute("aria-disabled");
-    } else {
-      element.setAttribute("aria-disabled", state.ariaDisabled);
-    }
-
-    if (state.pointerEvents) {
-      element.style.setProperty("pointer-events", state.pointerEvents, state.pointerEventsPriority);
-    } else {
-      element.style.removeProperty("pointer-events");
-    }
-
-    if (state.opacity) {
-      element.style.setProperty("opacity", state.opacity, state.opacityPriority);
-    } else {
-      element.style.removeProperty("opacity");
-    }
-
-    OTP_DISABLED_STATE.delete(element);
-    OTP_DISABLED_ELEMENTS.delete(element);
-  }
-
-  function setOtpControlDisabled(element, disabled) {
-    if (!element) return;
-
-    if (disabled) {
-      rememberOtpDisabledState(element);
-
-      if ("disabled" in element) {
-        element.disabled = true;
-      }
-
-      element.setAttribute("aria-disabled", "true");
-      element.style.setProperty("pointer-events", "none", "important");
-      element.style.setProperty("opacity", "0.45", "important");
-      return;
-    }
-
-    restoreOtpDisabledState(element);
-  }
-
-  function removeOtpLockMessage() {
-    const message = document.getElementById(OTP_LOCK_MESSAGE_ID);
-
-    if (message) {
-      message.remove();
-    }
-  }
-
-  function getOtpLockMessage(errorElement) {
-    let message = document.getElementById(OTP_LOCK_MESSAGE_ID);
-
-    if (!message) {
-      message = document.createElement("div");
-      message.id = OTP_LOCK_MESSAGE_ID;
-      errorElement.insertAdjacentElement("afterend", message);
-    }
-
-    const computed = getComputedStyle(errorElement);
-
-    message.style.setProperty("margin-top", "-2px", "important");
-    message.style.setProperty("margin-bottom", "14px", "important");
-    message.style.setProperty("font-size", computed.fontSize, "important");
-    message.style.setProperty("font-family", computed.fontFamily, "important");
-    message.style.setProperty("font-weight", "700", "important");
-    message.style.setProperty("line-height", computed.lineHeight, "important");
-    message.style.setProperty("color", computed.color, "important");
-    message.style.setProperty("text-align", computed.textAlign || "center", "important");
-
-    return message;
-  }
-
-  function updateOtpLockUi() {
-    const root = getOtpRoot();
-
-    if (!root) {
-      removeOtpLockMessage();
-      return;
-    }
-
-    const now = Date.now();
-    const isLocked = otpLockedUntil > now;
-    const remainingSeconds = Math.max(0, Math.ceil((otpLockedUntil - now) / 1000));
-    const continueButton = findOtpContinueButton();
-    const resendAction = findOtpResendAction();
-    const errorElement = findOtpInvalidError();
-
-    setOtpControlDisabled(continueButton, isLocked);
-    setOtpControlDisabled(resendAction, isLocked);
-
-    if (isLocked && errorElement) {
-      const message = getOtpLockMessage(errorElement);
-      const nextText = "Too many attempts. Try again in " + remainingSeconds + "s.";
-
-      if (message.textContent !== nextText) {
-        message.textContent = nextText;
-      }
-
-      return;
-    }
-
-    removeOtpLockMessage();
-
-    if (otpLockedUntil && !isLocked) {
-      otpInvalidAttempts = 0;
-      otpLockedUntil = 0;
-      otpSubmitSequence = 0;
-      otpCountedSequence = 0;
-
-      OTP_DISABLED_ELEMENTS.forEach(function (element) {
-        restoreOtpDisabledState(element);
-      });
-    }
-  }
-
-  function lockOtpControls() {
-    otpLockedUntil = Date.now() + OTP_LOCK_SECONDS * 1000;
-    updateOtpLockUi();
-  }
-
-  function countOtpInvalidAttempt(sequence) {
-    if (sequence <= otpCountedSequence) return;
-
-    const errorElement = findOtpInvalidError();
-
-    if (!errorElement) return;
-
-    otpCountedSequence = sequence;
-    otpInvalidAttempts += 1;
-
-    if (otpInvalidAttempts >= OTP_MAX_INVALID_ATTEMPTS) {
-      lockOtpControls();
-      return;
-    }
-
-    updateOtpLockUi();
-  }
-
-  function handleOtpClick(event) {
-    const continueButton = findOtpContinueButton();
-    const resendAction = findOtpResendAction();
-    const isLocked = otpLockedUntil > Date.now();
-
-    if (isLocked && resendAction && resendAction.contains(event.target)) {
-      event.preventDefault();
-      event.stopPropagation();
-      updateOtpLockUi();
-      return;
-    }
-
-    if (!continueButton || !continueButton.contains(event.target)) return;
-
-    if (isLocked) {
-      event.preventDefault();
-      event.stopPropagation();
-      updateOtpLockUi();
-      return;
-    }
-
-    otpSubmitSequence += 1;
-
-    const sequence = otpSubmitSequence;
-
-    [700, 1300, 2200].forEach(function (delay) {
-      setTimeout(function () {
-        countOtpInvalidAttempt(sequence);
-      }, delay);
-    });
-  }
-
-  function installOtpRetryLock() {
-    if (!otpClickHandlerInstalled) {
-      document.addEventListener("click", handleOtpClick, true);
-      otpClickHandlerInstalled = true;
-    }
-
-    if (!otpLockTimer) {
-      otpLockTimer = setInterval(updateOtpLockUi, 250);
-    }
-
-    updateOtpLockUi();
-  }
-
-  function normalizePasscodeText(text) {
-    return String(text || "")
-      .replace(/[’‘]/g, "'")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
-  }
-
-  function getPasscodeRoot() {
+  function getVerificationRoot() {
     return document.querySelector(".mv-body") || document.querySelector(".merlin-verify") || document.body;
   }
 
-  function isPasscodeElementVisible(element) {
+  function isElementVisible(element) {
     if (!element) return false;
 
     const rect = element.getBoundingClientRect();
     const style = getComputedStyle(element);
 
-    return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      style.display !== "none" &&
+      style.visibility !== "hidden"
+    );
   }
 
-  function findPasscodeContinueButton() {
-    return Array.from(getPasscodeRoot().querySelectorAll("button, [role='button']")).find(function (element) {
-      return normalizePasscodeText(element.textContent).includes("continue");
+  function getVisibleVerificationInputs() {
+    return Array.from(getVerificationRoot().querySelectorAll("input")).filter(isElementVisible);
+  }
+
+  function detectVerificationMode() {
+    const root = getVerificationRoot();
+    const text = normalizeText(root.textContent);
+    const inputs = getVisibleVerificationInputs();
+
+    if (
+      inputs.length >= 4 ||
+      text.includes("resend passcode") ||
+      text.includes("email sent to:") ||
+      text.includes("one-time passcode") ||
+      text.includes("6-digit")
+    ) {
+      return "split-passcode";
+    }
+
+    if (
+      text.includes("verify your account") &&
+      (inputs.length > 0 ||
+        text.includes("didn't receive a code") ||
+        text.includes("invalid verification code") ||
+        text.includes("resend"))
+    ) {
+      return "single-code";
+    }
+
+    return null;
+  }
+
+  function removeLegacyVerificationLockMessages() {
+    LEGACY_LOCK_MESSAGE_IDS.forEach(function (id) {
+      const element = document.getElementById(id);
+
+      if (element) {
+        element.remove();
+      }
     });
   }
 
-  function findPasscodeResendAction() {
-    return Array.from(getPasscodeRoot().querySelectorAll("a, button, [role='button']")).find(function (element) {
-      const text = normalizePasscodeText(element.textContent);
+  function findVerificationContinueButton() {
+    return Array.from(
+      getVerificationRoot().querySelectorAll("button, [role='button'], input[type='submit']")
+    ).find(function (element) {
+      const text = normalizeText(
+        element.textContent || element.value || element.getAttribute("aria-label")
+      );
+
+      return text.includes("continue");
+    });
+  }
+
+  function findVerificationResendAction() {
+    return Array.from(
+      getVerificationRoot().querySelectorAll("a, button, [role='button']")
+    ).find(function (element) {
+      const text = normalizeText(element.textContent || element.getAttribute("aria-label"));
+
       return text.includes("resend") || text.includes("send another");
     });
   }
 
-  function isInvalidPasscodeText(text) {
-    const value = normalizePasscodeText(text);
+  function isInvalidVerificationText(text) {
+    const value = normalizeText(text);
+
+    if (value === "invalid verification code") return true;
 
     const mentionsOtp =
       value.includes("code") ||
@@ -648,35 +457,43 @@
     return mentionsOtp && saysInvalid;
   }
 
-  function findPasscodeInvalidError() {
-    const error = Array.from(getPasscodeRoot().querySelectorAll("*"))
-      .filter(isPasscodeElementVisible)
+  function findVerificationInvalidError() {
+    const error = Array.from(getVerificationRoot().querySelectorAll("*"))
+      .filter(isElementVisible)
       .find(function (element) {
         if (
-          element.id === PASSCODE_LOCK_MESSAGE_ID ||
-          element.closest("#" + PASSCODE_LOCK_MESSAGE_ID)
+          element.id === VERIFICATION_LOCK_MESSAGE_ID ||
+          element.closest("#" + VERIFICATION_LOCK_MESSAGE_ID)
         ) {
           return false;
         }
 
-        if (!isInvalidPasscodeText(element.textContent)) return false;
+        if (
+          LEGACY_LOCK_MESSAGE_IDS.some(function (id) {
+            return element.id === id || element.closest("#" + id);
+          })
+        ) {
+          return false;
+        }
+
+        if (!isInvalidVerificationText(element.textContent)) return false;
 
         return !Array.from(element.children || []).some(function (child) {
-          return isInvalidPasscodeText(child.textContent);
+          return isInvalidVerificationText(child.textContent);
         });
       });
 
     if (error) {
-      passcodeLastErrorElement = error;
+      verificationLastErrorElement = error;
     }
 
-    return error || (isPasscodeElementVisible(passcodeLastErrorElement) ? passcodeLastErrorElement : null);
+    return error || (isElementVisible(verificationLastErrorElement) ? verificationLastErrorElement : null);
   }
 
-  function rememberPasscodeDisabledState(element) {
-    if (!element || PASSCODE_DISABLED_STATE.has(element)) return;
+  function rememberVerificationDisabledState(element) {
+    if (!element || VERIFICATION_DISABLED_STATE.has(element)) return;
 
-    PASSCODE_DISABLED_STATE.set(element, {
+    VERIFICATION_DISABLED_STATE.set(element, {
       disabled: "disabled" in element ? element.disabled : null,
       ariaDisabled: element.getAttribute("aria-disabled"),
       pointerEvents: element.style.getPropertyValue("pointer-events"),
@@ -685,11 +502,11 @@
       opacityPriority: element.style.getPropertyPriority("opacity")
     });
 
-    PASSCODE_DISABLED_ELEMENTS.add(element);
+    VERIFICATION_DISABLED_ELEMENTS.add(element);
   }
 
-  function restorePasscodeDisabledState(element) {
-    const state = PASSCODE_DISABLED_STATE.get(element);
+  function restoreVerificationDisabledState(element) {
+    const state = VERIFICATION_DISABLED_STATE.get(element);
 
     if (!element || !state) return;
 
@@ -715,15 +532,15 @@
       element.style.removeProperty("opacity");
     }
 
-    PASSCODE_DISABLED_STATE.delete(element);
-    PASSCODE_DISABLED_ELEMENTS.delete(element);
+    VERIFICATION_DISABLED_STATE.delete(element);
+    VERIFICATION_DISABLED_ELEMENTS.delete(element);
   }
 
-  function setPasscodeControlDisabled(element, disabled) {
+  function setVerificationControlDisabled(element, disabled) {
     if (!element) return;
 
     if (disabled) {
-      rememberPasscodeDisabledState(element);
+      rememberVerificationDisabledState(element);
 
       if ("disabled" in element) {
         element.disabled = true;
@@ -735,19 +552,62 @@
       return;
     }
 
-    restorePasscodeDisabledState(element);
+    restoreVerificationDisabledState(element);
   }
 
-  function getPasscodeErrorBlock(errorElement) {
+  function removeVerificationLockMessage() {
+    const message = document.getElementById(VERIFICATION_LOCK_MESSAGE_ID);
+
+    if (message) {
+      message.remove();
+    }
+  }
+
+  function resetVerificationLockState() {
+    verificationInvalidAttempts = 0;
+    verificationLockedUntil = 0;
+    verificationSubmitSequence = 0;
+    verificationCountedSequence = 0;
+    verificationLastErrorElement = null;
+    verificationLastRenderedSecond = null;
+
+    removeVerificationLockMessage();
+
+    VERIFICATION_DISABLED_ELEMENTS.forEach(function (element) {
+      restoreVerificationDisabledState(element);
+    });
+  }
+
+  function resetVerificationLockIfExpired() {
+    if (verificationLockedUntil && verificationLockedUntil <= Date.now()) {
+      resetVerificationLockState();
+      return true;
+    }
+
+    return false;
+  }
+
+  function syncVerificationMode() {
+    const nextMode = detectVerificationMode();
+
+    if (verificationMode && nextMode && verificationMode !== nextMode) {
+      resetVerificationLockState();
+    }
+
+    verificationMode = nextMode;
+    return verificationMode;
+  }
+
+  function getVerificationErrorBlock(errorElement) {
     if (!errorElement) return null;
 
     const parent = errorElement.parentElement;
 
     if (
       parent &&
-      parent !== getPasscodeRoot() &&
+      parent !== getVerificationRoot() &&
       parent.children.length <= 3 &&
-      isInvalidPasscodeText(parent.textContent)
+      isInvalidVerificationText(parent.textContent)
     ) {
       return parent;
     }
@@ -755,30 +615,22 @@
     return errorElement;
   }
 
-  function removePasscodeLockMessage() {
-    const message = document.getElementById(PASSCODE_LOCK_MESSAGE_ID);
-
-    if (message) {
-      message.remove();
-    }
-  }
-
-  function getPasscodeLockMessage(errorElement) {
-    let message = document.getElementById(PASSCODE_LOCK_MESSAGE_ID);
+  function getVerificationLockMessage(errorElement) {
+    let message = document.getElementById(VERIFICATION_LOCK_MESSAGE_ID);
 
     if (!message) {
       message = document.createElement("div");
-      message.id = PASSCODE_LOCK_MESSAGE_ID;
+      message.id = VERIFICATION_LOCK_MESSAGE_ID;
       message.innerHTML =
-        'Too many attempts. Try again in <span id="' + PASSCODE_LOCK_SECONDS_ID + '"></span>s.';
+        'Too many attempts. Try again in <span id="' + VERIFICATION_LOCK_SECONDS_ID + '"></span>s.';
     }
 
-    const errorBlock = getPasscodeErrorBlock(errorElement);
+    const errorBlock = getVerificationErrorBlock(errorElement);
 
     if (errorBlock && message.previousElementSibling !== errorBlock) {
       errorBlock.insertAdjacentElement("afterend", message);
     } else if (!document.documentElement.contains(message)) {
-      getPasscodeRoot().prepend(message);
+      getVerificationRoot().prepend(message);
     }
 
     const styleSource = errorElement || errorBlock || message;
@@ -804,87 +656,95 @@
     return message;
   }
 
-  function updatePasscodeLockMessage(remainingSeconds, errorElement) {
-    const message = getPasscodeLockMessage(errorElement);
-    const seconds = message.querySelector("#" + PASSCODE_LOCK_SECONDS_ID);
+  function updateVerificationLockMessage(remainingSeconds, errorElement) {
+    const message = getVerificationLockMessage(errorElement);
+    const seconds = message.querySelector("#" + VERIFICATION_LOCK_SECONDS_ID);
 
-    if (seconds && passcodeLastRenderedSecond !== remainingSeconds) {
+    if (seconds && verificationLastRenderedSecond !== remainingSeconds) {
       seconds.textContent = String(remainingSeconds);
-      passcodeLastRenderedSecond = remainingSeconds;
+      verificationLastRenderedSecond = remainingSeconds;
     }
   }
 
-  function updatePasscodeLockUi() {
-    const root = getPasscodeRoot();
+  function updateVerificationLockUi() {
+    removeLegacyVerificationLockMessages();
 
-    if (!root) {
-      removePasscodeLockMessage();
+    const mode = syncVerificationMode();
+
+    if (!mode) {
+      removeVerificationLockMessage();
       return;
     }
 
-    const now = Date.now();
-    const isLocked = passcodeLockedUntil > now;
-    const remainingSeconds = Math.max(0, Math.ceil((passcodeLockedUntil - now) / 1000));
-    const continueButton = findPasscodeContinueButton();
-    const resendAction = findPasscodeResendAction();
-    const errorElement = findPasscodeInvalidError();
+    if (resetVerificationLockIfExpired()) return;
 
-    setPasscodeControlDisabled(continueButton, isLocked);
-    setPasscodeControlDisabled(resendAction, isLocked);
+    const isLocked = verificationLockedUntil > Date.now();
+    const remainingSeconds = Math.max(0, Math.ceil((verificationLockedUntil - Date.now()) / 1000));
+    const continueButton = findVerificationContinueButton();
+    const resendAction = findVerificationResendAction();
+    const errorElement = findVerificationInvalidError();
+
+    setVerificationControlDisabled(continueButton, isLocked);
+    setVerificationControlDisabled(resendAction, isLocked);
 
     if (isLocked) {
-      updatePasscodeLockMessage(remainingSeconds, errorElement);
-      return;
-    }
-
-    removePasscodeLockMessage();
-    passcodeLastRenderedSecond = null;
-
-    if (passcodeLockedUntil && !isLocked) {
-      passcodeInvalidAttempts = 0;
-      passcodeLockedUntil = 0;
-      passcodeSubmitSequence = 0;
-      passcodeCountedSequence = 0;
-      passcodeLastErrorElement = null;
-
-      PASSCODE_DISABLED_ELEMENTS.forEach(function (element) {
-        restorePasscodeDisabledState(element);
-      });
+      updateVerificationLockMessage(remainingSeconds, errorElement);
     }
   }
 
-  function lockPasscodeControls() {
-    passcodeLockedUntil = Date.now() + OTP_LOCK_SECONDS * 1000;
-    updatePasscodeLockUi();
+  function lockVerificationControls() {
+    verificationLockedUntil = Date.now() + VERIFICATION_LOCK_SECONDS * 1000;
+    updateVerificationLockUi();
   }
 
-  function countPasscodeInvalidAttempt(sequence) {
-    if (sequence <= passcodeCountedSequence) return;
+  function countVerificationInvalidAttempt(sequence) {
+    removeLegacyVerificationLockMessages();
+    syncVerificationMode();
+    resetVerificationLockIfExpired();
 
-    const errorElement = findPasscodeInvalidError();
+    if (sequence <= verificationCountedSequence) return;
+
+    const errorElement = findVerificationInvalidError();
 
     if (!errorElement) return;
 
-    passcodeCountedSequence = sequence;
-    passcodeInvalidAttempts += 1;
+    verificationCountedSequence = sequence;
+    verificationInvalidAttempts += 1;
 
-    if (passcodeInvalidAttempts >= OTP_MAX_INVALID_ATTEMPTS) {
-      lockPasscodeControls();
+    if (verificationInvalidAttempts >= VERIFICATION_MAX_INVALID_ATTEMPTS) {
+      lockVerificationControls();
       return;
     }
 
-    updatePasscodeLockUi();
+    updateVerificationLockUi();
   }
 
-  function handlePasscodeClick(event) {
-    const continueButton = findPasscodeContinueButton();
-    const resendAction = findPasscodeResendAction();
-    const isLocked = passcodeLockedUntil > Date.now();
+  function handleVerificationClick(event) {
+    removeLegacyVerificationLockMessages();
+
+    const mode = syncVerificationMode();
+
+    if (!mode) return;
+
+    const expired = resetVerificationLockIfExpired();
+    const continueButton = findVerificationContinueButton();
+    const resendAction = findVerificationResendAction();
+    const isLocked = verificationLockedUntil > Date.now();
+
+    if (!isLocked && expired && resendAction && resendAction.contains(event.target)) {
+      resetVerificationLockState();
+      return;
+    }
+
+    if (!isLocked && resendAction && resendAction.contains(event.target)) {
+      resetVerificationLockState();
+      return;
+    }
 
     if (isLocked && resendAction && resendAction.contains(event.target)) {
       event.preventDefault();
       event.stopPropagation();
-      updatePasscodeLockUi();
+      updateVerificationLockUi();
       return;
     }
 
@@ -893,32 +753,47 @@
     if (isLocked) {
       event.preventDefault();
       event.stopPropagation();
-      updatePasscodeLockUi();
+      updateVerificationLockUi();
       return;
     }
 
-    passcodeSubmitSequence += 1;
+    verificationSubmitSequence += 1;
 
-    const sequence = passcodeSubmitSequence;
+    const sequence = verificationSubmitSequence;
 
-    [400, 900, 1500, 2500].forEach(function (delay) {
+    [400, 900, 1500, 2500, 4000].forEach(function (delay) {
       setTimeout(function () {
-        countPasscodeInvalidAttempt(sequence);
+        countVerificationInvalidAttempt(sequence);
       }, delay);
     });
   }
 
-  function installPasscodeRetryLock() {
-    if (!passcodeClickHandlerInstalled) {
-      document.addEventListener("click", handlePasscodeClick, true);
-      passcodeClickHandlerInstalled = true;
+  function installVerificationRetryLock() {
+    if (!verificationClickHandlerInstalled) {
+      document.addEventListener("click", handleVerificationClick, true);
+      verificationClickHandlerInstalled = true;
     }
 
-    if (!passcodeLockTimer) {
-      passcodeLockTimer = setInterval(updatePasscodeLockUi, 250);
+    if (!verificationLockTimer) {
+      verificationLockTimer = setInterval(updateVerificationLockUi, 250);
     }
 
-    updatePasscodeLockUi();
+    window.__merlinVerificationLockStop = function () {
+      document.removeEventListener("click", handleVerificationClick, true);
+      verificationClickHandlerInstalled = false;
+
+      if (verificationLockTimer) {
+        clearInterval(verificationLockTimer);
+        verificationLockTimer = null;
+      }
+
+      resetVerificationLockState();
+      removeLegacyVerificationLockMessages();
+
+      console.log("[Merlin Asset Brand] Verification lock stopped");
+    };
+
+    updateVerificationLockUi();
   }
 
   function installRegistrationCreamGuard() {
@@ -1624,8 +1499,7 @@
     console.log("[Merlin Asset Brand] URL from:", getFromParam());
 
     installRegistrationCreamGuard();
-    installOtpRetryLock();
-    installPasscodeRetryLock();
+    installVerificationRetryLock();
     injectBaseStyle();
     applyTheme();
     observeDavinciDomChanges();
