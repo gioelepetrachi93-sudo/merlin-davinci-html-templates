@@ -1,0 +1,10 @@
+Test logo flow:
+
+https://auth.pingone.eu/8f417be9-f7a6-4a32-a6ba-71ee39f8832f/as/authorize?client_id=2d6c249a-b77b-436c-9059-955ec3479b30&response_type=code&redirect_uri=https://oauth.pstmn.io/v1/browser-callback&scope=openid&login_hint=testtesttest@gmail.com&from=002
+
+https://auth.pingone.eu/8f417be9-f7a6-4a32-a6ba-71ee39f8832f/as/authorize?client_id=2d6c249a-b77b-436c-9059-955ec3479b30&response_type=code&redirect_uri=https://oauth.pstmn.io/v1/browser-callback&scope=openid&login_hint=giopetra93@gmail.com&from=002
+
+
+Registration flow:
+
+
