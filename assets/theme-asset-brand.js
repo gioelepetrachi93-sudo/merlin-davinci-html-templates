@@ -321,7 +321,25 @@
   }
 
   function getHeroElement() {
-    return document.querySelector(".mv-hero") || document.querySelector(".mr-hero");
+    return document.querySelector(".mv-hero") ||
+      document.querySelector(".mr-hero") ||
+      document.querySelector(".ml-hero");
+  }
+
+  function isSplitLayoutHero(hero) {
+    return !!hero && (hero.matches(".mr-hero") || hero.matches(".ml-hero"));
+  }
+
+  function getSplitShell() {
+    return document.querySelector(".mr-shell") || document.querySelector(".ml-shell");
+  }
+
+  function getSplitBody() {
+    return document.querySelector(".mr-body") || document.querySelector(".ml-body");
+  }
+
+  function getSplitRoot() {
+    return document.querySelector(".merlin-register") || document.querySelector(".merlin-login");
   }
 
   function installRegistrationCreamGuard() {
@@ -338,9 +356,13 @@
         document.body,
         document.querySelector(".reactSingularKey_CC_main_generic"),
         document.querySelector(".merlin-register"),
+        document.querySelector(".merlin-login"),
         document.querySelector(".mr-shell"),
+        document.querySelector(".ml-shell"),
         document.querySelector(".mr-body"),
-        document.querySelector(".mr-body-inner")
+        document.querySelector(".ml-body"),
+        document.querySelector(".mr-body-inner"),
+        document.querySelector(".ml-body-inner")
       ].filter(Boolean).some(function (element) {
         return element.style === style;
       });
@@ -351,7 +373,8 @@
       const nextValue = String(value || "").toLowerCase();
 
       if (
-        document.querySelector(".merlin-register .mr-body") &&
+        (document.querySelector(".merlin-register .mr-body") ||
+          document.querySelector(".merlin-login .ml-body")) &&
         isRegistrationBackgroundTarget(this) &&
         (property === "background" || property === "background-color") &&
         darkValues.some(function (darkValue) {
@@ -380,7 +403,11 @@
       .merlin-register,
       .merlin-register .mr-shell,
       .merlin-register .mr-body,
-      .merlin-register .mr-body-inner {
+      .merlin-register .mr-body-inner,
+      .merlin-login,
+      .merlin-login .ml-shell,
+      .merlin-login .ml-body,
+      .merlin-login .ml-body-inner {
         color-scheme: light !important;
       }
 
@@ -389,7 +416,11 @@
       .merlin-register,
       .merlin-register .mr-shell,
       .merlin-register .mr-body,
-      .merlin-register .mr-body-inner {
+      .merlin-register .mr-body-inner,
+      .merlin-login,
+      .merlin-login .ml-shell,
+      .merlin-login .ml-body,
+      .merlin-login .ml-body-inner {
         --mr-cream-soft: ${PAGE_BACKGROUND} !important;
         --mr-cream: ${PAGE_BACKGROUND} !important;
         --mr-ink: ${BASE_TEXT} !important;
@@ -400,7 +431,13 @@
       .merlin-register .mr-shell > .mr-body,
       main.merlin-register .mr-body,
       section.mr-body,
-      .merlin-register .mr-body-inner {
+      .merlin-register .mr-body-inner,
+      .merlin-login,
+      .merlin-login .ml-shell,
+      .merlin-login .ml-shell > .ml-body,
+      main.merlin-login .ml-body,
+      section.ml-body,
+      .merlin-login .ml-body-inner {
         background: ${PAGE_BACKGROUND} !important;
         background-color: ${PAGE_BACKGROUND} !important;
         color: ${BASE_TEXT} !important;
@@ -420,13 +457,31 @@
       .merlin-register .mr-body em,
       .merlin-register .mr-body li,
       .merlin-register .mr-body legend,
-      .merlin-register .mr-body div {
+      .merlin-register .mr-body div,
+      .merlin-login .ml-body h1,
+      .merlin-login .ml-body h2,
+      .merlin-login .ml-body h3,
+      .merlin-login .ml-body h4,
+      .merlin-login .ml-body h5,
+      .merlin-login .ml-body h6,
+      .merlin-login .ml-body p,
+      .merlin-login .ml-body label,
+      .merlin-login .ml-body span,
+      .merlin-login .ml-body small,
+      .merlin-login .ml-body strong,
+      .merlin-login .ml-body em,
+      .merlin-login .ml-body li,
+      .merlin-login .ml-body legend,
+      .merlin-login .ml-body div {
         color: ${BASE_TEXT} !important;
       }
 
       .merlin-register .mr-body input,
       .merlin-register .mr-body textarea,
-      .merlin-register .mr-body select {
+      .merlin-register .mr-body select,
+      .merlin-login .ml-body input,
+      .merlin-login .ml-body textarea,
+      .merlin-login .ml-body select {
         background: ${INPUT_BACKGROUND} !important;
         background-color: ${INPUT_BACKGROUND} !important;
         color: ${BASE_TEXT} !important;
@@ -439,7 +494,11 @@
         .merlin-register,
         .merlin-register .mr-shell,
         .merlin-register .mr-body,
-        .merlin-register .mr-body-inner {
+        .merlin-register .mr-body-inner,
+        .merlin-login,
+        .merlin-login .ml-shell,
+        .merlin-login .ml-body,
+        .merlin-login .ml-body-inner {
           color-scheme: light !important;
           --mr-cream-soft: ${PAGE_BACKGROUND} !important;
           --mr-cream: ${PAGE_BACKGROUND} !important;
@@ -451,7 +510,13 @@
         .merlin-register .mr-shell > .mr-body,
         main.merlin-register .mr-body,
         section.mr-body,
-        .merlin-register .mr-body-inner {
+        .merlin-register .mr-body-inner,
+        .merlin-login,
+        .merlin-login .ml-shell,
+        .merlin-login .ml-shell > .ml-body,
+        main.merlin-login .ml-body,
+        section.ml-body,
+        .merlin-login .ml-body-inner {
           background: ${PAGE_BACKGROUND} !important;
           background-color: ${PAGE_BACKGROUND} !important;
           color: ${BASE_TEXT} !important;
@@ -459,7 +524,8 @@
       }
 
       html[data-theme]:not([data-theme="000"]) .mv-hero,
-      html[data-theme]:not([data-theme="000"]) .mr-hero {
+      html[data-theme]:not([data-theme="000"]) .mr-hero,
+      html[data-theme]:not([data-theme="000"]) .ml-hero {
         position: relative !important;
         overflow: hidden !important;
         padding: 0 !important;
@@ -467,7 +533,8 @@
 
       html[data-theme]:not([data-theme="000"]) .mv-hero-bg,
       html[data-theme]:not([data-theme="000"]) .mv-hero-logo,
-      html[data-theme]:not([data-theme="000"]) .mr-hero svg {
+      html[data-theme]:not([data-theme="000"]) .mr-hero svg,
+      html[data-theme]:not([data-theme="000"]) .ml-hero svg {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -511,11 +578,17 @@
       document.documentElement,
       document.body,
       document.querySelector(".merlin-register"),
+      document.querySelector(".merlin-login"),
       document.querySelector(".mr-shell"),
+      document.querySelector(".ml-shell"),
       document.querySelector(".mr-hero"),
+      document.querySelector(".ml-hero"),
       document.querySelector(".mr-body"),
+      document.querySelector(".ml-body"),
       document.querySelector(".mr-hero .mv-hero-brand-wrapper"),
-      document.querySelector(".mr-hero .mv-hero-brand-layer")
+      document.querySelector(".ml-hero .mv-hero-brand-wrapper"),
+      document.querySelector(".mr-hero .mv-hero-brand-layer"),
+      document.querySelector(".ml-hero .mv-hero-brand-layer")
     ].forEach(function (element) {
       if (!element) return;
 
@@ -534,19 +607,19 @@
   }
 
   function applyRegistrationDesktopScrollState() {
-    if (!document.querySelector(".mr-body")) return;
+    if (!getSplitBody()) return;
 
     if (!isDesktopLayout()) {
       clearRegistrationDesktopScrollState();
       return;
     }
 
-    const register = document.querySelector(".merlin-register");
-    const shell = document.querySelector(".mr-shell");
-    const hero = document.querySelector(".mr-hero");
-    const body = document.querySelector(".mr-body");
-    const wrapper = document.querySelector(".mr-hero .mv-hero-brand-wrapper");
-    const layer = document.querySelector(".mr-hero .mv-hero-brand-layer");
+    const register = getSplitRoot();
+    const shell = getSplitShell();
+    const hero = document.querySelector(".mr-hero") || document.querySelector(".ml-hero");
+    const body = getSplitBody();
+    const wrapper = hero ? hero.querySelector(".mv-hero-brand-wrapper") : null;
+    const layer = hero ? hero.querySelector(".mv-hero-brand-layer") : null;
 
     [document.documentElement, document.body].forEach(function (element) {
       setImportant(element, "height", "100%");
@@ -607,9 +680,13 @@
       document.body,
       document.querySelector(".reactSingularKey_CC_main_generic"),
       document.querySelector(".merlin-register"),
+      document.querySelector(".merlin-login"),
       document.querySelector(".mr-shell"),
+      document.querySelector(".ml-shell"),
       document.querySelector(".mr-body"),
-      document.querySelector(".mr-body-inner")
+      document.querySelector(".ml-body"),
+      document.querySelector(".mr-body-inner"),
+      document.querySelector(".ml-body-inner")
     ].forEach(function (element) {
       if (!element) return;
 
@@ -622,7 +699,9 @@
       setImportant(element, "--mr-ink", BASE_TEXT);
     });
 
-    document.querySelectorAll(".mr-body, .mr-body *, .mr-body-inner, .mr-body-inner *").forEach(function (element) {
+    document.querySelectorAll(
+      ".mr-body, .mr-body *, .mr-body-inner, .mr-body-inner *, .ml-body, .ml-body *, .ml-body-inner, .ml-body-inner *"
+    ).forEach(function (element) {
       if (element.matches("button, [role='button']") || element.closest("button, [role='button']")) {
         return;
       }
@@ -631,15 +710,17 @@
       setImportant(element, "--mr-ink", BASE_TEXT);
     });
 
-    document.querySelectorAll(".mr-body input, .mr-body textarea, .mr-body select").forEach(function (element) {
+    document.querySelectorAll(
+      ".mr-body input, .mr-body textarea, .mr-body select, .ml-body input, .ml-body textarea, .ml-body select"
+    ).forEach(function (element) {
       setImportant(element, "background", INPUT_BACKGROUND);
       setImportant(element, "background-color", INPUT_BACKGROUND);
       setImportant(element, "color", BASE_TEXT);
       setImportant(element, "border-color", INPUT_BORDER);
     });
 
-    const hero = document.querySelector(".mr-hero");
-    const layer = document.querySelector(".mr-hero .mv-hero-brand-layer");
+    const hero = document.querySelector(".mr-hero") || document.querySelector(".ml-hero");
+    const layer = hero ? hero.querySelector(".mv-hero-brand-layer") : null;
     const themeCode = resolveThemeCode();
     const theme = THEMES[themeCode];
 
@@ -657,7 +738,7 @@
   }
 
   function applyBaseBackgroundsForCurrentLayout() {
-    if (document.querySelector(".mr-body")) {
+    if (getSplitBody()) {
       applyRegistrationBackgrounds();
       return;
     }
@@ -672,7 +753,7 @@
       setImportant(element, "opacity", "0");
     });
 
-    if (hero && hero.matches(".mr-hero")) {
+    if (isSplitLayoutHero(hero)) {
       hero.querySelectorAll("svg").forEach(function (element) {
         if (element.closest(".mv-hero-brand-wrapper")) return;
 
@@ -729,7 +810,7 @@
 
   function configureLayout(hero, theme) {
     const shell = document.querySelector(".mv-shell");
-    const isRegistrationHero = hero.matches(".mr-hero");
+    const isRegistrationHero = isSplitLayoutHero(hero);
     const brandDom = ensureBrandDom(hero);
     const desktopMode = isDesktopLayout();
     const logoUrl = getLogoUrl(theme);
@@ -859,7 +940,7 @@
   }
 
   function applyRegistrationHeroFallback(theme) {
-    const hero = document.querySelector(".mr-hero");
+    const hero = document.querySelector(".mr-hero") || document.querySelector(".ml-hero");
 
     if (!hero || !theme) return;
 
