@@ -8,7 +8,6 @@
 
   const ASSET_VERSION = "v=1";
   const PAGE_BACKGROUND = "#FFF8E2";
-  const BASE_TEXT = "#000B5E";
   const INPUT_BACKGROUND = "#FFFFFF";
   const INPUT_BORDER = "rgba(0, 11, 94, 0.25)";
   const MOBILE_HEADER_HEIGHT = "140px";
@@ -321,9 +320,11 @@
   }
 
   function getHeroElement() {
-    return document.querySelector(".mv-hero") ||
+    return (
+      document.querySelector(".mv-hero") ||
       document.querySelector(".mr-hero") ||
-      document.querySelector(".ml-hero");
+      document.querySelector(".ml-hero")
+    );
   }
 
   function isSplitLayoutHero(hero) {
@@ -423,7 +424,8 @@
       .merlin-login .ml-body-inner {
         --mr-cream-soft: ${PAGE_BACKGROUND} !important;
         --mr-cream: ${PAGE_BACKGROUND} !important;
-        --mr-ink: ${BASE_TEXT} !important;
+        --ml-cream-soft: ${PAGE_BACKGROUND} !important;
+        --ml-cream: ${PAGE_BACKGROUND} !important;
       }
 
       .merlin-register,
@@ -440,40 +442,6 @@
       .merlin-login .ml-body-inner {
         background: ${PAGE_BACKGROUND} !important;
         background-color: ${PAGE_BACKGROUND} !important;
-        color: ${BASE_TEXT} !important;
-      }
-
-      .merlin-register .mr-body h1,
-      .merlin-register .mr-body h2,
-      .merlin-register .mr-body h3,
-      .merlin-register .mr-body h4,
-      .merlin-register .mr-body h5,
-      .merlin-register .mr-body h6,
-      .merlin-register .mr-body p,
-      .merlin-register .mr-body label,
-      .merlin-register .mr-body span,
-      .merlin-register .mr-body small,
-      .merlin-register .mr-body strong,
-      .merlin-register .mr-body em,
-      .merlin-register .mr-body li,
-      .merlin-register .mr-body legend,
-      .merlin-register .mr-body div,
-      .merlin-login .ml-body h1,
-      .merlin-login .ml-body h2,
-      .merlin-login .ml-body h3,
-      .merlin-login .ml-body h4,
-      .merlin-login .ml-body h5,
-      .merlin-login .ml-body h6,
-      .merlin-login .ml-body p,
-      .merlin-login .ml-body label,
-      .merlin-login .ml-body span,
-      .merlin-login .ml-body small,
-      .merlin-login .ml-body strong,
-      .merlin-login .ml-body em,
-      .merlin-login .ml-body li,
-      .merlin-login .ml-body legend,
-      .merlin-login .ml-body div {
-        color: ${BASE_TEXT} !important;
       }
 
       .merlin-register .mr-body input,
@@ -484,7 +452,6 @@
       .merlin-login .ml-body select {
         background: ${INPUT_BACKGROUND} !important;
         background-color: ${INPUT_BACKGROUND} !important;
-        color: ${BASE_TEXT} !important;
         border-color: ${INPUT_BORDER} !important;
       }
 
@@ -502,7 +469,8 @@
           color-scheme: light !important;
           --mr-cream-soft: ${PAGE_BACKGROUND} !important;
           --mr-cream: ${PAGE_BACKGROUND} !important;
-          --mr-ink: ${BASE_TEXT} !important;
+          --ml-cream-soft: ${PAGE_BACKGROUND} !important;
+          --ml-cream: ${PAGE_BACKGROUND} !important;
         }
 
         .merlin-register,
@@ -519,7 +487,6 @@
         .merlin-login .ml-body-inner {
           background: ${PAGE_BACKGROUND} !important;
           background-color: ${PAGE_BACKGROUND} !important;
-          color: ${BASE_TEXT} !important;
         }
       }
 
@@ -645,7 +612,6 @@
       setImportant(body, "overflow-x", "hidden");
       setImportant(body, "background", PAGE_BACKGROUND);
       setImportant(body, "background-color", PAGE_BACKGROUND);
-      setImportant(body, "color", BASE_TEXT);
     }
 
     [wrapper, layer].forEach(function (element) {
@@ -692,22 +658,11 @@
 
       setImportant(element, "background", PAGE_BACKGROUND);
       setImportant(element, "background-color", PAGE_BACKGROUND);
-      setImportant(element, "color", BASE_TEXT);
       setImportant(element, "color-scheme", "light");
       setImportant(element, "--mr-cream-soft", PAGE_BACKGROUND);
       setImportant(element, "--mr-cream", PAGE_BACKGROUND);
-      setImportant(element, "--mr-ink", BASE_TEXT);
-    });
-
-    document.querySelectorAll(
-      ".mr-body, .mr-body *, .mr-body-inner, .mr-body-inner *, .ml-body, .ml-body *, .ml-body-inner, .ml-body-inner *"
-    ).forEach(function (element) {
-      if (element.matches("button, [role='button']") || element.closest("button, [role='button']")) {
-        return;
-      }
-
-      setImportant(element, "color", BASE_TEXT);
-      setImportant(element, "--mr-ink", BASE_TEXT);
+      setImportant(element, "--ml-cream-soft", PAGE_BACKGROUND);
+      setImportant(element, "--ml-cream", PAGE_BACKGROUND);
     });
 
     document.querySelectorAll(
@@ -715,7 +670,6 @@
     ).forEach(function (element) {
       setImportant(element, "background", INPUT_BACKGROUND);
       setImportant(element, "background-color", INPUT_BACKGROUND);
-      setImportant(element, "color", BASE_TEXT);
       setImportant(element, "border-color", INPUT_BORDER);
     });
 
