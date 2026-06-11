@@ -12,7 +12,7 @@
     : fallbackBase;
 
   const scripts = [
-    "theme-asset-brand.js",
+    "merlin-theme.js",
     "merlin-otp-lock.js"
   ];
 
