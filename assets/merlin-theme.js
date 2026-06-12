@@ -562,33 +562,61 @@
   }
 
 function findContentScaleElements() {
-  const verifyInner = document.querySelector(".merlin-verify .mv-body-inner");
-  const verifyBody = document.querySelector(".merlin-verify .mv-body");
+  const candidates = [
+    {
+      page: "verify",
+      root: document.querySelector(".merlin-verify"),
+      inner: document.querySelector(".merlin-verify .mv-body-inner"),
+      body: document.querySelector(".merlin-verify .mv-body")
+    },
+    {
+      page: "login",
+      root: document.querySelector(".merlin-login"),
+      inner: document.querySelector(".merlin-login .ml-body-inner"),
+      body: document.querySelector(".merlin-login .ml-body")
+    },
+    {
+      page: "register",
+      root: document.querySelector(".merlin-register"),
+      inner: document.querySelector(".merlin-register .mr-body-inner"),
+      body: document.querySelector(".merlin-register .mr-body")
+    }
+  ];
 
-  if (verifyInner) {
+  function isVisible(element) {
+    if (!element) return false;
+
+    const rect = element.getBoundingClientRect();
+    const style = window.getComputedStyle(element);
+
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      style.opacity !== "0"
+    );
+  }
+
+  const visibleCandidate = candidates.find(function (candidate) {
+    return isVisible(candidate.root) && isVisible(candidate.inner);
+  });
+
+  if (visibleCandidate) {
     return {
-      inner: verifyInner,
-      body: verifyBody
+      inner: visibleCandidate.inner,
+      body: visibleCandidate.body
     };
   }
 
-  const loginInner = document.querySelector(".merlin-login .ml-body-inner");
-  const loginBody = document.querySelector(".merlin-login .ml-body");
+  const fallbackCandidate = candidates.find(function (candidate) {
+    return candidate.inner;
+  });
 
-  if (loginInner) {
+  if (fallbackCandidate) {
     return {
-      inner: loginInner,
-      body: loginBody
-    };
-  }
-
-  const registerInner = document.querySelector(".merlin-register .mr-body-inner");
-  const registerBody = document.querySelector(".merlin-register .mr-body");
-
-  if (registerInner) {
-    return {
-      inner: registerInner,
-      body: registerBody
+      inner: fallbackCandidate.inner,
+      body: fallbackCandidate.body
     };
   }
 
