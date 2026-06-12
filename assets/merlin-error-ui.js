@@ -10,6 +10,17 @@
   const STYLE_ID = "merlin-error-ui-style";
   const CHECK_INTERVAL_MS = 300;
 
+  const OTP_SELECTORS = [
+    {
+      wrapper: ".mv-otp-wrapper",
+      cell: ".mv-otp-wrapper > .mv-otp-cell"
+    },
+    {
+      wrapper: ".mv-otp-boxes",
+      cell: ".mv-otp-boxes > .mv-otp-box"
+    }
+  ];
+
   let timer = null;
   let dismissedOtpInvalid = false;
 
@@ -42,9 +53,19 @@
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
+      .merlin-verify .mv-otp-wrapper > .mv-otp-cell.is-invalid,
       .merlin-verify .mv-otp-boxes > .mv-otp-box.is-invalid {
         border-color: #FF3434 !important;
         box-shadow: none !important;
+        outline-color: #FF3434 !important;
+      }
+
+      .merlin-verify .mv-otp-wrapper > .mv-otp-cell.is-invalid:focus,
+      .merlin-verify .mv-otp-wrapper > .mv-otp-cell.is-invalid:focus-visible,
+      .merlin-verify .mv-otp-boxes > .mv-otp-box.is-invalid:focus,
+      .merlin-verify .mv-otp-boxes > .mv-otp-box.is-invalid:focus-visible {
+        border-color: #FF3434 !important;
+        box-shadow: 0 0 0 1px #FF3434 !important;
         outline-color: #FF3434 !important;
       }
 
@@ -76,22 +97,42 @@
     document.head.appendChild(style);
   }
 
-  function isVerifyEmailPage() {
-    return !!(
-      document.querySelector(".merlin-verify") &&
-      document.querySelector(".mv-otp-boxes") &&
-      document.querySelector(".mv-otp-boxes > .mv-otp-box")
-    );
-  }
-
   function getVerifyRoot() {
     return document.querySelector(".merlin-verify") || document.body;
   }
 
-  function getOtpBoxes() {
-    return Array.from(
-      getVerifyRoot().querySelectorAll(".mv-otp-boxes > .mv-otp-box")
-    ).filter(isVisible);
+  function getActiveOtpConfig() {
+    const root = getVerifyRoot();
+
+    return OTP_SELECTORS.find(function (config) {
+      return !!(
+        root.querySelector(config.wrapper) &&
+        root.querySelector(config.cell)
+      );
+    }) || null;
+  }
+
+  function isVerifyEmailPage() {
+    return !!(
+      document.querySelector(".merlin-verify") &&
+      getActiveOtpConfig()
+    );
+  }
+
+  function getOtpWrapper() {
+    const root = getVerifyRoot();
+    const config = getActiveOtpConfig();
+
+    return config ? root.querySelector(config.wrapper) : null;
+  }
+
+  function getOtpCells() {
+    const root = getVerifyRoot();
+    const config = getActiveOtpConfig();
+
+    if (!config) return [];
+
+    return Array.from(root.querySelectorAll(config.cell)).filter(isVisible);
   }
 
   function getOtpInvalidMessage() {
@@ -129,6 +170,7 @@
 
   function findNativeInvalidOtpErrors() {
     const root = getVerifyRoot();
+    const wrapper = getOtpWrapper();
 
     return Array.from(
       root.querySelectorAll("[role='alert'], [aria-live], .error, .Error, [class*='error'], [class*='Error'], p, span, div")
@@ -137,7 +179,7 @@
       .filter(function (element) {
         if (element.id === "mvOtpInvalidMessage") return false;
         if (element.closest("#mvOtpInvalidMessage")) return false;
-        if (element.closest(".mv-otp-boxes")) return false;
+        if (wrapper && wrapper.contains(element)) return false;
         if (element.id === "merlin-verification-lock-message") return false;
         if (element.closest("#merlin-verification-lock-message")) return false;
         if (hasVisibleFormControl(element)) return false;
@@ -165,26 +207,28 @@
   function showOtpInvalidState() {
     if (!isVerifyEmailPage()) return;
 
-    const boxes = getOtpBoxes();
+    const cells = getOtpCells();
     const message = getOtpInvalidMessage();
 
-    if (!boxes.length || !message) return;
+    if (!cells.length) return;
 
-    boxes.forEach(function (box) {
-      box.classList.add("is-invalid");
-      box.setAttribute("aria-invalid", "true");
+    cells.forEach(function (cell) {
+      cell.classList.add("is-invalid");
+      cell.setAttribute("aria-invalid", "true");
     });
 
-    message.hidden = false;
-    hideNativeInvalidOtpErrors();
+    if (message) {
+      message.hidden = false;
+      hideNativeInvalidOtpErrors();
+    }
   }
 
   function clearOtpInvalidState() {
     dismissedOtpInvalid = true;
 
-    getOtpBoxes().forEach(function (box) {
-      box.classList.remove("is-invalid");
-      box.removeAttribute("aria-invalid");
+    getOtpCells().forEach(function (cell) {
+      cell.classList.remove("is-invalid");
+      cell.removeAttribute("aria-invalid");
     });
 
     const message = getOtpInvalidMessage();
@@ -205,10 +249,13 @@
     }
   }
 
-  function onUserEditingOtp(event) {
-    if (!isVerifyEmailPage()) return;
+  function isOtpEditEvent(event) {
+    const target = event.target;
+    const wrapper = getOtpWrapper();
 
-    const isEditing =
+    if (!target || !wrapper || !wrapper.contains(target)) return false;
+
+    return (
       event.type === "paste" ||
       event.type === "input" ||
       (
@@ -218,9 +265,13 @@
           event.key === "Delete" ||
           (event.key && event.key.length === 1)
         )
-      );
+      )
+    );
+  }
 
-    if (!isEditing) return;
+  function onUserEditingOtp(event) {
+    if (!isVerifyEmailPage()) return;
+    if (!isOtpEditEvent(event)) return;
 
     clearOtpInvalidState();
   }
@@ -282,9 +333,9 @@
     document.removeEventListener("paste", onUserEditingOtp, true);
     document.removeEventListener("click", onSubmitOtp, true);
 
-    getOtpBoxes().forEach(function (box) {
-      box.classList.remove("is-invalid");
-      box.removeAttribute("aria-invalid");
+    getOtpCells().forEach(function (cell) {
+      cell.classList.remove("is-invalid");
+      cell.removeAttribute("aria-invalid");
     });
 
     const message = getOtpInvalidMessage();
