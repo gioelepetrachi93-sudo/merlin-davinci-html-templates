@@ -207,6 +207,8 @@
   let isApplyScheduled = false;
   let lastAppliedThemeCode = null;
   let lastAppliedMode = null;
+  let largeDesktopScaleTarget = null;
+  let largeDesktopScaleResizeHandler = null;
 
   const ORIGINAL_STYLES = new WeakMap();
   const TRACKED_ELEMENTS = new Set();
@@ -559,6 +561,99 @@
     });
   }
 
+  function findContentScaleElements() {
+    const verifyInner = document.querySelector(".merlin-verify .mv-body-inner");
+    const verifyBody = document.querySelector(".merlin-verify .mv-body");
+
+    if (verifyInner) {
+      return {
+        inner: verifyInner,
+        body: verifyBody
+      };
+    }
+
+    const loginInner = document.querySelector(".merlin-login .ml-body-inner");
+    const loginBody = document.querySelector(".merlin-login .ml-body");
+
+    if (loginInner) {
+      return {
+        inner: loginInner,
+        body: loginBody
+      };
+    }
+
+    return {
+      inner: null,
+      body: null
+    };
+  }
+
+  function clampNumber(min, value, max) {
+    return Math.max(min, Math.min(value, max));
+  }
+
+  function applyLargeDesktopContentScale(inner, body) {
+    if (!inner) return;
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    if (body && body.style.getPropertyValue("overflow") !== "visible") {
+      body.style.setProperty("overflow", "visible", "important");
+    }
+
+    if (width < 1500 || width < 768) {
+      if (inner.__merlinLargeDesktopScaleState !== "none") {
+        inner.style.removeProperty("transform");
+        inner.style.removeProperty("transform-origin");
+        inner.__merlinLargeDesktopScaleState = "none";
+      }
+
+      return;
+    }
+
+    let scale = width / 1850;
+
+    if (height < 850) {
+      scale = Math.min(scale, height / 860);
+    }
+
+    scale = clampNumber(1, scale, 1.42);
+
+    const nextState = "scale(" + scale.toFixed(4) + ")";
+
+    if (inner.__merlinLargeDesktopScaleState === nextState) {
+      return;
+    }
+
+    inner.style.setProperty("transform", "scale(" + scale + ")", "important");
+    inner.style.setProperty("transform-origin", "center center", "important");
+    inner.__merlinLargeDesktopScaleState = nextState;
+  }
+
+  function installLargeDesktopContentScale() {
+    const elements = findContentScaleElements();
+    const inner = elements.inner;
+    const body = elements.body;
+
+    if (!inner) return;
+
+    if (largeDesktopScaleTarget !== inner) {
+      if (largeDesktopScaleResizeHandler) {
+        window.removeEventListener("resize", largeDesktopScaleResizeHandler);
+      }
+
+      largeDesktopScaleTarget = inner;
+      largeDesktopScaleResizeHandler = function () {
+        applyLargeDesktopContentScale(inner, body);
+      };
+
+      window.addEventListener("resize", largeDesktopScaleResizeHandler);
+    }
+
+    applyLargeDesktopContentScale(inner, body);
+  }
+
   function resetToMerlinDefault() {
     document.documentElement.setAttribute("data-theme", DEFAULT_THEME_CODE);
 
@@ -618,6 +713,7 @@
 
       applyAssetTheme(THEMES[themeCode]);
     } finally {
+      installLargeDesktopContentScale();
       isApplyingTheme = false;
     }
   }
@@ -630,6 +726,7 @@
     window.requestAnimationFrame(function () {
       isApplyScheduled = false;
       applyTheme();
+      installLargeDesktopContentScale();
     });
   }
 
@@ -652,6 +749,7 @@
 
     injectBaseStyle();
     applyTheme();
+    installLargeDesktopContentScale();
     observeDavinciDomChanges();
 
     window.addEventListener("resize", scheduleApplyTheme);
@@ -662,7 +760,16 @@
     setTimeout(applyTheme, 1500);
     setTimeout(applyTheme, 3000);
 
-    const interval = setInterval(applyTheme, 500);
+    setTimeout(installLargeDesktopContentScale, 100);
+    setTimeout(installLargeDesktopContentScale, 300);
+    setTimeout(installLargeDesktopContentScale, 800);
+    setTimeout(installLargeDesktopContentScale, 1500);
+    setTimeout(installLargeDesktopContentScale, 3000);
+
+    const interval = setInterval(function () {
+      applyTheme();
+      installLargeDesktopContentScale();
+    }, 500);
 
     setTimeout(function () {
       clearInterval(interval);
