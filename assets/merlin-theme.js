@@ -630,44 +630,49 @@ function findContentScaleElements() {
     return Math.max(min, Math.min(value, max));
   }
 
-  function applyLargeDesktopContentScale(inner, body) {
-    if (!inner) return;
+function applyLargeDesktopContentScale(inner, body) {
+  if (!inner) return;
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const isRegisterPage = !!inner.closest(".merlin-register");
 
-    if (body && body.style.getPropertyValue("overflow") !== "visible") {
-      body.style.setProperty("overflow", "visible", "important");
-    }
-
-    if (width < 1500 || width < 768) {
-      if (inner.__merlinLargeDesktopScaleState !== "none") {
-        inner.style.removeProperty("transform");
-        inner.style.removeProperty("transform-origin");
-        inner.__merlinLargeDesktopScaleState = "none";
-      }
-
-      return;
-    }
-
-    let scale = width / 1850;
-
-    if (height < 850) {
-      scale = Math.min(scale, height / 860);
-    }
-
-    scale = clampNumber(1, scale, 1.42);
-
-    const nextState = "scale(" + scale.toFixed(4) + ")";
-
-    if (inner.__merlinLargeDesktopScaleState === nextState) {
-      return;
-    }
-
-    inner.style.setProperty("transform", "scale(" + scale + ")", "important");
-    inner.style.setProperty("transform-origin", "center center", "important");
-    inner.__merlinLargeDesktopScaleState = nextState;
+  if (body && body.style.getPropertyValue("overflow") !== "visible") {
+    body.style.setProperty("overflow", "visible", "important");
   }
+
+  if (width < 1500 || width < 768) {
+    if (inner.__merlinLargeDesktopScaleState !== "none") {
+      inner.style.removeProperty("transform");
+      inner.style.removeProperty("transform-origin");
+      inner.__merlinLargeDesktopScaleState = "none";
+    }
+
+    return;
+  }
+
+  let scale = isRegisterPage ? width / 1500 : width / 1850;
+
+  if (!isRegisterPage && height < 850) {
+    scale = Math.min(scale, height / 860);
+  }
+
+  if (isRegisterPage && height < 760) {
+    scale = Math.min(scale, height / 720);
+  }
+
+  scale = clampNumber(1, scale, isRegisterPage ? 1.42 : 1.42);
+
+  const nextState = "scale(" + scale.toFixed(4) + ")";
+
+  if (inner.__merlinLargeDesktopScaleState === nextState) {
+    return;
+  }
+
+  inner.style.setProperty("transform", "scale(" + scale + ")", "important");
+  inner.style.setProperty("transform-origin", "center center", "important");
+  inner.__merlinLargeDesktopScaleState = nextState;
+}
 
   function installLargeDesktopContentScale() {
     const elements = findContentScaleElements();
