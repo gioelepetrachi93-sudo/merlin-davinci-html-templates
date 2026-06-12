@@ -10,6 +10,8 @@ Registration flow:
 
 https://auth.pingone.eu/8f417be9-f7a6-4a32-a6ba-71ee39f8832f/as/authorize?client_id=3021af87-9032-4512-9b7e-9d6950bdac7d&response_type=code&redirect_uri=https://oauth.pstmn.io/v1/browser-callback&scope=openid&login_hint=giopetra93@gmail.com&from=002&prompt=login#
 
+https://auth.pingone.eu/8f417be9-f7a6-4a32-a6ba-71ee39f8832f/as/authorize?client_id=3021af87-9032-4512-9b7e-9d6950bdac7d&response_type=code&redirect_uri=https://oauth.pstmn.io/v1/browser-callback&scope=openid&login_hint=trefliptofakie@libero.it&from=002&prompt=login#
+
 
 sms flow:
 

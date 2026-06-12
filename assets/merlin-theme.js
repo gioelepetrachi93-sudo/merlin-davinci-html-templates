@@ -561,32 +561,42 @@
     });
   }
 
-  function findContentScaleElements() {
-    const verifyInner = document.querySelector(".merlin-verify .mv-body-inner");
-    const verifyBody = document.querySelector(".merlin-verify .mv-body");
+function findContentScaleElements() {
+  const verifyInner = document.querySelector(".merlin-verify .mv-body-inner");
+  const verifyBody = document.querySelector(".merlin-verify .mv-body");
 
-    if (verifyInner) {
-      return {
-        inner: verifyInner,
-        body: verifyBody
-      };
-    }
-
-    const loginInner = document.querySelector(".merlin-login .ml-body-inner");
-    const loginBody = document.querySelector(".merlin-login .ml-body");
-
-    if (loginInner) {
-      return {
-        inner: loginInner,
-        body: loginBody
-      };
-    }
-
+  if (verifyInner) {
     return {
-      inner: null,
-      body: null
+      inner: verifyInner,
+      body: verifyBody
     };
   }
+
+  const loginInner = document.querySelector(".merlin-login .ml-body-inner");
+  const loginBody = document.querySelector(".merlin-login .ml-body");
+
+  if (loginInner) {
+    return {
+      inner: loginInner,
+      body: loginBody
+    };
+  }
+
+  const registerInner = document.querySelector(".merlin-register .mr-body-inner");
+  const registerBody = document.querySelector(".merlin-register .mr-body");
+
+  if (registerInner) {
+    return {
+      inner: registerInner,
+      body: registerBody
+    };
+  }
+
+  return {
+    inner: null,
+    body: null
+  };
+}
 
   function clampNumber(min, value, max) {
     return Math.max(min, Math.min(value, max));
