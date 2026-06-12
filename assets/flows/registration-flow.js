@@ -7,7 +7,8 @@
 
   const MODULES = [
     "merlin-theme.js",
-    "merlin-otp-lock.js"
+    "merlin-otp-lock.js",
+    "merlin-error-ui.js"
   ];
 
   const currentSrc =
