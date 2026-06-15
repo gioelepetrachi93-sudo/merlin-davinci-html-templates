@@ -48,7 +48,7 @@
         width: min(524px, calc(100vw - 48px));
         max-height: calc(100vh - 48px);
         overflow-y: auto;
-        padding: 32px 20px 22px;
+        padding: 20px;
         border-radius: 18px;
         background: #FFFFFF;
         color: #091464;
@@ -60,8 +60,8 @@
         position: absolute;
         top: 14px;
         right: 14px;
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         border: 0;
         border-radius: 999px;
         padding: 0;
@@ -83,14 +83,14 @@
       }
 
       .merlin-contact-icon {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         border-radius: 999px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 0 14px;
-        background: #F1F2F8;
+        margin: 0 0 16px;
+        background: #EDEEF8;
         color: #091464;
       }
 
@@ -103,9 +103,9 @@
       .merlin-contact-title {
         margin: 0 0 8px;
         color: #091464;
-        font-size: 14px;
-        font-weight: 800;
-        line-height: 20px;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 24px;
       }
 
       .merlin-contact-intro,
@@ -128,9 +128,9 @@
       .merlin-contact-section-title {
         margin: 0 0 8px;
         color: #091464;
-        font-size: 14px;
-        font-weight: 800;
-        line-height: 20px;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 24px;
       }
 
       .merlin-contact-phone,
@@ -140,13 +140,13 @@
         color: #091464;
         font-size: 16px;
         font-weight: 500;
-        line-height: 22px;
+        line-height: 24px;
         text-decoration: none;
       }
 
       .merlin-contact-email {
         font-size: 14px;
-        font-weight: 800;
+        font-weight: 700;
         line-height: 20px;
       }
 
@@ -168,7 +168,7 @@
         .merlin-contact-modal {
           width: min(228px, calc(100vw - 48px));
           max-height: calc(100vh - 48px);
-          padding: 48px 18px 20px;
+          padding: 20px 18px;
           border-radius: 16px;
         }
 
@@ -178,16 +178,9 @@
         }
 
         .merlin-contact-icon {
-          position: absolute;
-          top: 16px;
-          left: 18px;
-          width: 32px;
-          height: 32px;
-          margin: 0;
-        }
-
-        .merlin-contact-title {
-          margin-top: 0;
+          width: 40px;
+          height: 40px;
+          margin: 0 0 16px;
         }
 
         .merlin-contact-intro,
@@ -230,11 +223,15 @@
         <button class="merlin-contact-close" id="${CLOSE_ID}" type="button" aria-label="Close">×</button>
 
         <div class="merlin-contact-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M5 12a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M5 12v4a2 2 0 0 0 2 2h1v-8H7a2 2 0 0 0-2 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-            <path d="M19 12v4a2 2 0 0 1-2 2h-1v-8h1a2 2 0 0 1 2 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-            <path d="M15 18c0 1.1-.9 2-2 2h-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#merlinContactHeadphonesClip)">
+              <path d="M14 8H12C11.7348 8 11.4804 8.10536 11.2929 8.2929C11.1054 8.48043 11 8.73479 11 9V11.5C11 11.7652 11.1054 12.0196 11.2929 12.2071C11.4804 12.3946 11.7348 12.5 12 12.5H13C13.2652 12.5 13.5196 12.3946 13.7071 12.2071C13.8946 12.0196 14 11.7652 14 11.5V8ZM14 8C14 7.21207 13.8448 6.43185 13.5433 5.7039C13.2418 4.97595 12.7998 4.31451 12.2426 3.75736C11.6855 3.20021 11.0241 2.75825 10.2961 2.45672C9.56815 2.15519 8.78793 2 8 2C7.21207 2 6.43185 2.15519 5.7039 2.45672C4.97595 2.75825 4.31451 3.20021 3.75736 3.75736C3.20021 4.31451 2.75825 4.97595 2.45672 5.7039C2.15519 6.43185 2 7.21207 2 8M2 8V11.5C2 11.7652 2.10536 12.0196 2.29289 12.2071C2.48043 12.3946 2.73478 12.5 3 12.5H4C4.26522 12.5 4.51957 12.3946 4.70711 12.2071C4.89464 12.0196 5 11.7652 5 11.5V9C5 8.73479 4.89464 8.48043 4.70711 8.2929C4.51957 8.10536 4.26522 8 4 8H2Z" stroke="#091464" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <defs>
+              <clipPath id="merlinContactHeadphonesClip">
+                <rect width="16" height="16" fill="white"/>
+              </clipPath>
+            </defs>
           </svg>
         </div>
 
