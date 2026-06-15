@@ -20,9 +20,15 @@
     ".mr-contact-link"
   ];
 
-  function injectStyles() {
-    if (document.getElementById(STYLE_ID)) return;
+  function removeExistingContactUi() {
+    const oldOverlay = document.getElementById(OVERLAY_ID);
+    const oldStyle = document.getElementById(STYLE_ID);
 
+    if (oldOverlay) oldOverlay.remove();
+    if (oldStyle) oldStyle.remove();
+  }
+
+  function injectStyles() {
     const style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = `
@@ -77,11 +83,6 @@
         cursor: pointer;
       }
 
-      .merlin-contact-close:hover {
-        color: #091464;
-        background: #E9EBF5;
-      }
-
       .merlin-contact-icon {
         width: 40px;
         height: 40px;
@@ -94,18 +95,19 @@
         color: #091464;
       }
 
-        .merlin-contact-icon svg {
+      .merlin-contact-icon svg {
         width: 14px;
         height: 12px;
         display: block;
-        }
+      }
 
-      .merlin-contact-title {
+      .merlin-contact-title,
+      .merlin-contact-section-title {
         margin: 0 0 8px;
-        color: #091464;
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 24px;
+        color: #091464 !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        line-height: 24px !important;
       }
 
       .merlin-contact-intro,
@@ -125,79 +127,31 @@
         border-top: 1px dashed #CDCDCE;
       }
 
-      .merlin-contact-section-title {
-        margin: 0 0 8px;
-        color: #091464;
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 24px;
-      }
-
       .merlin-contact-phone,
       .merlin-contact-email {
         display: inline-block;
         margin: 8px 0;
         color: #091464;
+        text-decoration: none;
+      }
+
+      .merlin-contact-phone {
         font-size: 16px;
         font-weight: 500;
         line-height: 24px;
-        text-decoration: none;
       }
 
       .merlin-contact-email {
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 600;
         line-height: 20px;
       }
 
-      .merlin-contact-phone:hover,
-      .merlin-contact-email:hover {
-        color: #571CFF;
-        text-decoration: underline;
-        text-decoration-thickness: 1px;
-        text-decoration-color: #CDCDCE;
-        text-underline-offset: 3px;
-      }
-
       @media (max-width: 767px) {
-        .merlin-contact-overlay {
-          align-items: center;
-          padding: 24px;
-        }
-
         .merlin-contact-modal {
           width: min(228px, calc(100vw - 48px));
-          max-height: calc(100vh - 48px);
           padding: 20px 18px;
           border-radius: 16px;
-        }
-
-        .merlin-contact-close {
-          top: 12px;
-          right: 12px;
-        }
-
-        .merlin-contact-icon {
-          width: 40px;
-          height: 40px;
-          margin: 0 0 16px;
-        }
-
-        .merlin-contact-intro,
-        .merlin-contact-label,
-        .merlin-contact-hours {
-          font-size: 11px;
-          line-height: 16px;
-        }
-
-        .merlin-contact-phone {
-          font-size: 14px;
-          line-height: 20px;
-        }
-
-        .merlin-contact-email {
-          font-size: 12px;
-          line-height: 18px;
         }
       }
     `;
@@ -206,11 +160,7 @@
   }
 
   function buildOverlay() {
-    let overlay = document.getElementById(OVERLAY_ID);
-
-    if (overlay) return overlay;
-
-    overlay = document.createElement("div");
+    const overlay = document.createElement("div");
     overlay.id = OVERLAY_ID;
     overlay.className = "merlin-contact-overlay";
     overlay.setAttribute("aria-hidden", "true");
@@ -223,9 +173,9 @@
         <button class="merlin-contact-close" id="${CLOSE_ID}" type="button" aria-label="Close">×</button>
 
         <div class="merlin-contact-icon" aria-hidden="true">
-        <svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12.75 6.75H10.75C10.4848 6.75 10.2304 6.85536 10.0429 7.0429C9.85536 7.23043 9.75 7.48479 9.75 7.75V10.25C9.75 10.5152 9.85536 10.7696 10.0429 10.9571C10.2304 11.1446 10.4848 11.25 10.75 11.25H11.75C12.0152 11.25 12.2696 11.1446 12.4571 10.9571C12.6446 10.7696 12.75 10.5152 12.75 10.25V6.75ZM12.75 6.75C12.75 5.96207 12.5948 5.18185 12.2933 4.4539C11.9918 3.72595 11.5498 3.06451 10.9926 2.50736C10.4355 1.95021 9.77406 1.50825 9.0461 1.20672C8.31815 0.905195 7.53793 0.75 6.75 0.75C5.96207 0.75 5.18185 0.905195 4.4539 1.20672C3.72595 1.50825 3.06451 1.95021 2.50736 2.50736C1.95021 3.06451 1.50825 3.72595 1.20672 4.4539C0.905195 5.18185 0.75 5.96207 0.75 6.75M0.75 6.75V10.25C0.75 10.5152 0.855357 10.7696 1.04289 10.9571C1.23043 11.1446 1.48478 11.25 1.75 11.25H2.75C3.01522 11.25 3.26957 11.1446 3.45711 10.9571C3.64464 10.7696 3.75 10.5152 3.75 10.25V7.75C3.75 7.48479 3.64464 7.23043 3.45711 7.0429C3.26957 6.85536 3.01522 6.75 2.75 6.75H0.75Z" stroke="#091464" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+          </svg>
         </div>
 
         <h2 class="merlin-contact-title" id="merlinContactTitle">Contact us</h2>
@@ -247,12 +197,7 @@
     `;
 
     document.body.appendChild(overlay);
-
     return overlay;
-  }
-
-  function getOverlay() {
-    return document.getElementById(OVERLAY_ID) || buildOverlay();
   }
 
   function openContact(event) {
@@ -261,13 +206,11 @@
       event.stopPropagation();
     }
 
-    const overlay = getOverlay();
+    const overlay = document.getElementById(OVERLAY_ID);
+    if (!overlay) return;
 
     overlay.classList.add("is-open");
     overlay.setAttribute("aria-hidden", "false");
-
-    const close = document.getElementById(CLOSE_ID);
-    if (close) close.focus({ preventScroll: true });
   }
 
   function closeContact() {
@@ -302,6 +245,7 @@
   }
 
   function start() {
+    removeExistingContactUi();
     injectStyles();
     buildOverlay();
 
@@ -314,15 +258,8 @@
   window.__merlinContactStop = function () {
     document.removeEventListener("click", onDocumentClick, true);
     document.removeEventListener("keydown", onKeydown, true);
-
-    const overlay = document.getElementById(OVERLAY_ID);
-    if (overlay) overlay.remove();
-
-    const style = document.getElementById(STYLE_ID);
-    if (style) style.remove();
-
+    removeExistingContactUi();
     delete window.__merlinContactStop;
-
     console.log("[Merlin Contact] stopped");
   };
 
