@@ -21,11 +21,11 @@
   ];
 
   function removeExistingContactUi() {
-    const oldOverlay = document.getElementById(OVERLAY_ID);
-    const oldStyle = document.getElementById(STYLE_ID);
+    const overlay = document.getElementById(OVERLAY_ID);
+    const style = document.getElementById(STYLE_ID);
 
-    if (oldOverlay) oldOverlay.remove();
-    if (oldStyle) oldStyle.remove();
+    if (overlay) overlay.remove();
+    if (style) style.remove();
   }
 
   function injectStyles() {
@@ -167,8 +167,10 @@
         }
 
         .merlin-contact-modal {
-          width: 100% !important;
+          width: calc(100vw - 32px) !important;
           max-width: 360px !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
           max-height: calc(100vh - 48px);
           padding: 20px 18px !important;
           border-radius: 16px !important;
@@ -220,6 +222,33 @@
     return overlay;
   }
 
+  function applyResponsiveContactLayout() {
+    const overlay = document.getElementById(OVERLAY_ID);
+    const modal = document.getElementById(MODAL_ID);
+
+    if (!overlay || !modal) return;
+
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      overlay.style.setProperty("padding", "0 16px", "important");
+
+      modal.style.setProperty("width", "calc(100vw - 32px)", "important");
+      modal.style.setProperty("max-width", "360px", "important");
+      modal.style.setProperty("min-width", "0", "important");
+      modal.style.setProperty("box-sizing", "border-box", "important");
+      modal.style.setProperty("padding", "20px 18px", "important");
+      modal.style.setProperty("border-radius", "16px", "important");
+    } else {
+      overlay.style.removeProperty("padding");
+
+      modal.style.removeProperty("width");
+      modal.style.removeProperty("max-width");
+      modal.style.removeProperty("min-width");
+      modal.style.removeProperty("box-sizing");
+      modal.style.removeProperty("padding");
+      modal.style.removeProperty("border-radius");
+    }
+  }
+
   function openContact(event) {
     if (event) {
       event.preventDefault();
@@ -228,6 +257,8 @@
 
     const overlay = document.getElementById(OVERLAY_ID);
     if (!overlay) return;
+
+    applyResponsiveContactLayout();
 
     overlay.classList.add("is-open");
     overlay.setAttribute("aria-hidden", "false");
@@ -264,21 +295,15 @@
     }
   }
 
-  function removeExistingContactUi() {
-    const overlay = document.getElementById(OVERLAY_ID);
-    const style = document.getElementById(STYLE_ID);
-
-    if (overlay) overlay.remove();
-    if (style) style.remove();
-  }
-
   function start() {
     removeExistingContactUi();
     injectStyles();
     buildOverlay();
+    applyResponsiveContactLayout();
 
     document.addEventListener("click", onDocumentClick, true);
     document.addEventListener("keydown", onKeydown, true);
+    window.addEventListener("resize", applyResponsiveContactLayout);
 
     console.log("[Merlin Contact] loaded");
   }
@@ -286,6 +311,7 @@
   window.__merlinContactStop = function () {
     document.removeEventListener("click", onDocumentClick, true);
     document.removeEventListener("keydown", onKeydown, true);
+    window.removeEventListener("resize", applyResponsiveContactLayout);
 
     removeExistingContactUi();
 
