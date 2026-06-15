@@ -149,7 +149,7 @@
 
       @media (max-width: 767px) {
         .merlin-contact-modal {
-          width: min(228px, calc(100vw - 48px));
+          width: min(312px, calc(100vw - 32px));
           padding: 20px 18px;
           border-radius: 16px;
         }
