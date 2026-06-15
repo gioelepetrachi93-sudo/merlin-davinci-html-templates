@@ -94,11 +94,11 @@
         color: #091464;
       }
 
-      .merlin-contact-icon svg {
-        width: 16px;
-        height: 16px;
+        .merlin-contact-icon svg {
+        width: 14px;
+        height: 12px;
         display: block;
-      }
+        }
 
       .merlin-contact-title {
         margin: 0 0 8px;
