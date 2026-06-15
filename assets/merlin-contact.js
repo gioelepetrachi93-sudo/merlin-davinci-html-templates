@@ -83,6 +83,11 @@
         cursor: pointer;
       }
 
+      .merlin-contact-close:hover {
+        color: #091464;
+        background: #E9EBF5;
+      }
+
       .merlin-contact-icon {
         width: 40px;
         height: 40px;
@@ -147,11 +152,26 @@
         line-height: 20px;
       }
 
+      .merlin-contact-phone:hover,
+      .merlin-contact-email:hover {
+        color: #571CFF;
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-decoration-color: #CDCDCE;
+        text-underline-offset: 3px;
+      }
+
       @media (max-width: 767px) {
+        .merlin-contact-overlay {
+          padding: 0 16px !important;
+        }
+
         .merlin-contact-modal {
-          width: min(312px, calc(100vw - 32px));
-          padding: 20px 18px;
-          border-radius: 16px;
+          width: 100% !important;
+          max-width: 360px !important;
+          max-height: calc(100vh - 48px);
+          padding: 20px 18px !important;
+          border-radius: 16px !important;
         }
       }
     `;
@@ -244,6 +264,14 @@
     }
   }
 
+  function removeExistingContactUi() {
+    const overlay = document.getElementById(OVERLAY_ID);
+    const style = document.getElementById(STYLE_ID);
+
+    if (overlay) overlay.remove();
+    if (style) style.remove();
+  }
+
   function start() {
     removeExistingContactUi();
     injectStyles();
@@ -258,8 +286,11 @@
   window.__merlinContactStop = function () {
     document.removeEventListener("click", onDocumentClick, true);
     document.removeEventListener("keydown", onKeydown, true);
+
     removeExistingContactUi();
+
     delete window.__merlinContactStop;
+
     console.log("[Merlin Contact] stopped");
   };
 
