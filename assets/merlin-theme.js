@@ -999,9 +999,9 @@ function buildFixedLeftLayoutCss(layout) {
   }
 
   function installEnterPrimaryAction() {
-    if (window.__merlinEnterPrimaryInstalled) return;
-
-    window.__merlinEnterPrimaryInstalled = true;
+    if (window.__merlinEnterPrimaryHandler) {
+      document.removeEventListener("keyup", window.__merlinEnterPrimaryHandler, true);
+    }
 
     function normalizePrimaryText(value) {
       return String(value || "")
@@ -1031,7 +1031,6 @@ function buildFixedLeftLayoutCss(layout) {
 
       return (
         id === "btncontinue" ||
-        id === "submit" ||
         dataId === "btncontinue" ||
         text === "continue" ||
         text === "let's go" ||
@@ -1047,17 +1046,6 @@ function buildFixedLeftLayoutCss(layout) {
     function findPrimaryButton(context) {
       var selectors = "button, input[type='submit'], [role='button']";
 
-      var directButton =
-        document.querySelector('button#submit[data-skbuttonvalue="NEXT"]') ||
-        document.querySelector('button[data-skform="otp-form"][data-skbuttonvalue="NEXT"]') ||
-        document.querySelector("#btnContinue") ||
-        document.querySelector("[data-id='btnContinue']") ||
-        document.querySelector("[data-skbuttonvalue='continue']");
-
-      if (directButton && isPrimaryButton(directButton)) {
-        return directButton;
-      }
-
       if (context && context.querySelector) {
         var scopedButton = Array.prototype.find.call(
           context.querySelectorAll(selectors),
@@ -1065,6 +1053,15 @@ function buildFixedLeftLayoutCss(layout) {
         );
 
         if (scopedButton) return scopedButton;
+      }
+
+      if (context && context.id) {
+        var linkedButton = Array.prototype.find.call(
+          document.querySelectorAll('[data-skform="' + context.id + '"]'),
+          isPrimaryButton
+        );
+
+        if (linkedButton) return linkedButton;
       }
 
       return Array.prototype.find.call(document.querySelectorAll(selectors), isPrimaryButton);
@@ -1079,34 +1076,32 @@ function buildFixedLeftLayoutCss(layout) {
       );
     }
 
-    document.addEventListener(
-      "keydown",
-      function (event) {
-        if (event.key !== "Enter") return;
-        if (!isTypingTarget(event.target)) return;
+    window.__merlinEnterPrimaryHandler = function (event) {
+      if (event.key !== "Enter") return;
+      if (!isTypingTarget(event.target)) return;
 
-        var target = event.target;
+      var target = event.target;
 
-        if (target.matches("textarea, [contenteditable='true']")) return;
+      if (target.matches("textarea, [contenteditable='true']")) return;
 
-        var context =
-          target.closest("form") ||
-          target.closest(".merlin-login, .merlin-register, .merlin-verify") ||
-          document;
+      var context =
+        target.closest("form") ||
+        target.closest(".merlin-login, .merlin-register, .merlin-verify") ||
+        document;
 
-        var primaryButton = findPrimaryButton(context);
+      var primaryButton = findPrimaryButton(context);
 
-        if (isDisabled(primaryButton)) {
-          event.preventDefault();
-          return;
-        }
-
+      if (isDisabled(primaryButton)) {
         event.preventDefault();
-        event.stopPropagation();
-        primaryButton.click();
-      },
-      true
-    );
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      primaryButton.click();
+    };
+
+    document.addEventListener("keyup", window.__merlinEnterPrimaryHandler, true);
   }
 
   function init() {
