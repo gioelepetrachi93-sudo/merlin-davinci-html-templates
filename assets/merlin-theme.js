@@ -753,9 +753,15 @@
   }
 
   function buildFixedLeftLayoutCss(layout) {
+    const root = "html[data-theme] " + layout.root;
+    const shell = "html[data-theme] " + layout.root + " " + layout.shell;
+    const hero = "html[data-theme] " + layout.root + " " + layout.hero;
+    const body = "html[data-theme] " + layout.root + " " + layout.body;
+    const inner = "html[data-theme] " + layout.root + " " + layout.inner;
+
     return `
       @media (min-width: 768px) {
-        ${layout.root} {
+        ${root} {
           display: block !important;
           width: 100% !important;
           height: auto !important;
@@ -765,7 +771,7 @@
           contain: none !important;
         }
 
-        ${layout.shell} {
+        ${shell} {
           display: block !important;
           width: 100% !important;
           height: auto !important;
@@ -775,7 +781,7 @@
           contain: none !important;
         }
 
-        ${layout.hero} {
+        ${hero} {
           position: fixed !important;
           top: 0 !important;
           left: 0 !important;
@@ -789,17 +795,18 @@
           contain: none !important;
         }
 
-        ${layout.body} {
+        ${body} {
           width: 50vw !important;
           min-height: 100vh !important;
           height: auto !important;
           max-height: none !important;
           margin-left: 50vw !important;
+          margin-top: 0 !important;
           overflow: visible !important;
           contain: none !important;
         }
 
-        ${layout.inner} {
+        ${inner} {
           height: auto !important;
           min-height: auto !important;
           max-height: none !important;
@@ -808,7 +815,7 @@
       }
 
       @media (max-width: 767px) {
-        ${layout.root} {
+        ${root} {
           display: flex !important;
           width: 100% !important;
           height: auto !important;
@@ -816,7 +823,7 @@
           overflow: visible !important;
         }
 
-        ${layout.shell} {
+        ${shell} {
           display: grid !important;
           grid-template-columns: 1fr !important;
           width: 100% !important;
@@ -825,7 +832,7 @@
           overflow: visible !important;
         }
 
-        ${layout.hero} {
+        ${hero} {
           position: relative !important;
           top: auto !important;
           left: auto !important;
@@ -838,7 +845,7 @@
           overflow: hidden !important;
         }
 
-        ${layout.body} {
+        ${body} {
           width: 100% !important;
           margin-left: 0 !important;
           min-height: auto !important;
