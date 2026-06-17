@@ -63,11 +63,12 @@
       }
 
       .merlin-contact-close {
+        display: block;
         position: absolute;
         top: 14px;
         right: 14px;
-        width: 24px;
-        height: 24px;
+        width: 10px;
+        height: 10px;
         border: 0;
         border-radius: 999px;
         padding: 0;
@@ -192,7 +193,11 @@
 
     overlay.innerHTML = `
       <div class="merlin-contact-modal" id="${MODAL_ID}" role="document">
-        <button class="merlin-contact-close" id="${CLOSE_ID}" type="button" aria-label="Close">×</button>
+        <button class="merlin-contact-close" id="${CLOSE_ID}" type="button" aria-label="Close">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                 <path fill-rule="evenodd" clip-rule="evenodd" d="M0.21967 0.21967C0.512563 -0.0732233 0.987437 -0.0732233 1.28033 0.21967L4.75 3.68934L8.21967 0.21967C8.51256 -0.0732233 8.98744 -0.0732233 9.28033 0.21967C9.57322 0.512563 9.57322 0.987437 9.28033 1.28033L5.81066 4.75L9.28033 8.21967C9.57322 8.51256 9.57322 8.98744 9.28033 9.28033C8.98744 9.57322 8.51256 9.57322 8.21967 9.28033L4.75 5.81066L1.28033 9.28033C0.987437 9.57322 0.512563 9.57322 0.21967 9.28033C-0.0732233 8.98744 -0.0732233 8.51256 0.21967 8.21967L3.68934 4.75L0.21967 1.28033C-0.0732233 0.987437 -0.0732233 0.512563 0.21967 0.21967Z" fill="#475569"/>
+            </svg>
+        </button>
 
         <div class="merlin-contact-icon" aria-hidden="true">
           <svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg">
