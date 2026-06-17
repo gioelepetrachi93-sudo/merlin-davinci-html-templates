@@ -1031,6 +1031,7 @@ function buildFixedLeftLayoutCss(layout) {
 
       return (
         id === "btncontinue" ||
+        id === "submit" ||
         dataId === "btncontinue" ||
         text === "continue" ||
         text === "let's go" ||
@@ -1045,11 +1046,26 @@ function buildFixedLeftLayoutCss(layout) {
 
     function findPrimaryButton(context) {
       var selectors = "button, input[type='submit'], [role='button']";
-      var scopedButton = context && context.querySelector
-        ? Array.prototype.find.call(context.querySelectorAll(selectors), isPrimaryButton)
-        : null;
 
-      if (scopedButton) return scopedButton;
+      var directButton =
+        document.querySelector('button#submit[data-skbuttonvalue="NEXT"]') ||
+        document.querySelector('button[data-skform="otp-form"][data-skbuttonvalue="NEXT"]') ||
+        document.querySelector("#btnContinue") ||
+        document.querySelector("[data-id='btnContinue']") ||
+        document.querySelector("[data-skbuttonvalue='continue']");
+
+      if (directButton && isPrimaryButton(directButton)) {
+        return directButton;
+      }
+
+      if (context && context.querySelector) {
+        var scopedButton = Array.prototype.find.call(
+          context.querySelectorAll(selectors),
+          isPrimaryButton
+        );
+
+        if (scopedButton) return scopedButton;
+      }
 
       return Array.prototype.find.call(document.querySelectorAll(selectors), isPrimaryButton);
     }
