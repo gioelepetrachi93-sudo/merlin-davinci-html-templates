@@ -998,6 +998,98 @@ function buildFixedLeftLayoutCss(layout) {
     });
   }
 
+    function installEnterPrimaryAction() {
+    if (window.__merlinEnterPrimaryInstalled) return;
+
+    window.__merlinEnterPrimaryInstalled = true;
+
+    function normalizePrimaryText(value) {
+      return String(value || "")
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    function isTypingTarget(element) {
+      return (
+        element &&
+        element.matches &&
+        element.matches("input, select, [contenteditable='true']")
+      );
+    }
+
+    function findPrimaryButton(context) {
+      return (
+        context.querySelector("#btnContinue") ||
+        context.querySelector("[data-id='btnContinue']") ||
+        context.querySelector("[data-skbuttonvalue='continue']") ||
+        context.querySelector("[data-skbuttonvalue='letsGo']") ||
+        Array.prototype.find.call(
+          context.querySelectorAll("button, input[type='submit'], [role='button']"),
+          function (button) {
+            var text = normalizePrimaryText(
+              button.textContent || button.value || button.getAttribute("aria-label")
+            );
+            var value = normalizePrimaryText(button.getAttribute("data-skbuttonvalue"));
+
+            return (
+              text === "continue" ||
+              text === "let's go" ||
+              text === "lets go" ||
+              value === "continue" ||
+              value === "letsgo" ||
+              value === "let's go" ||
+              value === "lets go"
+            );
+          }
+        )
+      );
+    }
+
+    function isDisabled(button) {
+      return (
+        !button ||
+        button.disabled ||
+        button.getAttribute("aria-disabled") === "true" ||
+        button.style.pointerEvents === "none"
+      );
+    }
+
+    document.addEventListener(
+      "keydown",
+      function (event) {
+        if (event.key !== "Enter") return;
+        if (!isTypingTarget(event.target)) return;
+
+        var target = event.target;
+
+        if (target.matches("textarea, [contenteditable='true']")) return;
+
+        var context =
+          target.closest("form") ||
+          target.closest(".merlin-login, .merlin-register, .merlin-verify") ||
+          document;
+
+        var primaryButton = findPrimaryButton(context);
+
+        if (!primaryButton && context !== document) {
+          primaryButton = findPrimaryButton(document);
+        }
+
+        if (isDisabled(primaryButton)) {
+          event.preventDefault();
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        primaryButton.click();
+      },
+      true
+    );
+  }
+
   function init() {
     console.log("[Merlin Theme] loaded");
     console.log("[Merlin Theme] URL from:", getFromParam());
@@ -1006,6 +1098,7 @@ function buildFixedLeftLayoutCss(layout) {
     applyTheme();
     installLargeDesktopContentScale();
     scheduleFixedLeftScrollLayout();
+    installEnterPrimaryAction();
     observeDavinciDomChanges();
 
     window.addEventListener("resize", function () {
