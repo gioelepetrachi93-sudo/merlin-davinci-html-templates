@@ -84,6 +84,12 @@
         cursor: pointer;
       }
 
+    .merlin-contact-close svg {
+        display: block;
+        width: 10px;
+        height: 10px;
+    }
+
       .merlin-contact-close:hover {
         color: #091464;
         background: #E9EBF5;
