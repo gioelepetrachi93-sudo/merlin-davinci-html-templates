@@ -998,7 +998,7 @@ function buildFixedLeftLayoutCss(layout) {
     });
   }
 
-    function installEnterPrimaryAction() {
+  function installEnterPrimaryAction() {
     if (window.__merlinEnterPrimaryInstalled) return;
 
     window.__merlinEnterPrimaryInstalled = true;
@@ -1019,32 +1019,39 @@ function buildFixedLeftLayoutCss(layout) {
       );
     }
 
-    function findPrimaryButton(context) {
-      return (
-        context.querySelector("#btnContinue") ||
-        context.querySelector("[data-id='btnContinue']") ||
-        context.querySelector("[data-skbuttonvalue='continue']") ||
-        context.querySelector("[data-skbuttonvalue='letsGo']") ||
-        Array.prototype.find.call(
-          context.querySelectorAll("button, input[type='submit'], [role='button']"),
-          function (button) {
-            var text = normalizePrimaryText(
-              button.textContent || button.value || button.getAttribute("aria-label")
-            );
-            var value = normalizePrimaryText(button.getAttribute("data-skbuttonvalue"));
+    function isPrimaryButton(button) {
+      if (!button) return false;
 
-            return (
-              text === "continue" ||
-              text === "let's go" ||
-              text === "lets go" ||
-              value === "continue" ||
-              value === "letsgo" ||
-              value === "let's go" ||
-              value === "lets go"
-            );
-          }
-        )
+      var text = normalizePrimaryText(
+        button.textContent || button.value || button.getAttribute("aria-label")
       );
+      var value = normalizePrimaryText(button.getAttribute("data-skbuttonvalue"));
+      var id = normalizePrimaryText(button.id);
+      var dataId = normalizePrimaryText(button.getAttribute("data-id"));
+
+      return (
+        id === "btncontinue" ||
+        dataId === "btncontinue" ||
+        text === "continue" ||
+        text === "let's go" ||
+        text === "lets go" ||
+        value === "continue" ||
+        value === "next" ||
+        value === "letsgo" ||
+        value === "let's go" ||
+        value === "lets go"
+      );
+    }
+
+    function findPrimaryButton(context) {
+      var selectors = "button, input[type='submit'], [role='button']";
+      var scopedButton = context && context.querySelector
+        ? Array.prototype.find.call(context.querySelectorAll(selectors), isPrimaryButton)
+        : null;
+
+      if (scopedButton) return scopedButton;
+
+      return Array.prototype.find.call(document.querySelectorAll(selectors), isPrimaryButton);
     }
 
     function isDisabled(button) {
@@ -1072,10 +1079,6 @@ function buildFixedLeftLayoutCss(layout) {
           document;
 
         var primaryButton = findPrimaryButton(context);
-
-        if (!primaryButton && context !== document) {
-          primaryButton = findPrimaryButton(document);
-        }
 
         if (isDisabled(primaryButton)) {
           event.preventDefault();
