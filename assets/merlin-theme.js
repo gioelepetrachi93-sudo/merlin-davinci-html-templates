@@ -752,109 +752,109 @@
     });
   }
 
-  function buildFixedLeftLayoutCss(layout) {
-    const root = "html[data-theme] " + layout.root;
-    const shell = "html[data-theme] " + layout.root + " " + layout.shell;
-    const hero = "html[data-theme] " + layout.root + " " + layout.hero;
-    const body = "html[data-theme] " + layout.root + " " + layout.body;
-    const inner = "html[data-theme] " + layout.root + " " + layout.inner;
+function buildFixedLeftLayoutCss(layout) {
+  const root = "html[data-theme][data-theme] " + layout.root;
+  const shell = "html[data-theme][data-theme] " + layout.root + " " + layout.shell;
+  const hero = "html[data-theme][data-theme] " + layout.root + " " + layout.hero;
+  const body = "html[data-theme][data-theme] " + layout.root + " " + layout.body;
+  const inner = "html[data-theme][data-theme] " + layout.root + " " + layout.inner;
 
-    return `
-      @media (min-width: 768px) {
-        ${root} {
-          display: block !important;
-          width: 100% !important;
-          height: auto !important;
-          min-height: 100vh !important;
-          max-height: none !important;
-          overflow: visible !important;
-          contain: none !important;
-        }
-
-        ${shell} {
-          display: block !important;
-          width: 100% !important;
-          height: auto !important;
-          min-height: 100vh !important;
-          max-height: none !important;
-          overflow: visible !important;
-          contain: none !important;
-        }
-
-        ${hero} {
-          position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          bottom: 0 !important;
-          width: 50vw !important;
-          height: 100vh !important;
-          min-height: 100vh !important;
-          max-height: 100vh !important;
-          overflow: hidden !important;
-          z-index: 1 !important;
-          contain: none !important;
-        }
-
-        ${body} {
-          width: 50vw !important;
-          min-height: 100vh !important;
-          height: auto !important;
-          max-height: none !important;
-          margin-left: 50vw !important;
-          margin-top: 0 !important;
-          overflow: visible !important;
-          contain: none !important;
-        }
-
-        ${inner} {
-          height: auto !important;
-          min-height: auto !important;
-          max-height: none !important;
-          overflow: visible !important;
-        }
+  return `
+    @media (min-width: 768px) {
+      ${root} {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100vh !important;
+        max-height: none !important;
+        overflow: visible !important;
+        contain: none !important;
       }
 
-      @media (max-width: 767px) {
-        ${root} {
-          display: flex !important;
-          width: 100% !important;
-          height: auto !important;
-          min-height: 100svh !important;
-          overflow: visible !important;
-        }
-
-        ${shell} {
-          display: grid !important;
-          grid-template-columns: 1fr !important;
-          width: 100% !important;
-          height: auto !important;
-          min-height: 100svh !important;
-          overflow: visible !important;
-        }
-
-        ${hero} {
-          position: relative !important;
-          top: auto !important;
-          left: auto !important;
-          right: auto !important;
-          bottom: auto !important;
-          width: 100% !important;
-          height: 140px !important;
-          min-height: auto !important;
-          max-height: 140px !important;
-          overflow: hidden !important;
-        }
-
-        ${body} {
-          width: 100% !important;
-          margin-left: 0 !important;
-          min-height: auto !important;
-          height: auto !important;
-          overflow: visible !important;
-        }
+      ${shell} {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100vh !important;
+        max-height: none !important;
+        overflow: visible !important;
+        contain: none !important;
       }
-    `;
-  }
+
+      ${hero} {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: 50vw !important;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+        z-index: 1 !important;
+        contain: none !important;
+      }
+
+      ${body} {
+        width: 50vw !important;
+        min-height: 100vh !important;
+        height: auto !important;
+        max-height: none !important;
+        margin-left: 50vw !important;
+        margin-top: 0 !important;
+        overflow: visible !important;
+        contain: none !important;
+      }
+
+      ${inner} {
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      ${root} {
+        display: flex !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100svh !important;
+        overflow: visible !important;
+      }
+
+      ${shell} {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100svh !important;
+        overflow: visible !important;
+      }
+
+      ${hero} {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        width: 100% !important;
+        height: 140px !important;
+        min-height: auto !important;
+        max-height: 140px !important;
+        overflow: hidden !important;
+      }
+
+      ${body} {
+        width: 100% !important;
+        margin-left: 0 !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+    }
+  `;
+}
 
   function injectFixedLeftScrollStyle() {
     let style = document.getElementById(FIXED_LEFT_STYLE_ID);
