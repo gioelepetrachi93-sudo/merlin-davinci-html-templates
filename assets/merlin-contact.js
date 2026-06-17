@@ -67,8 +67,8 @@
         position: absolute;
         top: 14px;
         right: 14px;
-        width: 10px;
-        height: 10px;
+        width: 24px;
+        height: 24px;
         border: 0;
         border-radius: 999px;
         padding: 0;
