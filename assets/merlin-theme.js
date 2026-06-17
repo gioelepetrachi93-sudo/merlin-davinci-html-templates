@@ -2,6 +2,7 @@
   const DEFAULT_THEME_CODE = "000";
   const SESSION_KEY = "merlin_asset_theme_code";
   const STYLE_ID = "merlin-theme-style";
+  const FIXED_LEFT_STYLE_ID = "merlin-fixed-left-scroll-style";
 
   const CDN_BASE =
     "https://cdn.jsdelivr.net/gh/gioelepetrachi93-sudo/merlin-davinci-html-templates@main/assets/brand-logos/";
@@ -203,8 +204,42 @@
 
   const VALID_THEME_CODES = [DEFAULT_THEME_CODE].concat(Object.keys(THEMES));
 
+  const FIXED_LEFT_LAYOUTS = [
+    { root: ".merlin-login", shell: ".ml-shell", hero: ".ml-hero", body: ".ml-body", inner: ".ml-body-inner" },
+    { root: ".merlin-register", shell: ".mr-shell", hero: ".mr-hero", body: ".mr-body", inner: ".mr-body-inner" },
+    { root: ".merlin-verify", shell: ".mv-shell", hero: ".mv-hero", body: ".mv-body", inner: ".mv-body-inner" }
+  ];
+
+  const DAVINCI_WRAPPERS = [
+    "#widgetContainer",
+    ".reactSingularKey_bodyContainer",
+    ".reactSingularKey_CC_main_generic"
+  ];
+
+  const FIXED_LEFT_PROPS_TO_CLEAR = [
+    "height",
+    "min-height",
+    "max-height",
+    "overflow",
+    "overflow-y",
+    "overflow-x",
+    "position",
+    "top",
+    "left",
+    "right",
+    "bottom",
+    "width",
+    "margin",
+    "margin-left",
+    "contain",
+    "touch-action",
+    "overscroll-behavior",
+    "z-index"
+  ];
+
   let isApplyingTheme = false;
   let isApplyScheduled = false;
+  let isFixedLeftScheduled = false;
   let lastAppliedThemeCode = null;
   let lastAppliedMode = null;
   let largeDesktopScaleTarget = null;
@@ -561,118 +596,118 @@
     });
   }
 
-function findContentScaleElements() {
-  const candidates = [
-    {
-      page: "verify",
-      root: document.querySelector(".merlin-verify"),
-      inner: document.querySelector(".merlin-verify .mv-body-inner"),
-      body: document.querySelector(".merlin-verify .mv-body")
-    },
-    {
-      page: "login",
-      root: document.querySelector(".merlin-login"),
-      inner: document.querySelector(".merlin-login .ml-body-inner"),
-      body: document.querySelector(".merlin-login .ml-body")
-    },
-    {
-      page: "register",
-      root: document.querySelector(".merlin-register"),
-      inner: document.querySelector(".merlin-register .mr-body-inner"),
-      body: document.querySelector(".merlin-register .mr-body")
+  function findContentScaleElements() {
+    const candidates = [
+      {
+        page: "verify",
+        root: document.querySelector(".merlin-verify"),
+        inner: document.querySelector(".merlin-verify .mv-body-inner"),
+        body: document.querySelector(".merlin-verify .mv-body")
+      },
+      {
+        page: "login",
+        root: document.querySelector(".merlin-login"),
+        inner: document.querySelector(".merlin-login .ml-body-inner"),
+        body: document.querySelector(".merlin-login .ml-body")
+      },
+      {
+        page: "register",
+        root: document.querySelector(".merlin-register"),
+        inner: document.querySelector(".merlin-register .mr-body-inner"),
+        body: document.querySelector(".merlin-register .mr-body")
+      }
+    ];
+
+    function isVisible(element) {
+      if (!element) return false;
+
+      const rect = element.getBoundingClientRect();
+      const style = window.getComputedStyle(element);
+
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        style.display !== "none" &&
+        style.visibility !== "hidden" &&
+        style.opacity !== "0"
+      );
     }
-  ];
 
-  function isVisible(element) {
-    if (!element) return false;
+    const visibleCandidate = candidates.find(function (candidate) {
+      return isVisible(candidate.root) && isVisible(candidate.inner);
+    });
 
-    const rect = element.getBoundingClientRect();
-    const style = window.getComputedStyle(element);
+    if (visibleCandidate) {
+      return {
+        inner: visibleCandidate.inner,
+        body: visibleCandidate.body
+      };
+    }
 
-    return (
-      rect.width > 0 &&
-      rect.height > 0 &&
-      style.display !== "none" &&
-      style.visibility !== "hidden" &&
-      style.opacity !== "0"
-    );
-  }
+    const fallbackCandidate = candidates.find(function (candidate) {
+      return candidate.inner;
+    });
 
-  const visibleCandidate = candidates.find(function (candidate) {
-    return isVisible(candidate.root) && isVisible(candidate.inner);
-  });
+    if (fallbackCandidate) {
+      return {
+        inner: fallbackCandidate.inner,
+        body: fallbackCandidate.body
+      };
+    }
 
-  if (visibleCandidate) {
     return {
-      inner: visibleCandidate.inner,
-      body: visibleCandidate.body
+      inner: null,
+      body: null
     };
   }
-
-  const fallbackCandidate = candidates.find(function (candidate) {
-    return candidate.inner;
-  });
-
-  if (fallbackCandidate) {
-    return {
-      inner: fallbackCandidate.inner,
-      body: fallbackCandidate.body
-    };
-  }
-
-  return {
-    inner: null,
-    body: null
-  };
-}
 
   function clampNumber(min, value, max) {
     return Math.max(min, Math.min(value, max));
   }
 
-function applyLargeDesktopContentScale(inner, body) {
-  if (!inner) return;
+  function applyLargeDesktopContentScale(inner, body) {
+    if (!inner) return;
 
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const isRegisterPage = !!inner.closest(".merlin-register");
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const isRegisterPage = !!inner.closest(".merlin-register");
 
-  if (body && body.style.getPropertyValue("overflow") !== "visible") {
-    body.style.setProperty("overflow", "visible", "important");
-  }
-
-  if (width < 1500 || width < 768) {
-    if (inner.__merlinLargeDesktopScaleState !== "none") {
-      inner.style.removeProperty("transform");
-      inner.style.removeProperty("transform-origin");
-      inner.__merlinLargeDesktopScaleState = "none";
+    if (body && body.style.getPropertyValue("overflow") !== "visible") {
+      body.style.setProperty("overflow", "visible", "important");
     }
 
-    return;
+    if (width < 1500 || width < 768) {
+      if (inner.__merlinLargeDesktopScaleState !== "none") {
+        inner.style.removeProperty("transform");
+        inner.style.removeProperty("transform-origin");
+        inner.__merlinLargeDesktopScaleState = "none";
+      }
+
+      return;
+    }
+
+    let scale = isRegisterPage ? width / 1500 : width / 1850;
+
+    if (!isRegisterPage && height < 850) {
+      scale = Math.min(scale, height / 860);
+    }
+
+    if (isRegisterPage && height < 760) {
+      scale = Math.min(scale, height / 720);
+    }
+
+    scale = clampNumber(1, scale, isRegisterPage ? 1.42 : 1.42);
+
+    const nextState = "scale(" + scale.toFixed(4) + ")";
+
+    if (inner.__merlinLargeDesktopScaleState === nextState) {
+      return;
+    }
+
+    inner.style.setProperty("transform", "scale(" + scale + ")", "important");
+    inner.style.setProperty("transform-origin", "center center", "important");
+    inner.__merlinLargeDesktopScaleState = nextState;
   }
-
-  let scale = isRegisterPage ? width / 1500 : width / 1850;
-
-  if (!isRegisterPage && height < 850) {
-    scale = Math.min(scale, height / 860);
-  }
-
-  if (isRegisterPage && height < 760) {
-    scale = Math.min(scale, height / 720);
-  }
-
-  scale = clampNumber(1, scale, isRegisterPage ? 1.42 : 1.42);
-
-  const nextState = "scale(" + scale.toFixed(4) + ")";
-
-  if (inner.__merlinLargeDesktopScaleState === nextState) {
-    return;
-  }
-
-  inner.style.setProperty("transform", "scale(" + scale + ")", "important");
-  inner.style.setProperty("transform-origin", "center center", "important");
-  inner.__merlinLargeDesktopScaleState = nextState;
-}
 
   function installLargeDesktopContentScale() {
     const elements = findContentScaleElements();
@@ -695,6 +730,173 @@ function applyLargeDesktopContentScale(inner, body) {
     }
 
     applyLargeDesktopContentScale(inner, body);
+  }
+
+  function removeInlineFixedLeftLayoutLocks() {
+    const selectors = DAVINCI_WRAPPERS.slice();
+
+    FIXED_LEFT_LAYOUTS.forEach(function (layout) {
+      selectors.push(layout.root, layout.shell, layout.hero, layout.body);
+    });
+
+    [document.documentElement, document.body].concat(
+      selectors.map(function (selector) {
+        return document.querySelector(selector);
+      })
+    ).forEach(function (element) {
+      if (!element || !element.style) return;
+
+      FIXED_LEFT_PROPS_TO_CLEAR.forEach(function (property) {
+        element.style.removeProperty(property);
+      });
+    });
+  }
+
+  function buildFixedLeftLayoutCss(layout) {
+    return `
+      @media (min-width: 768px) {
+        ${layout.root} {
+          display: block !important;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 100vh !important;
+          max-height: none !important;
+          overflow: visible !important;
+          contain: none !important;
+        }
+
+        ${layout.shell} {
+          display: block !important;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 100vh !important;
+          max-height: none !important;
+          overflow: visible !important;
+          contain: none !important;
+        }
+
+        ${layout.hero} {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          bottom: 0 !important;
+          width: 50vw !important;
+          height: 100vh !important;
+          min-height: 100vh !important;
+          max-height: 100vh !important;
+          overflow: hidden !important;
+          z-index: 1 !important;
+          contain: none !important;
+        }
+
+        ${layout.body} {
+          width: 50vw !important;
+          min-height: 100vh !important;
+          height: auto !important;
+          max-height: none !important;
+          margin-left: 50vw !important;
+          overflow: visible !important;
+          contain: none !important;
+        }
+
+        ${layout.inner} {
+          height: auto !important;
+          min-height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
+        }
+      }
+
+      @media (max-width: 767px) {
+        ${layout.root} {
+          display: flex !important;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 100svh !important;
+          overflow: visible !important;
+        }
+
+        ${layout.shell} {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 100svh !important;
+          overflow: visible !important;
+        }
+
+        ${layout.hero} {
+          position: relative !important;
+          top: auto !important;
+          left: auto !important;
+          right: auto !important;
+          bottom: auto !important;
+          width: 100% !important;
+          height: 140px !important;
+          min-height: auto !important;
+          max-height: 140px !important;
+          overflow: hidden !important;
+        }
+
+        ${layout.body} {
+          width: 100% !important;
+          margin-left: 0 !important;
+          min-height: auto !important;
+          height: auto !important;
+          overflow: visible !important;
+        }
+      }
+    `;
+  }
+
+  function injectFixedLeftScrollStyle() {
+    let style = document.getElementById(FIXED_LEFT_STYLE_ID);
+
+    if (!style) {
+      style = document.createElement("style");
+      style.id = FIXED_LEFT_STYLE_ID;
+      document.head.appendChild(style);
+    }
+
+    style.textContent = `
+      @media (min-width: 768px) {
+        html,
+        body {
+          height: auto !important;
+          min-height: 100% !important;
+          max-height: none !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+        }
+
+        ${DAVINCI_WRAPPERS.join(",")} {
+          height: auto !important;
+          min-height: 100vh !important;
+          max-height: none !important;
+          overflow: visible !important;
+          transform: none !important;
+          contain: none !important;
+        }
+      }
+
+      ${FIXED_LEFT_LAYOUTS.map(buildFixedLeftLayoutCss).join("\n")}
+    `;
+  }
+
+  function applyFixedLeftScrollLayout() {
+    removeInlineFixedLeftLayoutLocks();
+    injectFixedLeftScrollStyle();
+  }
+
+  function scheduleFixedLeftScrollLayout() {
+    if (isFixedLeftScheduled) return;
+
+    isFixedLeftScheduled = true;
+
+    window.requestAnimationFrame(function () {
+      isFixedLeftScheduled = false;
+      applyFixedLeftScrollLayout();
+    });
   }
 
   function resetToMerlinDefault() {
@@ -757,6 +959,7 @@ function applyLargeDesktopContentScale(inner, body) {
       applyAssetTheme(THEMES[themeCode]);
     } finally {
       installLargeDesktopContentScale();
+      scheduleFixedLeftScrollLayout();
       isApplyingTheme = false;
     }
   }
@@ -770,12 +973,14 @@ function applyLargeDesktopContentScale(inner, body) {
       isApplyScheduled = false;
       applyTheme();
       installLargeDesktopContentScale();
+      scheduleFixedLeftScrollLayout();
     });
   }
 
   function observeDavinciDomChanges() {
     const observer = new MutationObserver(function () {
       scheduleApplyTheme();
+      scheduleFixedLeftScrollLayout();
     });
 
     observer.observe(document.documentElement, {
@@ -793,9 +998,13 @@ function applyLargeDesktopContentScale(inner, body) {
     injectBaseStyle();
     applyTheme();
     installLargeDesktopContentScale();
+    scheduleFixedLeftScrollLayout();
     observeDavinciDomChanges();
 
-    window.addEventListener("resize", scheduleApplyTheme);
+    window.addEventListener("resize", function () {
+      scheduleApplyTheme();
+      scheduleFixedLeftScrollLayout();
+    });
 
     setTimeout(applyTheme, 100);
     setTimeout(applyTheme, 300);
@@ -809,9 +1018,16 @@ function applyLargeDesktopContentScale(inner, body) {
     setTimeout(installLargeDesktopContentScale, 1500);
     setTimeout(installLargeDesktopContentScale, 3000);
 
+    setTimeout(scheduleFixedLeftScrollLayout, 100);
+    setTimeout(scheduleFixedLeftScrollLayout, 300);
+    setTimeout(scheduleFixedLeftScrollLayout, 800);
+    setTimeout(scheduleFixedLeftScrollLayout, 1500);
+    setTimeout(scheduleFixedLeftScrollLayout, 3000);
+
     const interval = setInterval(function () {
       applyTheme();
       installLargeDesktopContentScale();
+      scheduleFixedLeftScrollLayout();
     }, 500);
 
     setTimeout(function () {
@@ -824,4 +1040,6 @@ function applyLargeDesktopContentScale(inner, body) {
   } else {
     init();
   }
+
+  window.__merlinApplyFixedLeftScrollLayout = scheduleFixedLeftScrollLayout;
 })();
