@@ -1,5 +1,5 @@
 (function () {
-  loadFlowModules(["merlin-theme.js", "merlin-contact.js"]);
+  loadFlowModules(["merlin-theme.js", "merlin-contact.js", "merlin-otp-lock.js"]);
 
   function loadFlowModules(files) {
     const fallbackBase =
