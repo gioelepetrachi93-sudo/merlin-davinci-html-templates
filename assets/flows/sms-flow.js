@@ -1,5 +1,15 @@
 (function () {
-  loadFlowModules(["merlin-theme.js", "merlin-contact.js", "merlin-otp-lock.js", "merlin-error-ui.js"]);
+  "use strict";
+
+  const VERSION = "20260618-error-ui";
+  const MODULES = [
+    "merlin-theme.js",
+    "merlin-contact.js",
+    "merlin-otp-lock.js",
+    "merlin-error-ui.js"
+  ];
+
+  loadFlowModules(MODULES);
 
   function loadFlowModules(files) {
     const fallbackBase =
@@ -15,18 +25,46 @@
       : fallbackBase;
 
     files
-      .reduce((chain, file) => chain.then(() => loadScript(assetBase + file)), Promise.resolve())
-      .then(() => console.log("[Merlin SMS Flow] modules loaded", files))
-      .catch((error) => console.error("[Merlin SMS Flow] failed to load modules", error));
+      .reduce(function (chain, file) {
+        return chain.then(function () {
+          return loadScript(assetBase + file + "?v=" + VERSION);
+        });
+      }, Promise.resolve())
+      .then(function () {
+        console.log("[Merlin SMS Flow] modules loaded", files);
+      })
+      .catch(function (error) {
+        console.error("[Merlin SMS Flow] failed to load modules", error);
+      });
   }
 
   function loadScript(url) {
-    return new Promise((resolve, reject) => {
+    return new Promise(function (resolve, reject) {
+      const cleanUrl = url.split("?")[0];
+
+      const alreadyLoaded = Array.from(document.scripts).some(function (script) {
+        return script.src && script.src.split("?")[0] === cleanUrl;
+      });
+
+      if (alreadyLoaded) {
+        console.log("[Merlin SMS Flow] already loaded", cleanUrl);
+        resolve();
+        return;
+      }
+
       const script = document.createElement("script");
       script.src = url;
       script.async = false;
-      script.onload = resolve;
-      script.onerror = () => reject(new Error("Unable to load " + url));
+
+      script.onload = function () {
+        console.log("[Merlin SMS Flow] loaded", cleanUrl);
+        resolve();
+      };
+
+      script.onerror = function () {
+        reject(new Error("Unable to load " + url));
+      };
+
       document.head.appendChild(script);
     });
   }
