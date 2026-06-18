@@ -7,6 +7,7 @@
 
   const VERIFICATION_MAX_INVALID_ATTEMPTS = 3;
   const VERIFICATION_LOCK_SECONDS = 60;
+  const VERIFICATION_VALIDITY_SECONDS = 15 * 60;
   const VERIFICATION_LOCK_MESSAGE_ID = "merlin-verification-lock-message";
   const VERIFICATION_LOCK_SECONDS_ID = "merlin-verification-lock-seconds";
   const VERIFICATION_STORAGE_PREFIX = "merlin_verification_lock_v1:";
@@ -21,12 +22,15 @@
   let verificationMode = null;
   let verificationInvalidAttempts = 0;
   let verificationLockedUntil = 0;
+  let verificationValidUntil = 0;
   let verificationSubmitSequence = 0;
   let verificationCountedSequence = 0;
   let verificationLockTimer = null;
+  let verificationValidityTimer = null;
   let verificationClickHandlerInstalled = false;
   let verificationLastErrorElement = null;
   let verificationLastRenderedSecond = null;
+  let verificationLastValiditySecond = null;
 
   const VERIFICATION_DISABLED_STATE = new WeakMap();
   const VERIFICATION_DISABLED_ELEMENTS = new Set();
@@ -80,11 +84,12 @@
     }
 
     if (
-      text.includes("verify your account") &&
+      (text.includes("verify your account") || text.includes("verify your email")) &&
       (inputs.length > 0 ||
         text.includes("didn't receive a code") ||
         text.includes("invalid verification code") ||
-        text.includes("resend"))
+        text.includes("resend") ||
+        text.includes("send another"))
     ) {
       return "single-code";
     }
@@ -164,8 +169,17 @@
       const text = normalizeText(
         element.textContent || element.value || element.getAttribute("aria-label")
       );
+      const value = normalizeText(element.getAttribute("data-skbuttonvalue"));
+      const id = normalizeText(element.id);
 
-      return text.includes("continue");
+      return (
+        text.includes("continue") ||
+        text.includes("let's go") ||
+        text.includes("lets go") ||
+        value === "next" ||
+        value === "continue" ||
+        id === "submit"
+      );
     });
   }
 
@@ -174,9 +188,61 @@
       getVerificationRoot().querySelectorAll("a, button, [role='button']")
     ).find(function (element) {
       const text = normalizeText(element.textContent || element.getAttribute("aria-label"));
+      const value = normalizeText(element.getAttribute("data-skbuttonvalue"));
 
-      return text.includes("resend") || text.includes("send another");
+      return text.includes("resend") || text.includes("send another") || value === "resend";
     });
+  }
+
+  function findVerificationValidityElement() {
+    return document.querySelector(".mv-validity") ||
+      document.querySelector("[data-merlin-validity-timer]");
+  }
+
+  function formatValidityTime(totalSeconds) {
+    const safeSeconds = Math.max(0, Number(totalSeconds) || 0);
+    const minutes = Math.floor(safeSeconds / 60);
+    const seconds = safeSeconds % 60;
+
+    return minutes + ":" + String(seconds).padStart(2, "0");
+  }
+
+  function resetVerificationValidityTimer() {
+    verificationValidUntil = Date.now() + VERIFICATION_VALIDITY_SECONDS * 1000;
+    verificationLastValiditySecond = VERIFICATION_VALIDITY_SECONDS;
+
+    const timerElement = findVerificationValidityElement();
+
+    if (timerElement) {
+      timerElement.textContent = "Valid for " + formatValidityTime(VERIFICATION_VALIDITY_SECONDS);
+    }
+  }
+
+  function updateVerificationValidityUi() {
+    const timerElement = findVerificationValidityElement();
+
+    if (!timerElement) return;
+
+    if (!verificationValidUntil) {
+      resetVerificationValidityTimer();
+      return;
+    }
+
+    const remainingSeconds = Math.max(0, Math.ceil((verificationValidUntil - Date.now()) / 1000));
+
+    if (remainingSeconds === verificationLastValiditySecond) return;
+
+    verificationLastValiditySecond = remainingSeconds;
+
+    if (remainingSeconds <= 0) {
+      timerElement.textContent = "Expired";
+
+      const continueButton = findVerificationContinueButton();
+      setVerificationControlDisabled(continueButton, true);
+      return;
+    }
+
+    timerElement.textContent = "Valid for " + formatValidityTime(remainingSeconds);
   }
 
   function isInvalidVerificationText(text) {
@@ -322,6 +388,8 @@
     if (clearStorage !== false) {
       clearStoredVerificationState();
     }
+
+    updateVerificationValidityUi();
   }
 
   function resetVerificationLockIfExpired() {
@@ -351,6 +419,7 @@
 
       if (verificationMode) {
         loadStoredVerificationState(verificationMode);
+        resetVerificationValidityTimer();
       } else {
         verificationInvalidAttempts = 0;
         verificationLockedUntil = 0;
@@ -476,17 +545,20 @@
     if (resetVerificationLockIfExpired()) return;
 
     const isLocked = verificationLockedUntil > Date.now();
+    const isValidityExpired = verificationValidUntil > 0 && verificationValidUntil <= Date.now();
     const remainingSeconds = Math.max(0, Math.ceil((verificationLockedUntil - Date.now()) / 1000));
     const continueButton = findVerificationContinueButton();
     const resendAction = findVerificationResendAction();
     const errorElement = findVerificationInvalidError();
 
-    setVerificationControlDisabled(continueButton, isLocked);
+    setVerificationControlDisabled(continueButton, isLocked || isValidityExpired);
     setVerificationControlDisabled(resendAction, isLocked);
 
     if (isLocked) {
       updateVerificationLockMessage(remainingSeconds, errorElement);
     }
+
+    updateVerificationValidityUi();
   }
 
   function lockVerificationControls() {
@@ -529,14 +601,17 @@
     const continueButton = findVerificationContinueButton();
     const resendAction = findVerificationResendAction();
     const isLocked = verificationLockedUntil > Date.now();
+    const isValidityExpired = verificationValidUntil > 0 && verificationValidUntil <= Date.now();
 
     if (!isLocked && expired && resendAction && resendAction.contains(event.target)) {
       resetVerificationLockState(true);
+      resetVerificationValidityTimer();
       return;
     }
 
     if (!isLocked && resendAction && resendAction.contains(event.target)) {
       resetVerificationLockState(true);
+      resetVerificationValidityTimer();
       return;
     }
 
@@ -549,7 +624,7 @@
 
     if (!continueButton || !continueButton.contains(event.target)) return;
 
-    if (isLocked) {
+    if (isLocked || isValidityExpired) {
       event.preventDefault();
       event.stopPropagation();
       updateVerificationLockUi();
@@ -577,6 +652,10 @@
       verificationLockTimer = setInterval(updateVerificationLockUi, 250);
     }
 
+    if (!verificationValidityTimer) {
+      verificationValidityTimer = setInterval(updateVerificationValidityUi, 1000);
+    }
+
     window.__merlinVerificationLockStop = function () {
       document.removeEventListener("click", handleVerificationClick, true);
       verificationClickHandlerInstalled = false;
@@ -584,6 +663,11 @@
       if (verificationLockTimer) {
         clearInterval(verificationLockTimer);
         verificationLockTimer = null;
+      }
+
+      if (verificationValidityTimer) {
+        clearInterval(verificationValidityTimer);
+        verificationValidityTimer = null;
       }
 
       resetVerificationLockState(false);
@@ -598,6 +682,7 @@
   function init() {
     console.log("[Merlin OTP Lock] loaded");
     installVerificationRetryLock();
+    resetVerificationValidityTimer();
     setTimeout(updateVerificationLockUi, 100);
     setTimeout(updateVerificationLockUi, 500);
     setTimeout(updateVerificationLockUi, 1200);
