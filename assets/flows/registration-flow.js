@@ -1,4 +1,6 @@
 (function () {
+  "use strict";
+
   const REPO = "gioelepetrachi93-sudo/merlin-davinci-html-templates";
   const BRANCH = "main";
   const FLOW_LABEL = "[Merlin Registration Flow]";
@@ -9,7 +11,7 @@
     "merlin-theme.js",
     "merlin-otp-lock.js",
     "merlin-error-ui.js",
-    "merlin-contact.js",
+    "merlin-contact.js"
   ];
 
   const currentSrc =
