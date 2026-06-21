@@ -199,10 +199,107 @@
       stageHeight: "220px",
       mobileStageWidth: "210px",
       mobileStageHeight: "140px"
+    },
+
+    "010": {
+      code: "010",
+      name: "London Eye",
+      background: "#0A2241",
+      logoFile: "010-london-eye.svg",
+      logoWidth: "330px",
+      logoHeight: "auto",
+      logoMaxWidth: "none",
+      logoMaxHeight: "170px",
+      logoScale: "1",
+      mobileLogoWidth: "190px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "78%",
+      mobileLogoMaxHeight: "100px",
+      mobileLogoScale: "1",
+      stageWidth: "360px",
+      stageHeight: "230px",
+      mobileStageWidth: "210px",
+      mobileStageHeight: "140px"
+    },
+
+    "011": {
+      code: "011",
+      name: "Madame Tussauds",
+      background: "#C31F2E",
+      logoFile: "011-madame-tussauds.svg",
+      logoWidth: "330px",
+      logoHeight: "auto",
+      logoMaxWidth: "none",
+      logoMaxHeight: "170px",
+      logoScale: "1",
+      mobileLogoWidth: "190px",
+      mobileLogoHeight: "auto",
+      mobileLogoMaxWidth: "78%",
+      mobileLogoMaxHeight: "100px",
+      mobileLogoScale: "1",
+      stageWidth: "360px",
+      stageHeight: "230px",
+      mobileStageWidth: "210px",
+      mobileStageHeight: "140px"
     }
+
   };
 
-  const VALID_THEME_CODES = [DEFAULT_THEME_CODE].concat(Object.keys(THEMES));
+    const VALID_THEME_CODES = [DEFAULT_THEME_CODE].concat(Object.keys(THEMES));
+
+  const ATTRACTION_TO_THEME_CODE = {
+    UKPKALT: "001",
+
+    UKLLWIN: "002",
+
+    UKPKWAC: "003",
+
+    UKGRBLA: "004",
+
+    UKCWBIR: "005",
+
+    UKSLBIR: "006",
+    UKSLBLA: "006",
+    UKSLBRI: "006",
+    UKSLYAR: "006",
+    UKSLHUN: "006",
+    UKSLLOM: "006",
+    UKSLMAN: "006",
+    UKSLSCA: "006",
+    UKSLWEY: "006",
+
+    UKDGEDI: "007",
+    UKDGYOR: "007",
+
+    UKPKCWA: "008",
+
+    UKPKTHO: "009",
+
+    UKEYLON: "010",
+
+    UKMTLON: "011"
+  };
+
+  function normalizeThemeCode(value) {
+    const raw = String(value || "").trim();
+
+    if (!raw) {
+      return DEFAULT_THEME_CODE;
+    }
+
+    const upper = raw.toUpperCase();
+    const paddedNumeric = /^\d{1,3}$/.test(upper) ? upper.padStart(3, "0") : upper;
+
+    if (VALID_THEME_CODES.includes(paddedNumeric)) {
+      return paddedNumeric;
+    }
+
+    if (ATTRACTION_TO_THEME_CODE[upper]) {
+      return ATTRACTION_TO_THEME_CODE[upper];
+    }
+
+    return DEFAULT_THEME_CODE;
+  }
 
   const FIXED_LEFT_LAYOUTS = [
     { root: ".merlin-login", shell: ".ml-shell", hero: ".ml-hero", body: ".ml-body", inner: ".ml-body-inner" },
@@ -273,12 +370,13 @@
   function resolveThemeCode() {
     const from = getFromParam();
 
-    if (VALID_THEME_CODES.includes(from)) {
-      setStoredThemeCode(from);
-      return from;
+    if (from) {
+      const themeCode = normalizeThemeCode(from);
+      setStoredThemeCode(themeCode);
+      return themeCode;
     }
 
-    return getStoredThemeCode() || DEFAULT_THEME_CODE;
+    return normalizeThemeCode(getStoredThemeCode());
   }
 
   function isDesktopLayout() {
