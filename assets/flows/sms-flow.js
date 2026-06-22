@@ -1,6 +1,8 @@
 (function () {
+  "use strict";
+
   const FLOW_LABEL = "[Merlin SMS Flow]";
-  const ASSET_VERSION = "v=20260622-error-ui-records";
+  const MODULE_VERSION = "v=" + Date.now();
 
   loadFlowModules([
     "merlin-theme.js",
@@ -25,7 +27,7 @@
     files
       .reduce(function (chain, file) {
         return chain.then(function () {
-          return loadScript(assetBase + file + "?" + ASSET_VERSION);
+          return loadScript(assetBase + file + "?" + MODULE_VERSION);
         });
       }, Promise.resolve())
       .then(function () {
@@ -57,6 +59,7 @@
       };
 
       script.onerror = function () {
+        console.error(FLOW_LABEL + " failed", url);
         reject(new Error("Unable to load " + url));
       };
 
