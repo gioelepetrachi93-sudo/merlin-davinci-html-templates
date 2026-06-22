@@ -136,6 +136,21 @@
         text-align: left !important;
       }
 
+      .merlin-login .merlin-records-error::before,
+      .merlin-login .merlin-records-error::after,
+      .merlin-login .ml-phone-error-card::before,
+      .merlin-login .ml-phone-error-card::after {
+        content: none !important;
+        display: none !important;
+      }
+
+.merlin-login .merlin-records-error .mdi,
+.merlin-login .merlin-records-error [class*="mdi"],
+.merlin-login .merlin-records-error [class*="icon"],
+.merlin-login .merlin-records-error [class*="Icon"] {
+  display: none !important;
+}
+
       .merlin-records-error__icon {
         width: 15px !important;
         height: 13px !important;
