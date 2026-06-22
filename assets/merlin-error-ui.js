@@ -8,30 +8,29 @@
   }
 
   const STYLE_ID = "merlin-error-ui-style";
-  const CHECK_INTERVAL_MS = 300;
   const ERROR_RED = "#FF383C";
+  const CHECK_INTERVAL_MS = 300;
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const EMAIL_FORMAT_ERROR_TEXT = "Please check your email format (e.g. name@mail.com)";
 
   const OTP_SELECTORS = [
     { wrapper: ".mv-otp-wrapper", cell: ".mv-otp-wrapper > .mv-otp-cell" },
     { wrapper: ".mv-otp-boxes", cell: ".mv-otp-boxes > .mv-otp-box" }
   ];
 
-  const EMAIL_FORMAT_ERROR_TEXT = "Please check your email format (e.g. name@mail.com)";
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
   let timer = null;
   let dismissedOtpInvalid = false;
-
   let emailFormatErrorBox = null;
   let emailFormatTimers = [];
-
-  let recordsErrorTimers = [];
+  let recordsTimers = [];
   let recordsObserver = null;
-  let isRenderingRecordsError = false;
+  let recordsObserverTarget = null;
   let activeRecordsValue = "";
+  let activeRecordsType = "";
+  let isRenderingRecords = false;
 
-  function normalizeText(text) {
-    return String(text || "")
+  function normalizeText(value) {
+    return String(value || "")
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/\s+/g, " ")
       .trim()
@@ -118,8 +117,8 @@
         text-align: left !important;
       }
 
-      .merlin-login .ml-flow-error.ml-format-error-hidden,
-      .merlin-login .merlin-records-source-hidden {
+      .merlin-login .merlin-records-source-hidden,
+      .merlin-login .ml-flow-error.ml-format-error-hidden {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -376,15 +375,18 @@
 
     if (text.includes("continue") || text.includes("let's go")) {
       dismissedOtpInvalid = false;
-
       window.setTimeout(checkOtpInvalidState, 300);
       window.setTimeout(checkOtpInvalidState, 700);
       window.setTimeout(checkOtpInvalidState, 1200);
     }
   }
 
+  function getLoginRoot() {
+    return document.querySelector(".merlin-login");
+  }
+
   function getLoginEmailNodes() {
-    const root = document.querySelector(".merlin-login");
+    const root = getLoginRoot();
 
     if (!root) return {};
 
@@ -394,30 +396,17 @@
     const button = root.querySelector("#btnContinue");
     const flowError = root.querySelector(".ml-flow-error");
 
-    return {
-      root: root,
-      form: form,
-      input: input,
-      label: label,
-      button: button,
-      flowError: flowError
-    };
+    return { root, form, input, label, button, flowError };
   }
 
   function isLoginEmailPage() {
     const nodes = getLoginEmailNodes();
-
     return !!(nodes.root && nodes.form && nodes.input && nodes.button);
   }
 
-  function getLoginEmailValue() {
-    const nodes = getLoginEmailNodes();
-
-    return String((nodes.input && nodes.input.value) || "").trim();
-  }
-
   function isLoginEmailInvalidFormat() {
-    const value = getLoginEmailValue();
+    const nodes = getLoginEmailNodes();
+    const value = String((nodes.input && nodes.input.value) || "").trim();
 
     return value.length > 0 && !EMAIL_RE.test(value);
   }
@@ -445,14 +434,6 @@
     return emailFormatErrorBox;
   }
 
-  function hideLoginFlowError() {
-    const nodes = getLoginEmailNodes();
-
-    if (nodes.flowError && isLoginEmailInvalidFormat()) {
-      nodes.flowError.classList.add("ml-format-error-hidden");
-    }
-  }
-
   function showLoginEmailFormatError() {
     const nodes = getLoginEmailNodes();
     const box = getEmailFormatErrorBox();
@@ -465,10 +446,11 @@
 
     nodes.input.classList.add("ml-has-format-error");
     nodes.input.setAttribute("aria-invalid", "true");
-
     box.textContent = EMAIL_FORMAT_ERROR_TEXT;
 
-    hideLoginFlowError();
+    if (nodes.flowError && isLoginEmailInvalidFormat()) {
+      nodes.flowError.classList.add("ml-format-error-hidden");
+    }
   }
 
   function clearLoginEmailFormatError() {
@@ -496,10 +478,7 @@
     if (!isLoginEmailPage()) return true;
 
     if (isLoginEmailInvalidFormat()) {
-      if (show) {
-        showLoginEmailFormatError();
-      }
-
+      if (show) showLoginEmailFormatError();
       return false;
     }
 
@@ -509,7 +488,6 @@
 
   function scheduleHideLoginFlowError() {
     emailFormatTimers.forEach(clearTimeout);
-
     emailFormatTimers = [0, 50, 150, 350, 700].map(function (delay) {
       return window.setTimeout(function () {
         if (isLoginEmailInvalidFormat()) {
@@ -532,10 +510,7 @@
     scheduleHideLoginFlowError();
 
     const nodes = getLoginEmailNodes();
-
-    if (nodes.input) {
-      nodes.input.focus();
-    }
+    if (nodes.input) nodes.input.focus();
 
     return false;
   }
@@ -553,7 +528,7 @@
     if (!isLoginPrimaryAction(event.target)) return;
 
     blockLoginEmailFormatIfInvalid(event);
-    scheduleRecordsErrorCheck();
+    scheduleRecordsCheck();
   }
 
   function onLoginEmailSubmit(event) {
@@ -563,7 +538,7 @@
 
     if (event.target === nodes.form) {
       blockLoginEmailFormatIfInvalid(event);
-      scheduleRecordsErrorCheck();
+      scheduleRecordsCheck();
     }
   }
 
@@ -576,7 +551,7 @@
     if (event.key !== "Enter") return;
 
     blockLoginEmailFormatIfInvalid(event);
-    scheduleRecordsErrorCheck();
+    scheduleRecordsCheck();
   }
 
   function onLoginEmailInput(event) {
@@ -586,13 +561,12 @@
 
     if (event.target !== nodes.input) return;
 
-    clearRecordsErrorsIfValueChanged();
+    clearRecordsIfValueChanged();
 
     if (isLoginEmailInvalidFormat()) {
       if (nodes.input.classList.contains("ml-has-format-error")) {
         showLoginEmailFormatError();
       }
-
       return;
     }
 
@@ -620,18 +594,22 @@
   function getRecordsIconSvg() {
     return (
       '<svg class="merlin-records-error__icon" width="15" height="13" viewBox="0 0 15 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-        '<path d="M7.24909 7.75V5.25M8.14971 1.26375L13.616 10.7556C13.9991 11.4244 13.5041 12.25 12.7153 12.25H1.78284C0.994086 12.25 0.499086 11.4244 0.882211 10.7556L6.34846 1.26375C6.74221 0.57875 7.75596 0.57875 8.14971 1.26375ZM7.24909 10.625C7.59427 10.625 7.87409 10.3452 7.87409 10C7.87409 9.65482 7.59427 9.375 7.24909 9.375C6.90391 9.375 6.62409 9.65482 6.62409 10C6.62409 10.3452 6.90391 10.625 7.24909 10.625Z" stroke="#FF383C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="M7.24909 7.75V5.25M8.14971 1.26375L13.616 10.7556C13.9991 11.4244 13.5041 12.25 12.7153 12.25H1.78284C0.994086 12.25 0.499086 11.4244 0.882211 10.7556L6.34846 1.26375C6.74221 0.57875 7.75596 0.57875 8.14971 1.26375ZM7.24909 10.625C7.59427 10.625 7.87409 10.3452 7.87409 10C7.87409 9.65482 7.59427 9.375 7.24909 9.375C6.90391 9.375 6.62409 9.65482 6.62409 10C6.62409 10.3452 6.90391 10.625 7.24909 10.625Z" stroke="#FF383C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
       '</svg>'
     );
   }
 
+  function getEmailInput() {
+    return document.getElementById("userEmail");
+  }
+
   function getPhoneInput() {
-    const root = document.querySelector(".merlin-login");
+    const root = getLoginRoot();
 
     if (!root) return null;
 
     return (
-      root.querySelector("input[type='tel'], #phoneNumber, #mobileNumber, #phone, #mobile") ||
+      root.querySelector("input[type='tel'], #phoneNumber, #mobileNumber, #phone, #mobile, input[data-id*='phone' i], input[data-id*='mobile' i]") ||
       Array.from(root.querySelectorAll("input")).find(function (input) {
         return input.id !== "userEmail" && input.type !== "hidden";
       }) ||
@@ -639,19 +617,9 @@
     );
   }
 
-  function getCurrentRecordsValue() {
-    const email = document.getElementById("userEmail");
-    const phone = getPhoneInput();
-
-    if (email && email.offsetParent !== null) {
-      return String(email.value || "").trim();
-    }
-
-    if (phone) {
-      return String(phone.value || "").trim();
-    }
-
-    return "";
+  function getCurrentRecordsValue(type) {
+    const input = type === "phone" ? getPhoneInput() : getEmailInput();
+    return String((input && input.value) || "").trim();
   }
 
   function isEmailRecordsText(text) {
@@ -671,9 +639,9 @@
   }
 
   function renderRecordsCard(target, type) {
-    if (!target || isRenderingRecordsError) return;
+    if (!target || isRenderingRecords) return;
 
-    isRenderingRecordsError = true;
+    isRenderingRecords = true;
 
     const copy = type === "phone"
       ? {
@@ -685,33 +653,28 @@
           body: "We don't recognise this email address. Please check it's entered correctly, or try a different one."
         };
 
-    target.classList.remove(
-      "mdi",
-      "mdi-alert",
-      "mdi-alert-circle",
-      "mdi-information",
-      "mdi-information-outline",
-      "ml-phone-error-card"
-    );
+    if (type === "phone") {
+      target.className = "ml-flow-error merlin-records-error";
+    } else {
+      target.classList.add("merlin-records-error");
+    }
 
-    target.classList.add("merlin-records-error");
-    target.classList.remove("merlin-records-source-hidden");
     target.dataset.merlinRecordsErrorType = type;
-
-    activeRecordsValue = getCurrentRecordsValue();
+    activeRecordsType = type;
+    activeRecordsValue = getCurrentRecordsValue(type);
 
     target.innerHTML =
       getRecordsIconSvg() +
       "<div>" +
-        '<p class="merlin-records-error__title">' + copy.title + "</p>" +
-        '<p class="merlin-records-error__body">' + copy.body + "</p>" +
+      '<p class="merlin-records-error__title">' + copy.title + "</p>" +
+      '<p class="merlin-records-error__body">' + copy.body + "</p>" +
       "</div>";
 
-    isRenderingRecordsError = false;
+    isRenderingRecords = false;
   }
 
   function renderEmailRecordsUnderInput(flowError) {
-    const input = document.getElementById("userEmail");
+    const input = getEmailInput();
 
     if (!input || !flowError) return;
 
@@ -728,11 +691,12 @@
   }
 
   function applyRecordsErrors() {
-    const root = document.querySelector(".merlin-login");
+    const root = getLoginRoot();
     const flowError = root && root.querySelector(".ml-flow-error");
 
-    if (!root || !flowError || isRenderingRecordsError) return;
+    if (!root || !flowError || isRenderingRecords) return;
     if (isLoginEmailInvalidFormat()) return;
+    if (flowError.dataset.merlinRecordsErrorType) return;
 
     const text = flowError.textContent;
 
@@ -746,30 +710,17 @@
     }
   }
 
-  function scheduleRecordsErrorCheck() {
-    recordsErrorTimers.forEach(clearTimeout);
-
-    recordsErrorTimers = [0, 50, 150, 350, 700, 1200].map(function (delay) {
+  function scheduleRecordsCheck() {
+    recordsTimers.forEach(clearTimeout);
+    recordsTimers = [0, 20, 60, 120, 250, 500, 900, 1500].map(function (delay) {
       return window.setTimeout(applyRecordsErrors, delay);
     });
   }
 
-  function clearRecordsErrorsIfValueChanged() {
-    if (!activeRecordsValue) return;
+  function clearRecords() {
+    const emailBox = document.getElementById("merlinEmailRecordsError");
 
-    const current = getCurrentRecordsValue();
-
-    if (current === activeRecordsValue) return;
-
-    clearRecordsErrors();
-  }
-
-  function clearRecordsErrors() {
-    const emailRecordsBox = document.getElementById("merlinEmailRecordsError");
-
-    if (emailRecordsBox) {
-      emailRecordsBox.remove();
-    }
+    if (emailBox) emailBox.remove();
 
     document.querySelectorAll(".merlin-records-source-hidden").forEach(function (element) {
       element.classList.remove("merlin-records-source-hidden");
@@ -777,16 +728,25 @@
     });
 
     document.querySelectorAll(".ml-flow-error.merlin-records-error").forEach(function (element) {
-      element.classList.remove("merlin-records-error");
+      element.className = "ml-flow-error";
       element.removeAttribute("data-merlin-records-error-type");
       element.textContent = "";
     });
 
+    activeRecordsType = "";
     activeRecordsValue = "";
   }
 
+  function clearRecordsIfValueChanged() {
+    if (!activeRecordsType || !activeRecordsValue) return;
+
+    if (getCurrentRecordsValue(activeRecordsType) !== activeRecordsValue) {
+      clearRecords();
+    }
+  }
+
   function onRecordsAction(event) {
-    const root = document.querySelector(".merlin-login");
+    const root = getLoginRoot();
 
     if (!root || !event.target || !root.contains(event.target)) return;
 
@@ -796,31 +756,38 @@
 
     if (!action) return;
 
-    scheduleRecordsErrorCheck();
+    scheduleRecordsCheck();
   }
 
   function onRecordsSubmit(event) {
-    const root = document.querySelector(".merlin-login");
+    const root = getLoginRoot();
 
     if (!root || !event.target || !root.contains(event.target)) return;
 
-    scheduleRecordsErrorCheck();
+    scheduleRecordsCheck();
   }
 
   function onRecordsInput(event) {
-    const root = document.querySelector(".merlin-login");
+    const root = getLoginRoot();
 
     if (!root || !event.target || !root.contains(event.target)) return;
     if (!event.target.matches || !event.target.matches("input")) return;
 
-    clearRecordsErrorsIfValueChanged();
+    clearRecordsIfValueChanged();
   }
 
   function installRecordsObserver() {
     const flowError = document.querySelector(".merlin-login .ml-flow-error");
 
-    if (!flowError || recordsObserver) return;
+    if (!flowError) return;
+    if (recordsObserverTarget === flowError) return;
 
+    if (recordsObserver) {
+      recordsObserver.disconnect();
+      recordsObserver = null;
+    }
+
+    recordsObserverTarget = flowError;
     recordsObserver = new MutationObserver(function () {
       window.requestAnimationFrame(applyRecordsErrors);
     });
@@ -839,6 +806,7 @@
   function start() {
     injectStyles();
     prepareLoginEmailValidation();
+    installRecordsObserver();
 
     document.addEventListener("keydown", onUserEditingOtp, true);
     document.addEventListener("input", onUserEditingOtp, true);
@@ -861,8 +829,6 @@
 
     document.addEventListener("submit", onAnySubmitForOtp, true);
 
-    installRecordsObserver();
-
     timer = window.setInterval(function () {
       checkOtpInvalidState();
       prepareLoginEmailValidation();
@@ -884,12 +850,13 @@
     emailFormatTimers.forEach(clearTimeout);
     emailFormatTimers = [];
 
-    recordsErrorTimers.forEach(clearTimeout);
-    recordsErrorTimers = [];
+    recordsTimers.forEach(clearTimeout);
+    recordsTimers = [];
 
     if (recordsObserver) {
       recordsObserver.disconnect();
       recordsObserver = null;
+      recordsObserverTarget = null;
     }
 
     document.removeEventListener("keydown", onUserEditingOtp, true);
@@ -918,10 +885,10 @@
       cell.removeAttribute("aria-invalid");
     });
 
-    const message = getOtpInvalidMessage();
+    const otpMessage = getOtpInvalidMessage();
 
-    if (message) {
-      message.hidden = true;
+    if (otpMessage) {
+      otpMessage.hidden = true;
     }
 
     clearLoginEmailFormatError();
@@ -931,14 +898,12 @@
       emailFormatErrorBox = null;
     }
 
-    clearRecordsErrors();
+    clearRecords();
     restoreNativeInvalidOtpErrors();
 
     const style = document.getElementById(STYLE_ID);
 
-    if (style) {
-      style.remove();
-    }
+    if (style) style.remove();
 
     delete window.__merlinErrorUiStop;
 
