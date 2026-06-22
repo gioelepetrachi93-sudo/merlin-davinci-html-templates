@@ -21,9 +21,14 @@
 
   let timer = null;
   let dismissedOtpInvalid = false;
+
   let emailFormatErrorBox = null;
   let emailFormatTimers = [];
+
   let recordsErrorTimers = [];
+  let recordsObserver = null;
+  let isRenderingRecordsError = false;
+  let activeRecordsValue = "";
 
   function normalizeText(text) {
     return String(text || "")
@@ -113,7 +118,8 @@
         text-align: left !important;
       }
 
-      .merlin-login .ml-flow-error.ml-format-error-hidden {
+      .merlin-login .ml-flow-error.ml-format-error-hidden,
+      .merlin-login .merlin-records-source-hidden {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -138,18 +144,17 @@
 
       .merlin-login .merlin-records-error::before,
       .merlin-login .merlin-records-error::after,
-      .merlin-login .ml-phone-error-card::before,
-      .merlin-login .ml-phone-error-card::after {
+      .merlin-login .ml-flow-error.merlin-records-error::before,
+      .merlin-login .ml-flow-error.merlin-records-error::after,
+      .merlin-login .ml-flow-error[class*="mdi"].merlin-records-error::before,
+      .merlin-login .ml-flow-error[class*="mdi"].merlin-records-error::after {
         content: none !important;
         display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        font-size: 0 !important;
+        line-height: 0 !important;
       }
-
-.merlin-login .merlin-records-error .mdi,
-.merlin-login .merlin-records-error [class*="mdi"],
-.merlin-login .merlin-records-error [class*="icon"],
-.merlin-login .merlin-records-error [class*="Icon"] {
-  display: none !important;
-}
 
       .merlin-records-error__icon {
         width: 15px !important;
@@ -581,7 +586,7 @@
 
     if (event.target !== nodes.input) return;
 
-    clearRecordsErrors();
+    clearRecordsErrorsIfValueChanged();
 
     if (isLoginEmailInvalidFormat()) {
       if (nodes.input.classList.contains("ml-has-format-error")) {
@@ -620,28 +625,33 @@
     );
   }
 
-  function renderRecordsError(target, type) {
-    const copy = type === "phone"
-      ? {
-          title: "This mobile number is not in our records",
-          body: "We don't recognise this mobile number. Please check it's entered correctly, or try a different one."
-        }
-      : {
-          title: "This email address is not in our records",
-          body: "We don't recognise this email address. Please check it's entered correctly, or try a different one."
-        };
+  function getPhoneInput() {
+    const root = document.querySelector(".merlin-login");
 
-    if (!target) return;
+    if (!root) return null;
 
-    target.dataset.merlinRecordsErrorType = type;
-    target.classList.add("merlin-records-error");
+    return (
+      root.querySelector("input[type='tel'], #phoneNumber, #mobileNumber, #phone, #mobile") ||
+      Array.from(root.querySelectorAll("input")).find(function (input) {
+        return input.id !== "userEmail" && input.type !== "hidden";
+      }) ||
+      null
+    );
+  }
 
-    target.innerHTML =
-      getRecordsIconSvg() +
-      '<div>' +
-        '<p class="merlin-records-error__title">' + copy.title + '</p>' +
-        '<p class="merlin-records-error__body">' + copy.body + '</p>' +
-      '</div>';
+  function getCurrentRecordsValue() {
+    const email = document.getElementById("userEmail");
+    const phone = getPhoneInput();
+
+    if (email && email.offsetParent !== null) {
+      return String(email.value || "").trim();
+    }
+
+    if (phone) {
+      return String(phone.value || "").trim();
+    }
+
+    return "";
   }
 
   function isEmailRecordsText(text) {
@@ -660,75 +670,122 @@
     return value === "something went wrong." || value === "something went wrong";
   }
 
-  function isPhoneRecordsContext(target) {
-    const root = document.querySelector(".merlin-login");
+  function renderRecordsCard(target, type) {
+    if (!target || isRenderingRecordsError) return;
 
-    if (!root || !target) return false;
-    if (target.classList.contains("ml-phone-error-card")) return true;
+    isRenderingRecordsError = true;
 
-    const pageText = normalizeText(root.textContent);
+    const copy = type === "phone"
+      ? {
+          title: "This mobile number is not in our records",
+          body: "We don't recognise this mobile number. Please check it's entered correctly, or try a different one."
+        }
+      : {
+          title: "This email address is not in our records",
+          body: "We don't recognise this email address. Please check it's entered correctly, or try a different one."
+        };
 
-    return (
-      pageText.includes("mobile number") ||
-      pageText.includes("choose email") ||
-      pageText.includes("unable to access sms")
+    target.classList.remove(
+      "mdi",
+      "mdi-alert",
+      "mdi-alert-circle",
+      "mdi-information",
+      "mdi-information-outline",
+      "ml-phone-error-card"
     );
+
+    target.classList.add("merlin-records-error");
+    target.classList.remove("merlin-records-source-hidden");
+    target.dataset.merlinRecordsErrorType = type;
+
+    activeRecordsValue = getCurrentRecordsValue();
+
+    target.innerHTML =
+      getRecordsIconSvg() +
+      "<div>" +
+        '<p class="merlin-records-error__title">' + copy.title + "</p>" +
+        '<p class="merlin-records-error__body">' + copy.body + "</p>" +
+      "</div>";
+
+    isRenderingRecordsError = false;
+  }
+
+  function renderEmailRecordsUnderInput(flowError) {
+    const input = document.getElementById("userEmail");
+
+    if (!input || !flowError) return;
+
+    let box = document.getElementById("merlinEmailRecordsError");
+
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "merlinEmailRecordsError";
+      input.insertAdjacentElement("afterend", box);
+    }
+
+    flowError.classList.add("merlin-records-source-hidden");
+    renderRecordsCard(box, "email");
   }
 
   function applyRecordsErrors() {
     const root = document.querySelector(".merlin-login");
+    const flowError = root && root.querySelector(".ml-flow-error");
 
-    if (!root) return;
+    if (!root || !flowError || isRenderingRecordsError) return;
     if (isLoginEmailInvalidFormat()) return;
 
-    Array.from(root.querySelectorAll(".ml-flow-error, [data-skcomponent='skerror']")).forEach(function (target) {
-      if (!target || !isVisible(target)) return;
+    const text = flowError.textContent;
 
-      const existingType = target.dataset.merlinRecordsErrorType;
+    if (isEmailRecordsText(text)) {
+      renderEmailRecordsUnderInput(flowError);
+      return;
+    }
 
-      if (existingType === "email" || existingType === "phone") {
-        return;
-      }
-
-      const text = target.textContent;
-
-      if (isEmailRecordsText(text)) {
-        renderRecordsError(target, "email");
-        return;
-      }
-
-      if (isPhoneRecordsText(text) && isPhoneRecordsContext(target)) {
-        renderRecordsError(target, "phone");
-      }
-    });
+    if (isPhoneRecordsText(text)) {
+      renderRecordsCard(flowError, "phone");
+    }
   }
 
   function scheduleRecordsErrorCheck() {
     recordsErrorTimers.forEach(clearTimeout);
 
-    recordsErrorTimers = [0, 100, 300, 700, 1200, 2000, 3500, 5000].map(function (delay) {
+    recordsErrorTimers = [0, 50, 150, 350, 700, 1200].map(function (delay) {
       return window.setTimeout(applyRecordsErrors, delay);
     });
   }
 
-  function clearRecordsErrors() {
-    document.querySelectorAll(".merlin-records-error").forEach(function (target) {
-      target.classList.remove("merlin-records-error");
-      target.removeAttribute("data-merlin-records-error-type");
-      target.textContent = "";
-    });
-  }
+  function clearRecordsErrorsIfValueChanged() {
+    if (!activeRecordsValue) return;
 
-  function onAnyLoginInput(event) {
-    const root = document.querySelector(".merlin-login");
+    const current = getCurrentRecordsValue();
 
-    if (!root || !event.target || !root.contains(event.target)) return;
-    if (!event.target.matches || !event.target.matches("input, select, textarea")) return;
+    if (current === activeRecordsValue) return;
 
     clearRecordsErrors();
   }
 
-  function onAnyLoginAction(event) {
+  function clearRecordsErrors() {
+    const emailRecordsBox = document.getElementById("merlinEmailRecordsError");
+
+    if (emailRecordsBox) {
+      emailRecordsBox.remove();
+    }
+
+    document.querySelectorAll(".merlin-records-source-hidden").forEach(function (element) {
+      element.classList.remove("merlin-records-source-hidden");
+      element.textContent = "";
+    });
+
+    document.querySelectorAll(".ml-flow-error.merlin-records-error").forEach(function (element) {
+      element.classList.remove("merlin-records-error");
+      element.removeAttribute("data-merlin-records-error-type");
+      element.textContent = "";
+    });
+
+    activeRecordsValue = "";
+  }
+
+  function onRecordsAction(event) {
     const root = document.querySelector(".merlin-login");
 
     if (!root || !event.target || !root.contains(event.target)) return;
@@ -742,12 +799,37 @@
     scheduleRecordsErrorCheck();
   }
 
-  function onAnyLoginSubmit(event) {
+  function onRecordsSubmit(event) {
     const root = document.querySelector(".merlin-login");
 
     if (!root || !event.target || !root.contains(event.target)) return;
 
     scheduleRecordsErrorCheck();
+  }
+
+  function onRecordsInput(event) {
+    const root = document.querySelector(".merlin-login");
+
+    if (!root || !event.target || !root.contains(event.target)) return;
+    if (!event.target.matches || !event.target.matches("input")) return;
+
+    clearRecordsErrorsIfValueChanged();
+  }
+
+  function installRecordsObserver() {
+    const flowError = document.querySelector(".merlin-login .ml-flow-error");
+
+    if (!flowError || recordsObserver) return;
+
+    recordsObserver = new MutationObserver(function () {
+      window.requestAnimationFrame(applyRecordsErrors);
+    });
+
+    recordsObserver.observe(flowError, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
   }
 
   function onAnySubmitForOtp() {
@@ -772,18 +854,19 @@
     document.addEventListener("change", onLoginEmailInput, true);
     document.addEventListener("blur", onLoginEmailBlur, true);
 
-    document.addEventListener("pointerdown", onAnyLoginAction, true);
-    document.addEventListener("click", onAnyLoginAction, true);
-    document.addEventListener("submit", onAnyLoginSubmit, true);
-    document.addEventListener("input", onAnyLoginInput, true);
-    document.addEventListener("change", onAnyLoginInput, true);
+    document.addEventListener("pointerdown", onRecordsAction, true);
+    document.addEventListener("click", onRecordsAction, true);
+    document.addEventListener("submit", onRecordsSubmit, true);
+    document.addEventListener("input", onRecordsInput, true);
 
     document.addEventListener("submit", onAnySubmitForOtp, true);
+
+    installRecordsObserver();
 
     timer = window.setInterval(function () {
       checkOtpInvalidState();
       prepareLoginEmailValidation();
-      applyRecordsErrors();
+      installRecordsObserver();
     }, CHECK_INTERVAL_MS);
 
     checkOtpInvalidState();
@@ -804,6 +887,11 @@
     recordsErrorTimers.forEach(clearTimeout);
     recordsErrorTimers = [];
 
+    if (recordsObserver) {
+      recordsObserver.disconnect();
+      recordsObserver = null;
+    }
+
     document.removeEventListener("keydown", onUserEditingOtp, true);
     document.removeEventListener("input", onUserEditingOtp, true);
     document.removeEventListener("paste", onUserEditingOtp, true);
@@ -818,11 +906,10 @@
     document.removeEventListener("change", onLoginEmailInput, true);
     document.removeEventListener("blur", onLoginEmailBlur, true);
 
-    document.removeEventListener("pointerdown", onAnyLoginAction, true);
-    document.removeEventListener("click", onAnyLoginAction, true);
-    document.removeEventListener("submit", onAnyLoginSubmit, true);
-    document.removeEventListener("input", onAnyLoginInput, true);
-    document.removeEventListener("change", onAnyLoginInput, true);
+    document.removeEventListener("pointerdown", onRecordsAction, true);
+    document.removeEventListener("click", onRecordsAction, true);
+    document.removeEventListener("submit", onRecordsSubmit, true);
+    document.removeEventListener("input", onRecordsInput, true);
 
     document.removeEventListener("submit", onAnySubmitForOtp, true);
 
