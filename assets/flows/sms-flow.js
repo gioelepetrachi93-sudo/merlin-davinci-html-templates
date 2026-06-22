@@ -1,7 +1,10 @@
 (function () {
-  "use strict";
+  const REPO = "gioelepetrachi93-sudo/merlin-davinci-html-templates";
+  const BRANCH = "main";
+  const FLOW_LABEL = "[Merlin SMS Flow]";
+  const FALLBACK_BASE =
+    "https://cdn.jsdelivr.net/gh/" + REPO + "@" + BRANCH + "/assets/";
 
-  const VERSION = "20260618-error-ui";
   const MODULES = [
     "merlin-theme.js",
     "merlin-contact.js",
@@ -9,45 +12,73 @@
     "merlin-error-ui.js"
   ];
 
-  loadFlowModules(MODULES);
+  const currentSrc =
+    document.currentScript && document.currentScript.src
+      ? document.currentScript.src
+      : FALLBACK_BASE + "flows/sms-flow.js";
 
-  function loadFlowModules(files) {
-    const fallbackBase =
-      "https://cdn.jsdelivr.net/gh/gioelepetrachi93-sudo/merlin-davinci-html-templates@main/assets/";
+  resolveLatestAssetBase()
+    .then(function (assetBase) {
+      console.log(FLOW_LABEL + " asset base", assetBase);
+      return loadFlowModules(assetBase, MODULES);
+    })
+    .then(function () {
+      console.log(FLOW_LABEL + " modules loaded", MODULES);
+    })
+    .catch(function (error) {
+      console.error(FLOW_LABEL + " failed to load modules", error);
+    });
 
-    const currentSrc =
-      document.currentScript && document.currentScript.src
-        ? document.currentScript.src
-        : fallbackBase + "flows/sms-flow.js";
+  function resolveLatestAssetBase() {
+    const currentShaMatch = currentSrc.match(/@([a-f0-9]{40})\/assets\/flows\//i);
 
-    const assetBase = currentSrc.includes("/assets/flows/")
-      ? currentSrc.split("/assets/flows/")[0] + "/assets/"
-      : fallbackBase;
+    if (currentShaMatch) {
+      return Promise.resolve(currentSrc.split("/assets/flows/")[0] + "/assets/");
+    }
 
-    files
-      .reduce(function (chain, file) {
-        return chain.then(function () {
-          return loadScript(assetBase + file + "?v=" + VERSION);
-        });
-      }, Promise.resolve())
-      .then(function () {
-        console.log("[Merlin SMS Flow] modules loaded", files);
+    return fetch("https://api.github.com/repos/" + REPO + "/commits/" + BRANCH + "?t=" + Date.now(), {
+      cache: "no-store"
+    })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("Unable to resolve latest GitHub SHA");
+        }
+
+        return response.json();
+      })
+      .then(function (data) {
+        if (!data || !data.sha) {
+          throw new Error("GitHub SHA missing");
+        }
+
+        return "https://cdn.jsdelivr.net/gh/" + REPO + "@" + data.sha + "/assets/";
       })
       .catch(function (error) {
-        console.error("[Merlin SMS Flow] failed to load modules", error);
+        console.warn(FLOW_LABEL + " latest SHA fallback", error);
+
+        if (currentSrc.includes("/assets/flows/")) {
+          return currentSrc.split("/assets/flows/")[0] + "/assets/";
+        }
+
+        return FALLBACK_BASE;
       });
+  }
+
+  function loadFlowModules(assetBase, files) {
+    return files.reduce(function (chain, file) {
+      return chain.then(function () {
+        return loadScript(assetBase + file);
+      });
+    }, Promise.resolve());
   }
 
   function loadScript(url) {
     return new Promise(function (resolve, reject) {
-      const cleanUrl = url.split("?")[0];
-
       const alreadyLoaded = Array.from(document.scripts).some(function (script) {
-        return script.src && script.src.split("?")[0] === cleanUrl;
+        return script.src === url;
       });
 
       if (alreadyLoaded) {
-        console.log("[Merlin SMS Flow] already loaded", cleanUrl);
         resolve();
         return;
       }
@@ -57,11 +88,12 @@
       script.async = false;
 
       script.onload = function () {
-        console.log("[Merlin SMS Flow] loaded", cleanUrl);
+        console.log(FLOW_LABEL + " loaded", url);
         resolve();
       };
 
       script.onerror = function () {
+        console.error(FLOW_LABEL + " failed", url);
         reject(new Error("Unable to load " + url));
       };
 
