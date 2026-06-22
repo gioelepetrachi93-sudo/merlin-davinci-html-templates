@@ -12,14 +12,8 @@
   const ERROR_RED = "#FF383C";
 
   const OTP_SELECTORS = [
-    {
-      wrapper: ".mv-otp-wrapper",
-      cell: ".mv-otp-wrapper > .mv-otp-cell"
-    },
-    {
-      wrapper: ".mv-otp-boxes",
-      cell: ".mv-otp-boxes > .mv-otp-box"
-    }
+    { wrapper: ".mv-otp-wrapper", cell: ".mv-otp-wrapper > .mv-otp-cell" },
+    { wrapper: ".mv-otp-boxes", cell: ".mv-otp-boxes > .mv-otp-box" }
   ];
 
   const EMAIL_FORMAT_ERROR_TEXT = "Please check your email format (e.g. name@mail.com)";
@@ -29,6 +23,7 @@
   let dismissedOtpInvalid = false;
   let emailFormatErrorBox = null;
   let emailFormatTimers = [];
+  let recordsErrorTimers = [];
 
   function normalizeText(text) {
     return String(text || "")
@@ -124,6 +119,46 @@
         opacity: 0 !important;
       }
 
+      .merlin-login .merlin-records-error {
+        display: grid !important;
+        grid-template-columns: 15px 1fr !important;
+        column-gap: 8px !important;
+        align-items: start !important;
+        width: 100% !important;
+        margin: 8px 0 0 !important;
+        padding: 12px 16px !important;
+        border-radius: 22px !important;
+        background: #FFFFFF !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        color: #475569 !important;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        text-align: left !important;
+      }
+
+      .merlin-records-error__icon {
+        width: 15px !important;
+        height: 13px !important;
+        margin-top: 1px !important;
+        display: block !important;
+      }
+
+      .merlin-records-error__title {
+        margin: 0 0 2px !important;
+        color: ${ERROR_RED} !important;
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        line-height: 17px !important;
+      }
+
+      .merlin-records-error__body {
+        margin: 0 !important;
+        color: #475569 !important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        line-height: 20px !important;
+      }
+
       .merlin-error-ui-native-hidden {
         display: none !important;
         visibility: hidden !important;
@@ -142,18 +177,12 @@
     const root = getVerifyRoot();
 
     return OTP_SELECTORS.find(function (config) {
-      return !!(
-        root.querySelector(config.wrapper) &&
-        root.querySelector(config.cell)
-      );
+      return !!(root.querySelector(config.wrapper) && root.querySelector(config.cell));
     }) || null;
   }
 
   function isVerifyEmailPage() {
-    return !!(
-      document.querySelector(".merlin-verify") &&
-      getActiveOtpConfig()
-    );
+    return !!(document.querySelector(".merlin-verify") && getActiveOtpConfig());
   }
 
   function getOtpWrapper() {
@@ -225,10 +254,6 @@
       });
   }
 
-  function hasNativeInvalidOtpError() {
-    return findNativeInvalidOtpErrors().length > 0;
-  }
-
   function hideNativeInvalidOtpErrors() {
     findNativeInvalidOtpErrors().forEach(function (element) {
       element.classList.add("merlin-error-ui-native-hidden");
@@ -281,7 +306,7 @@
     if (!isVerifyEmailPage()) return;
     if (dismissedOtpInvalid) return;
 
-    if (hasNativeInvalidOtpError()) {
+    if (findNativeInvalidOtpErrors().length > 0) {
       showOtpInvalidState();
     }
   }
@@ -341,9 +366,7 @@
   function getLoginEmailNodes() {
     const root = document.querySelector(".merlin-login");
 
-    if (!root) {
-      return {};
-    }
+    if (!root) return {};
 
     const input = root.querySelector("#userEmail");
     const form = root.querySelector("#loginForm") || (input && input.closest("form"));
@@ -364,12 +387,7 @@
   function isLoginEmailPage() {
     const nodes = getLoginEmailNodes();
 
-    return !!(
-      nodes.root &&
-      nodes.form &&
-      nodes.input &&
-      nodes.button
-    );
+    return !!(nodes.root && nodes.form && nodes.input && nodes.button);
   }
 
   function getLoginEmailValue() {
@@ -515,6 +533,7 @@
     if (!isLoginPrimaryAction(event.target)) return;
 
     blockLoginEmailFormatIfInvalid(event);
+    scheduleRecordsErrorCheck();
   }
 
   function onLoginEmailSubmit(event) {
@@ -522,9 +541,10 @@
 
     const nodes = getLoginEmailNodes();
 
-    if (event.target !== nodes.form) return;
-
-    blockLoginEmailFormatIfInvalid(event);
+    if (event.target === nodes.form) {
+      blockLoginEmailFormatIfInvalid(event);
+      scheduleRecordsErrorCheck();
+    }
   }
 
   function onLoginEmailKey(event) {
@@ -536,6 +556,7 @@
     if (event.key !== "Enter") return;
 
     blockLoginEmailFormatIfInvalid(event);
+    scheduleRecordsErrorCheck();
   }
 
   function onLoginEmailInput(event) {
@@ -544,6 +565,8 @@
     const nodes = getLoginEmailNodes();
 
     if (event.target !== nodes.input) return;
+
+    clearRecordsErrors();
 
     if (isLoginEmailInvalidFormat()) {
       if (nodes.input.classList.contains("ml-has-format-error")) {
@@ -574,6 +597,148 @@
     }
   }
 
+  function getRecordsIconSvg() {
+    return (
+      '<svg class="merlin-records-error__icon" width="15" height="13" viewBox="0 0 15 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+        '<path d="M7.24909 7.75V5.25M8.14971 1.26375L13.616 10.7556C13.9991 11.4244 13.5041 12.25 12.7153 12.25H1.78284C0.994086 12.25 0.499086 11.4244 0.882211 10.7556L6.34846 1.26375C6.74221 0.57875 7.75596 0.57875 8.14971 1.26375ZM7.24909 10.625C7.59427 10.625 7.87409 10.3452 7.87409 10C7.87409 9.65482 7.59427 9.375 7.24909 9.375C6.90391 9.375 6.62409 9.65482 6.62409 10C6.62409 10.3452 6.90391 10.625 7.24909 10.625Z" stroke="#FF383C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>'
+    );
+  }
+
+  function renderRecordsError(target, type) {
+    const copy = type === "phone"
+      ? {
+          title: "This mobile number is not in our records",
+          body: "We don't recognise this mobile number. Please check it's entered correctly, or try a different one."
+        }
+      : {
+          title: "This email address is not in our records",
+          body: "We don't recognise this email address. Please check it's entered correctly, or try a different one."
+        };
+
+    if (!target) return;
+
+    target.dataset.merlinRecordsErrorType = type;
+    target.classList.add("merlin-records-error");
+
+    target.innerHTML =
+      getRecordsIconSvg() +
+      '<div>' +
+        '<p class="merlin-records-error__title">' + copy.title + '</p>' +
+        '<p class="merlin-records-error__body">' + copy.body + '</p>' +
+      '</div>';
+  }
+
+  function isEmailRecordsText(text) {
+    const value = normalizeText(text);
+
+    return (
+      value.includes("email address is not in our records") ||
+      value.includes("email adress is not in our records") ||
+      value.includes("try with a different one")
+    );
+  }
+
+  function isPhoneRecordsText(text) {
+    const value = normalizeText(text);
+
+    return value === "something went wrong." || value === "something went wrong";
+  }
+
+  function isPhoneRecordsContext(target) {
+    const root = document.querySelector(".merlin-login");
+
+    if (!root || !target) return false;
+    if (target.classList.contains("ml-phone-error-card")) return true;
+
+    const pageText = normalizeText(root.textContent);
+
+    return (
+      pageText.includes("mobile number") ||
+      pageText.includes("choose email") ||
+      pageText.includes("unable to access sms")
+    );
+  }
+
+  function applyRecordsErrors() {
+    const root = document.querySelector(".merlin-login");
+
+    if (!root) return;
+    if (isLoginEmailInvalidFormat()) return;
+
+    Array.from(root.querySelectorAll(".ml-flow-error, [data-skcomponent='skerror']")).forEach(function (target) {
+      if (!target || !isVisible(target)) return;
+
+      const existingType = target.dataset.merlinRecordsErrorType;
+
+      if (existingType === "email" || existingType === "phone") {
+        return;
+      }
+
+      const text = target.textContent;
+
+      if (isEmailRecordsText(text)) {
+        renderRecordsError(target, "email");
+        return;
+      }
+
+      if (isPhoneRecordsText(text) && isPhoneRecordsContext(target)) {
+        renderRecordsError(target, "phone");
+      }
+    });
+  }
+
+  function scheduleRecordsErrorCheck() {
+    recordsErrorTimers.forEach(clearTimeout);
+
+    recordsErrorTimers = [0, 100, 300, 700, 1200, 2000, 3500, 5000].map(function (delay) {
+      return window.setTimeout(applyRecordsErrors, delay);
+    });
+  }
+
+  function clearRecordsErrors() {
+    document.querySelectorAll(".merlin-records-error").forEach(function (target) {
+      target.classList.remove("merlin-records-error");
+      target.removeAttribute("data-merlin-records-error-type");
+      target.textContent = "";
+    });
+  }
+
+  function onAnyLoginInput(event) {
+    const root = document.querySelector(".merlin-login");
+
+    if (!root || !event.target || !root.contains(event.target)) return;
+    if (!event.target.matches || !event.target.matches("input, select, textarea")) return;
+
+    clearRecordsErrors();
+  }
+
+  function onAnyLoginAction(event) {
+    const root = document.querySelector(".merlin-login");
+
+    if (!root || !event.target || !root.contains(event.target)) return;
+
+    const action =
+      event.target.closest &&
+      event.target.closest("#btnContinue, button, input[type='submit'], [role='button']");
+
+    if (!action) return;
+
+    scheduleRecordsErrorCheck();
+  }
+
+  function onAnyLoginSubmit(event) {
+    const root = document.querySelector(".merlin-login");
+
+    if (!root || !event.target || !root.contains(event.target)) return;
+
+    scheduleRecordsErrorCheck();
+  }
+
+  function onAnySubmitForOtp() {
+    dismissedOtpInvalid = false;
+  }
+
   function start() {
     injectStyles();
     prepareLoginEmailValidation();
@@ -592,20 +757,22 @@
     document.addEventListener("change", onLoginEmailInput, true);
     document.addEventListener("blur", onLoginEmailBlur, true);
 
-    document.addEventListener(
-      "submit",
-      function () {
-        dismissedOtpInvalid = false;
-      },
-      true
-    );
+    document.addEventListener("pointerdown", onAnyLoginAction, true);
+    document.addEventListener("click", onAnyLoginAction, true);
+    document.addEventListener("submit", onAnyLoginSubmit, true);
+    document.addEventListener("input", onAnyLoginInput, true);
+    document.addEventListener("change", onAnyLoginInput, true);
+
+    document.addEventListener("submit", onAnySubmitForOtp, true);
 
     timer = window.setInterval(function () {
       checkOtpInvalidState();
       prepareLoginEmailValidation();
+      applyRecordsErrors();
     }, CHECK_INTERVAL_MS);
 
     checkOtpInvalidState();
+    applyRecordsErrors();
 
     console.log("[Merlin Error UI] loaded");
   }
@@ -618,6 +785,9 @@
 
     emailFormatTimers.forEach(clearTimeout);
     emailFormatTimers = [];
+
+    recordsErrorTimers.forEach(clearTimeout);
+    recordsErrorTimers = [];
 
     document.removeEventListener("keydown", onUserEditingOtp, true);
     document.removeEventListener("input", onUserEditingOtp, true);
@@ -632,6 +802,14 @@
     document.removeEventListener("input", onLoginEmailInput, true);
     document.removeEventListener("change", onLoginEmailInput, true);
     document.removeEventListener("blur", onLoginEmailBlur, true);
+
+    document.removeEventListener("pointerdown", onAnyLoginAction, true);
+    document.removeEventListener("click", onAnyLoginAction, true);
+    document.removeEventListener("submit", onAnyLoginSubmit, true);
+    document.removeEventListener("input", onAnyLoginInput, true);
+    document.removeEventListener("change", onAnyLoginInput, true);
+
+    document.removeEventListener("submit", onAnySubmitForOtp, true);
 
     getOtpCells().forEach(function (cell) {
       cell.classList.remove("is-invalid");
@@ -651,6 +829,7 @@
       emailFormatErrorBox = null;
     }
 
+    clearRecordsErrors();
     restoreNativeInvalidOtpErrors();
 
     const style = document.getElementById(STYLE_ID);
