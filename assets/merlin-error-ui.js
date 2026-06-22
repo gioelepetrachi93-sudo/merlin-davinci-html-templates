@@ -75,17 +75,17 @@
       }
 
       .merlin-verify .mv-otp-error {
-        display: block;
-        margin: 10px 0 0;
-        padding: 0;
-        color: ${ERROR_RED};
-        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 20px;
-        text-align: left;
-        background: transparent;
-        border: 0;
+        display: block !important;
+        margin: 8px 0 0 !important;
+        padding: 0 !important;
+        color: ${ERROR_RED} !important;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        line-height: 17px !important;
+        text-align: center !important;
+        background: transparent !important;
+        border: 0 !important;
       }
 
       .merlin-verify .mv-otp-error[hidden] {
@@ -211,6 +211,13 @@
     return config ? root.querySelector(config.wrapper) : null;
   }
 
+  function getOtpShell() {
+    const shell = document.getElementById("otp-shell");
+    const wrapper = getOtpWrapper();
+
+    return shell || (wrapper && wrapper.closest(".mv-otp-shell")) || wrapper;
+  }
+
   function getOtpCells() {
     const root = getVerifyRoot();
     const config = getActiveOtpConfig();
@@ -255,7 +262,7 @@
 
   function findNativeInvalidOtpErrors() {
     const root = getVerifyRoot();
-    const wrapper = getOtpWrapper();
+    const shell = getOtpShell();
 
     return Array.from(
       root.querySelectorAll("[role='alert'], [aria-live], .error, .Error, [class*='error'], [class*='Error'], p, span, div")
@@ -264,7 +271,7 @@
       .filter(function (element) {
         if (element.id === "mvOtpInvalidMessage") return false;
         if (element.closest("#mvOtpInvalidMessage")) return false;
-        if (wrapper && wrapper.contains(element)) return false;
+        if (shell && shell.contains(element)) return false;
         if (element.id === "merlin-verification-lock-message") return false;
         if (element.closest("#merlin-verification-lock-message")) return false;
         if (hasVisibleFormControl(element)) return false;
@@ -289,6 +296,7 @@
     if (!isVerifyEmailPage()) return;
 
     const cells = getOtpCells();
+    const shell = getOtpShell();
     const message = getOtpInvalidMessage();
 
     if (!cells.length) return;
@@ -298,10 +306,20 @@
       cell.setAttribute("aria-invalid", "true");
     });
 
-    if (message) {
-      message.hidden = false;
-      hideNativeInvalidOtpErrors();
+    if (shell) {
+      shell.classList.add("has-error");
     }
+
+    if (message) {
+      if (shell && shell.contains(message)) {
+        shell.insertAdjacentElement("afterend", message);
+      }
+
+      message.textContent = "Invalid code, please try again";
+      message.hidden = false;
+    }
+
+    hideNativeInvalidOtpErrors();
   }
 
   function clearOtpInvalidState() {
@@ -312,13 +330,19 @@
       cell.removeAttribute("aria-invalid");
     });
 
+    const shell = getOtpShell();
+
+    if (shell) {
+      shell.classList.remove("has-error");
+    }
+
     const message = getOtpInvalidMessage();
 
     if (message) {
       message.hidden = true;
     }
 
-    restoreNativeInvalidOtpErrors();
+    hideNativeInvalidOtpErrors();
   }
 
   function checkOtpInvalidState() {
@@ -330,23 +354,34 @@
     }
   }
 
-  function isOtpEditEvent(event) {
-    const target = event.target;
+  function isOtpEditTarget(target) {
+    if (!target) return false;
+
+    const shell = getOtpShell();
     const wrapper = getOtpWrapper();
 
-    if (!target || !wrapper || !wrapper.contains(target)) return false;
+    return (
+      target.id === "passcode" ||
+      target.name === "passcode" ||
+      !!(target.closest && target.closest("#otp-shell")) ||
+      !!(wrapper && wrapper.contains(target)) ||
+      !!(shell && shell.contains(target))
+    );
+  }
+
+  function isOtpEditEvent(event) {
+    if (!isOtpEditTarget(event.target)) return false;
+
+    if (event.type === "input") return true;
+    if (event.type === "paste") return true;
+    if (event.type === "cut") return true;
+
+    if (event.type !== "keydown") return false;
 
     return (
-      event.type === "paste" ||
-      event.type === "input" ||
-      (
-        event.type === "keydown" &&
-        (
-          event.key === "Backspace" ||
-          event.key === "Delete" ||
-          (event.key && event.key.length === 1)
-        )
-      )
+      event.key === "Backspace" ||
+      event.key === "Delete" ||
+      (event.key && event.key.length === 1)
     );
   }
 
@@ -379,6 +414,13 @@
       window.setTimeout(checkOtpInvalidState, 700);
       window.setTimeout(checkOtpInvalidState, 1200);
     }
+  }
+
+  function onAnySubmitForOtp() {
+    dismissedOtpInvalid = false;
+    window.setTimeout(checkOtpInvalidState, 300);
+    window.setTimeout(checkOtpInvalidState, 700);
+    window.setTimeout(checkOtpInvalidState, 1200);
   }
 
   function getLoginRoot() {
@@ -799,10 +841,6 @@
     });
   }
 
-  function onAnySubmitForOtp() {
-    dismissedOtpInvalid = false;
-  }
-
   function start() {
     injectStyles();
     prepareLoginEmailValidation();
@@ -811,7 +849,9 @@
     document.addEventListener("keydown", onUserEditingOtp, true);
     document.addEventListener("input", onUserEditingOtp, true);
     document.addEventListener("paste", onUserEditingOtp, true);
+    document.addEventListener("cut", onUserEditingOtp, true);
     document.addEventListener("click", onSubmitOtp, true);
+    document.addEventListener("submit", onAnySubmitForOtp, true);
 
     document.addEventListener("pointerdown", onLoginEmailAction, true);
     document.addEventListener("click", onLoginEmailAction, true);
@@ -826,8 +866,6 @@
     document.addEventListener("click", onRecordsAction, true);
     document.addEventListener("submit", onRecordsSubmit, true);
     document.addEventListener("input", onRecordsInput, true);
-
-    document.addEventListener("submit", onAnySubmitForOtp, true);
 
     timer = window.setInterval(function () {
       checkOtpInvalidState();
@@ -862,7 +900,9 @@
     document.removeEventListener("keydown", onUserEditingOtp, true);
     document.removeEventListener("input", onUserEditingOtp, true);
     document.removeEventListener("paste", onUserEditingOtp, true);
+    document.removeEventListener("cut", onUserEditingOtp, true);
     document.removeEventListener("click", onSubmitOtp, true);
+    document.removeEventListener("submit", onAnySubmitForOtp, true);
 
     document.removeEventListener("pointerdown", onLoginEmailAction, true);
     document.removeEventListener("click", onLoginEmailAction, true);
@@ -877,8 +917,6 @@
     document.removeEventListener("click", onRecordsAction, true);
     document.removeEventListener("submit", onRecordsSubmit, true);
     document.removeEventListener("input", onRecordsInput, true);
-
-    document.removeEventListener("submit", onAnySubmitForOtp, true);
 
     getOtpCells().forEach(function (cell) {
       cell.classList.remove("is-invalid");
