@@ -243,20 +243,15 @@
       mobileStageWidth: "210px",
       mobileStageHeight: "140px"
     }
-
   };
 
-    const VALID_THEME_CODES = [DEFAULT_THEME_CODE].concat(Object.keys(THEMES));
+  const VALID_THEME_CODES = [DEFAULT_THEME_CODE].concat(Object.keys(THEMES));
 
   const ATTRACTION_TO_THEME_CODE = {
     UKPKALT: "001",
-
     UKLLWIN: "002",
-
     UKPKWAC: "003",
-
     UKGRBLA: "004",
-
     UKCWBIR: "005",
 
     UKSLBIR: "006",
@@ -273,34 +268,10 @@
     UKDGYOR: "007",
 
     UKPKCWA: "008",
-
     UKPKTHO: "009",
-
     UKEYLON: "010",
-
     UKMTLON: "011"
   };
-
-  function normalizeThemeCode(value) {
-    const raw = String(value || "").trim();
-
-    if (!raw) {
-      return DEFAULT_THEME_CODE;
-    }
-
-    const upper = raw.toUpperCase();
-    const paddedNumeric = /^\d{1,3}$/.test(upper) ? upper.padStart(3, "0") : upper;
-
-    if (VALID_THEME_CODES.includes(paddedNumeric)) {
-      return paddedNumeric;
-    }
-
-    if (ATTRACTION_TO_THEME_CODE[upper]) {
-      return ATTRACTION_TO_THEME_CODE[upper];
-    }
-
-    return DEFAULT_THEME_CODE;
-  }
 
   const FIXED_LEFT_LAYOUTS = [
     { root: ".merlin-login", shell: ".ml-shell", hero: ".ml-hero", body: ".ml-body", inner: ".ml-body-inner" },
@@ -345,6 +316,27 @@
 
   const ORIGINAL_STYLES = new WeakMap();
   const TRACKED_ELEMENTS = new Set();
+
+  function normalizeThemeCode(value) {
+    const raw = String(value || "").trim();
+
+    if (!raw) {
+      return DEFAULT_THEME_CODE;
+    }
+
+    const upper = raw.toUpperCase();
+    const paddedNumeric = /^\d{1,3}$/.test(upper) ? upper.padStart(3, "0") : upper;
+
+    if (VALID_THEME_CODES.includes(paddedNumeric)) {
+      return paddedNumeric;
+    }
+
+    if (ATTRACTION_TO_THEME_CODE[upper]) {
+      return ATTRACTION_TO_THEME_CODE[upper];
+    }
+
+    return DEFAULT_THEME_CODE;
+  }
 
   function getLogoUrl(theme) {
     return CDN_BASE + theme.logoFile + "?" + ASSET_VERSION;
@@ -526,6 +518,21 @@
         transform-origin: center center !important;
       }
 
+      html[data-theme]:not([data-theme="000"]) .${SMALL_MERLIN_LOGO_CLASS} {
+        display: block !important;
+        width: 144px !important;
+        height: 38px !important;
+        margin: 0 0 30px 0 !important;
+        line-height: 0 !important;
+        flex: 0 0 auto !important;
+      }
+
+      html[data-theme]:not([data-theme="000"]) .${SMALL_MERLIN_LOGO_CLASS} svg {
+        display: block !important;
+        width: 144px !important;
+        height: auto !important;
+      }
+
       @media (max-width: ${DESKTOP_BREAKPOINT - 1}px) {
         html[data-theme]:not([data-theme="000"]) .mv-shell {
           display: grid !important;
@@ -648,6 +655,7 @@
       setImportant(hero, "min-height", MOBILE_HEADER_HEIGHT);
       setImportant(hero, "max-height", MOBILE_HEADER_HEIGHT);
     }
+
     setImportant(hero, "overflow", "hidden");
     setImportant(hero, "padding", "0");
 
@@ -711,6 +719,62 @@
     document.querySelectorAll(".mv-hero-brand-wrapper").forEach(function (element) {
       element.remove();
     });
+  }
+
+  function removeSmallMerlinLogo() {
+    document.querySelectorAll("." + SMALL_MERLIN_LOGO_CLASS).forEach(function (element) {
+      element.remove();
+    });
+  }
+
+  function getSmallMerlinLogoTarget() {
+    return (
+      document.querySelector(".merlin-register .mr-body-inner") ||
+      document.querySelector(".merlin-login .ml-body-inner") ||
+      document.querySelector(".merlin-verify .mv-body-inner")
+    );
+  }
+
+  function ensureSmallMerlinLogo() {
+    if (document.documentElement.getAttribute("data-theme") === DEFAULT_THEME_CODE) {
+      removeSmallMerlinLogo();
+      return;
+    }
+
+    const bodyInner = getSmallMerlinLogoTarget();
+
+    if (!bodyInner) return;
+
+    let logo = bodyInner.querySelector("." + SMALL_MERLIN_LOGO_CLASS);
+
+    if (!logo) {
+      removeSmallMerlinLogo();
+
+      logo = document.createElement("div");
+      logo.className = SMALL_MERLIN_LOGO_CLASS;
+      logo.innerHTML = `
+        <svg width="144" height="38" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Merlin" role="img">
+          <path d="M21.8838 3.09766C24.0356 3.09766 26.4062 4.2498 26.4062 9.7666V20.3906C29.589 15.693 31.6574 12.208 35.749 12.208C39.8405 12.2081 40.7978 16.9056 40.7979 19.584V19.5869C40.8075 23.8557 41.2502 29.1365 44.6514 30.4805C44.3354 30.8169 42.0232 31.9844 39.3584 31.9844C34.3197 31.984 33.9821 24.4193 34.0527 21.3633L29.2617 28.1826C27.4954 30.6273 26.1429 31.9999 23.9912 32C21.8394 32 19.4688 30.8479 19.4688 25.3311V15.6484L10.6631 28.1787C8.89681 30.6233 6.67412 31.9969 4.52246 31.9971C2.37067 31.9971 3.58377e-05 30.8448 0 25.3281V15.9902H6.9375V20.4443L16.4473 6.91504C18.2135 4.47057 19.7323 3.09782 21.8838 3.09766ZM53.3682 12.1436C56.3035 12.1436 58.542 13.0946 60.2666 14.6689C62.5436 16.7522 63.6071 20.0804 63.5332 23.7764H50.1719C50.5766 25.933 51.7498 27.251 53.8438 27.251C55.0543 27.2508 55.9344 26.7742 56.4482 25.8623H63.1631C62.7584 27.5455 61.4386 29.1901 59.6016 30.3613C57.8769 31.4589 56.0044 31.9326 53.6182 31.9326C47.4905 31.9325 43.3799 27.7631 43.3799 22.0576L43.3857 22.0547C43.3857 16.4227 47.4619 12.1436 53.3682 12.1436ZM88.1338 31.4141H81.0137V5.26758H88.1338V31.4141ZM97.8848 31.4141H90.9473V12.7646H97.8848V31.4141ZM113.429 12.1797C117.761 12.1797 120 15.0693 120 19.3477V31.4141H113.062V21.0273C113.062 19.0881 112.257 17.8076 110.458 17.8076C108.66 17.8077 107.632 19.3439 107.632 21.3564V31.4141H100.694V12.7646H107.301V15.3252H107.41C108.916 13.2773 110.824 12.1798 113.429 12.1797ZM78.0137 12.3613C78.5629 12.3613 78.933 12.4351 79.1514 12.5439V18.4316H79.0029C74.9276 17.7374 72.5449 19.5649 72.5449 23.7695V31.4111H65.6074V12.7617H72.2139V15.5771L72.2168 15.5811H72.3262C73.8323 13.242 75.6309 12.3614 78.0137 12.3613ZM53.5186 16.7871C51.611 16.7873 50.5448 18.0674 50.1787 20.1152H56.6377C56.3454 18.032 55.1693 16.7871 53.5186 16.7871ZM94.7275 0C94.7275 2.90872 97.0944 5.26745 100.014 5.26758V5.8916C97.0945 5.89173 94.7276 8.24957 94.7275 11.1582H94.1016C94.1015 8.24949 91.7338 5.8916 88.8145 5.8916V5.26758C91.7338 5.26758 94.1016 2.9088 94.1016 0H94.7275Z" fill="#571CFF"/>
+        </svg>
+      `;
+
+      bodyInner.insertBefore(logo, bodyInner.firstElementChild);
+    }
+
+    setImportant(logo, "display", "block");
+    setImportant(logo, "width", "144px");
+    setImportant(logo, "height", "38px");
+    setImportant(logo, "margin", "0 0 30px 0");
+    setImportant(logo, "line-height", "0");
+    setImportant(logo, "flex", "0 0 auto");
+
+    const svg = logo.querySelector("svg");
+
+    if (svg) {
+      setImportant(svg, "display", "block");
+      setImportant(svg, "width", "144px");
+      setImportant(svg, "height", "auto");
+    }
   }
 
   function findContentScaleElements() {
@@ -869,109 +933,109 @@
     });
   }
 
-function buildFixedLeftLayoutCss(layout) {
-  const root = "html[data-theme][data-theme] " + layout.root;
-  const shell = "html[data-theme][data-theme] " + layout.root + " " + layout.shell;
-  const hero = "html[data-theme][data-theme] " + layout.root + " " + layout.hero;
-  const body = "html[data-theme][data-theme] " + layout.root + " " + layout.body;
-  const inner = "html[data-theme][data-theme] " + layout.root + " " + layout.inner;
+  function buildFixedLeftLayoutCss(layout) {
+    const root = "html[data-theme][data-theme] " + layout.root;
+    const shell = "html[data-theme][data-theme] " + layout.root + " " + layout.shell;
+    const hero = "html[data-theme][data-theme] " + layout.root + " " + layout.hero;
+    const body = "html[data-theme][data-theme] " + layout.root + " " + layout.body;
+    const inner = "html[data-theme][data-theme] " + layout.root + " " + layout.inner;
 
-  return `
-    @media (min-width: 768px) {
-      ${root} {
-        display: block !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: 100vh !important;
-        max-height: none !important;
-        overflow: visible !important;
-        contain: none !important;
+    return `
+      @media (min-width: 768px) {
+        ${root} {
+          display: block !important;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 100vh !important;
+          max-height: none !important;
+          overflow: visible !important;
+          contain: none !important;
+        }
+
+        ${shell} {
+          display: block !important;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 100vh !important;
+          max-height: none !important;
+          overflow: visible !important;
+          contain: none !important;
+        }
+
+        ${hero} {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          bottom: 0 !important;
+          width: 50vw !important;
+          height: 100vh !important;
+          min-height: 100vh !important;
+          max-height: 100vh !important;
+          overflow: hidden !important;
+          z-index: 1 !important;
+          contain: none !important;
+        }
+
+        ${body} {
+          width: 50vw !important;
+          min-height: 100vh !important;
+          height: auto !important;
+          max-height: none !important;
+          margin-left: 50vw !important;
+          margin-top: 0 !important;
+          overflow: visible !important;
+          contain: none !important;
+        }
+
+        ${inner} {
+          height: auto !important;
+          min-height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
+        }
       }
 
-      ${shell} {
-        display: block !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: 100vh !important;
-        max-height: none !important;
-        overflow: visible !important;
-        contain: none !important;
-      }
+      @media (max-width: 767px) {
+        ${root} {
+          display: flex !important;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 100svh !important;
+          overflow: visible !important;
+        }
 
-      ${hero} {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        bottom: 0 !important;
-        width: 50vw !important;
-        height: 100vh !important;
-        min-height: 100vh !important;
-        max-height: 100vh !important;
-        overflow: hidden !important;
-        z-index: 1 !important;
-        contain: none !important;
-      }
+        ${shell} {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 100svh !important;
+          overflow: visible !important;
+        }
 
-      ${body} {
-        width: 50vw !important;
-        min-height: 100vh !important;
-        height: auto !important;
-        max-height: none !important;
-        margin-left: 50vw !important;
-        margin-top: 0 !important;
-        overflow: visible !important;
-        contain: none !important;
-      }
+        ${hero} {
+          position: relative !important;
+          top: auto !important;
+          left: auto !important;
+          right: auto !important;
+          bottom: auto !important;
+          width: 100% !important;
+          height: 140px !important;
+          min-height: auto !important;
+          max-height: 140px !important;
+          overflow: hidden !important;
+        }
 
-      ${inner} {
-        height: auto !important;
-        min-height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
+        ${body} {
+          width: 100% !important;
+          margin-left: 0 !important;
+          min-height: auto !important;
+          height: auto !important;
+          overflow: visible !important;
+        }
       }
-    }
-
-    @media (max-width: 767px) {
-      ${root} {
-        display: flex !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: 100svh !important;
-        overflow: visible !important;
-      }
-
-      ${shell} {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: 100svh !important;
-        overflow: visible !important;
-      }
-
-      ${hero} {
-        position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        right: auto !important;
-        bottom: auto !important;
-        width: 100% !important;
-        height: 140px !important;
-        min-height: auto !important;
-        max-height: 140px !important;
-        overflow: hidden !important;
-      }
-
-      ${body} {
-        width: 100% !important;
-        margin-left: 0 !important;
-        min-height: auto !important;
-        height: auto !important;
-        overflow: visible !important;
-      }
-    }
-  `;
-}
+    `;
+  }
 
   function injectFixedLeftScrollStyle() {
     let style = document.getElementById(FIXED_LEFT_STYLE_ID);
@@ -1050,7 +1114,6 @@ function buildFixedLeftLayoutCss(layout) {
     hideNativeHeroAssets(hero);
 
     const result = applyBrandHero(theme, hero);
-    ensureSmallMerlinLogo();
 
     if (lastAppliedThemeCode !== theme.code || lastAppliedMode !== result.mode) {
       console.log("[Merlin Theme] Theme applied", {
@@ -1083,9 +1146,18 @@ function buildFixedLeftLayoutCss(layout) {
       }
 
       applyAssetTheme(THEMES[themeCode]);
+      ensureSmallMerlinLogo();
     } finally {
       installLargeDesktopContentScale();
       scheduleFixedLeftScrollLayout();
+
+      if (document.documentElement.getAttribute("data-theme") !== DEFAULT_THEME_CODE) {
+        setTimeout(ensureSmallMerlinLogo, 50);
+        setTimeout(ensureSmallMerlinLogo, 300);
+        setTimeout(ensureSmallMerlinLogo, 800);
+        setTimeout(ensureSmallMerlinLogo, 1500);
+      }
+
       isApplyingTheme = false;
     }
   }
