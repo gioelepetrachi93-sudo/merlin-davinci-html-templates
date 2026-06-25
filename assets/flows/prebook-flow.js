@@ -2,8 +2,8 @@
   "use strict";
 
   const FLOW_LABEL = "[Merlin SMS Flow Live]";
-  const REPO_BASE =
-    "https://cdn.jsdelivr.net/gh/gioelepetrachi93-sudo/merlin-davinci-html-templates@main/assets/";
+  const REPO = "gioelepetrachi93-sudo/merlin-davinci-html-templates";
+  const BRANCH = "main";
   const MODULE_VERSION = "v=" + Date.now();
 
   const MODULES = [
@@ -13,18 +13,42 @@
     "merlin-error-ui.js"
   ];
 
-  MODULES
-    .reduce(function (chain, file) {
-      return chain.then(function () {
-        return loadScript(REPO_BASE + file + "?" + MODULE_VERSION);
-      });
-    }, Promise.resolve())
+  resolveLatestAssetBase()
+    .then(function (assetBase) {
+      console.log(FLOW_LABEL + " asset base", assetBase);
+
+      return MODULES.reduce(function (chain, file) {
+        return chain.then(function () {
+          return loadScript(assetBase + file + "?" + MODULE_VERSION);
+        });
+      }, Promise.resolve());
+    })
     .then(function () {
       console.log(FLOW_LABEL + " modules loaded", MODULES);
     })
     .catch(function (error) {
       console.error(FLOW_LABEL + " failed to load modules", error);
     });
+
+  function resolveLatestAssetBase() {
+    return fetch("https://api.github.com/repos/" + REPO + "/commits/" + BRANCH + "?t=" + Date.now(), {
+      cache: "no-store"
+    })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("Unable to resolve latest GitHub SHA");
+        }
+
+        return response.json();
+      })
+      .then(function (data) {
+        if (!data || !data.sha) {
+          throw new Error("GitHub SHA missing");
+        }
+
+        return "https://cdn.jsdelivr.net/gh/" + REPO + "@" + data.sha + "/assets/";
+      });
+  }
 
   function loadScript(url) {
     return new Promise(function (resolve, reject) {
