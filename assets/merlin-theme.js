@@ -3,6 +3,7 @@
   const SESSION_KEY = "merlin_asset_theme_code";
   const STYLE_ID = "merlin-theme-style";
   const FIXED_LEFT_STYLE_ID = "merlin-fixed-left-scroll-style";
+  const SMALL_MERLIN_LOGO_CLASS = "merlin-small-brand-logo";
 
   const CDN_BASE =
     "https://cdn.jsdelivr.net/gh/gioelepetrachi93-sudo/merlin-davinci-html-templates@main/assets/brand-logos/";
@@ -1027,6 +1028,7 @@ function buildFixedLeftLayoutCss(layout) {
 
     removeInjectedStyle();
     removeBrandDom();
+    removeSmallMerlinLogo();
     restoreTrackedStyles();
 
     if (lastAppliedThemeCode !== DEFAULT_THEME_CODE) {
@@ -1048,6 +1050,7 @@ function buildFixedLeftLayoutCss(layout) {
     hideNativeHeroAssets(hero);
 
     const result = applyBrandHero(theme, hero);
+    ensureSmallMerlinLogo();
 
     if (lastAppliedThemeCode !== theme.code || lastAppliedMode !== result.mode) {
       console.log("[Merlin Theme] Theme applied", {
