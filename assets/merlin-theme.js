@@ -628,7 +628,25 @@
     const logoOffsetY = getResponsiveValue(theme, "logoOffsetY", "mobileLogoOffsetY", "0px");
     const logoScale = getResponsiveValue(theme, "logoScale", "mobileLogoScale", "1");
 
-    setImportant(hero, "position", "relative");
+    if (isDesktopLayout() && isSplitHero(hero)) {
+      setImportant(hero, "position", "fixed");
+      setImportant(hero, "top", "0");
+      setImportant(hero, "left", "0");
+      setImportant(hero, "bottom", "0");
+      setImportant(hero, "width", "50vw");
+      setImportant(hero, "height", "100vh");
+      setImportant(hero, "min-height", "100vh");
+      setImportant(hero, "max-height", "100vh");
+    } else {
+      setImportant(hero, "position", "relative");
+      setImportant(hero, "top", "auto");
+      setImportant(hero, "left", "auto");
+      setImportant(hero, "bottom", "auto");
+      setImportant(hero, "width", "100%");
+      setImportant(hero, "height", MOBILE_HEADER_HEIGHT);
+      setImportant(hero, "min-height", MOBILE_HEADER_HEIGHT);
+      setImportant(hero, "max-height", MOBILE_HEADER_HEIGHT);
+    }
     setImportant(hero, "overflow", "hidden");
     setImportant(hero, "padding", "0");
 
