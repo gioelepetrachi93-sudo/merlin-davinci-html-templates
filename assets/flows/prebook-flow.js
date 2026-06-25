@@ -52,6 +52,15 @@
 
   function loadScript(url) {
     return new Promise(function (resolve, reject) {
+      const alreadyLoaded = Array.from(document.scripts).some(function (script) {
+        return script.src === url;
+      });
+
+      if (alreadyLoaded) {
+        resolve();
+        return;
+      }
+
       const script = document.createElement("script");
       script.src = url;
       script.async = false;
