@@ -55,175 +55,202 @@
   }
 
   function injectStyles() {
-    if (document.getElementById(STYLE_ID)) return;
+  if (document.getElementById(STYLE_ID)) return;
 
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
-    style.textContent = `
-      .merlin-verify .mv-otp-wrapper > .mv-otp-cell.is-invalid,
-      .merlin-verify .mv-otp-boxes > .mv-otp-box.is-invalid {
-        border-color: ${ERROR_RED} !important;
-        box-shadow: none !important;
-        outline-color: ${ERROR_RED} !important;
-      }
+  const style = document.createElement("style");
+  style.id = STYLE_ID;
+  style.textContent = `
+    .merlin-verify .mv-otp-wrapper > .mv-otp-cell.is-invalid,
+    .merlin-verify .mv-otp-boxes > .mv-otp-box.is-invalid {
+      border-color: ${ERROR_RED} !important;
+      box-shadow: none !important;
+      outline-color: ${ERROR_RED} !important;
+    }
 
-      .merlin-verify .mv-otp-wrapper > .mv-otp-cell.is-invalid:focus,
-      .merlin-verify .mv-otp-wrapper > .mv-otp-cell.is-invalid:focus-visible,
-      .merlin-verify .mv-otp-boxes > .mv-otp-box.is-invalid:focus,
-      .merlin-verify .mv-otp-boxes > .mv-otp-box.is-invalid:focus-visible {
-        border-color: ${ERROR_RED} !important;
-        box-shadow: 0 0 0 1px ${ERROR_RED} !important;
-        outline-color: ${ERROR_RED} !important;
-      }
+    .merlin-verify .mv-otp-wrapper > .mv-otp-cell.is-invalid:focus,
+    .merlin-verify .mv-otp-wrapper > .mv-otp-cell.is-invalid:focus-visible,
+    .merlin-verify .mv-otp-boxes > .mv-otp-box.is-invalid:focus,
+    .merlin-verify .mv-otp-boxes > .mv-otp-box.is-invalid:focus-visible {
+      border-color: ${ERROR_RED} !important;
+      box-shadow: 0 0 0 1px ${ERROR_RED} !important;
+      outline-color: ${ERROR_RED} !important;
+    }
 
-      .merlin-verify .mv-otp-error {
-        display: block !important;
-        margin: 8px 0 0 !important;
-        padding: 0 !important;
-        color: ${ERROR_RED} !important;
-        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-        font-size: 12px !important;
-        font-weight: 400 !important;
-        line-height: 17px !important;
-        text-align: center !important;
-        background: transparent !important;
-        border: 0 !important;
-      }
+    .merlin-verify .mv-otp-error {
+      display: block !important;
+      margin: 8px 0 0 !important;
+      padding: 0 !important;
+      color: ${ERROR_RED} !important;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      line-height: 17px !important;
+      text-align: center !important;
+      background: transparent !important;
+      border: 0 !important;
+    }
 
-      .merlin-verify .mv-otp-error[hidden] {
-        display: none !important;
-      }
+    .merlin-verify .mv-otp-error[hidden] {
+      display: none !important;
+    }
 
-      .merlin-login .ml-label.ml-has-format-error {
-        color: ${ERROR_RED} !important;
-      }
+    .merlin-login .ml-label.ml-has-format-error,
+    .merlin-email .em-label.em-has-format-error,
+    .merlin-email label.em-has-format-error {
+      color: ${ERROR_RED} !important;
+    }
 
-      .merlin-login .ml-input.ml-has-format-error {
-        border-color: ${ERROR_RED} !important;
-        box-shadow: none !important;
-      }
+    .merlin-login .ml-input.ml-has-format-error,
+    .merlin-email .em-input.em-has-format-error,
+    .merlin-email input.em-has-format-error {
+      border-color: ${ERROR_RED} !important;
+      box-shadow: none !important;
+    }
 
-      .merlin-login .ml-input.ml-has-format-error:focus {
-        border-color: ${ERROR_RED} !important;
-        box-shadow: 0 0 0 1px ${ERROR_RED} !important;
-      }
+    .merlin-login .ml-input.ml-has-format-error:focus,
+    .merlin-email .em-input.em-has-format-error:focus,
+    .merlin-email input.em-has-format-error:focus {
+      border-color: ${ERROR_RED} !important;
+      box-shadow: 0 0 0 1px ${ERROR_RED} !important;
+    }
 
-      .merlin-login .ml-email-format-error {
-        display: block !important;
-        color: ${ERROR_RED} !important;
-        font-size: 12px !important;
-        font-weight: 400 !important;
-        line-height: 17px !important;
-        margin-top: 6px !important;
-        min-height: 0 !important;
-        text-align: left !important;
-      }
+    .merlin-login .ml-email-format-error,
+    .merlin-email .em-email-format-error {
+      display: block !important;
+      color: ${ERROR_RED} !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      line-height: 17px !important;
+      margin-top: 6px !important;
+      min-height: 0 !important;
+      text-align: left !important;
+    }
 
-            .merlin-login .ml-label.ml-has-associated-error {
-        color: ${ERROR_RED} !important;
-      }
+    .merlin-login .ml-email-format-error:empty,
+    .merlin-email .em-email-format-error:empty {
+      display: none !important;
+    }
 
-      .merlin-login .ml-input.ml-has-associated-error {
-        border-color: ${ERROR_RED} !important;
-        box-shadow: none !important;
-      }
+    .merlin-login .ml-label.ml-has-associated-error,
+    .merlin-email .em-label.em-has-associated-error,
+    .merlin-email label.em-has-associated-error {
+      color: ${ERROR_RED} !important;
+    }
 
-      .merlin-login .ml-input.ml-has-associated-error:focus {
-        border-color: ${ERROR_RED} !important;
-        box-shadow: 0 0 0 1px ${ERROR_RED} !important;
-      }
+    .merlin-login .ml-input.ml-has-associated-error,
+    .merlin-email .em-input.em-has-associated-error,
+    .merlin-email input.em-has-associated-error {
+      border-color: ${ERROR_RED} !important;
+      box-shadow: none !important;
+    }
 
-      .merlin-login .ml-email-associated-error {
-        display: block !important;
-        color: ${ERROR_RED} !important;
-        font-size: 12px !important;
-        font-weight: 400 !important;
-        line-height: 17px !important;
-        margin-top: 6px !important;
-        min-height: 0 !important;
-        text-align: left !important;
-      }
+    .merlin-login .ml-input.ml-has-associated-error:focus,
+    .merlin-email .em-input.em-has-associated-error:focus,
+    .merlin-email input.em-has-associated-error:focus {
+      border-color: ${ERROR_RED} !important;
+      box-shadow: 0 0 0 1px ${ERROR_RED} !important;
+    }
 
-      .merlin-login .ml-email-associated-error:empty {
-        display: none !important;
-      }
+    .merlin-login .ml-email-associated-error,
+    .merlin-email .em-email-associated-error {
+      display: block !important;
+      color: ${ERROR_RED} !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      line-height: 17px !important;
+      margin-top: 6px !important;
+      min-height: 0 !important;
+      text-align: left !important;
+    }
 
-      .merlin-login .ml-flow-error.ml-associated-error-hidden {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
+    .merlin-login .ml-email-associated-error:empty,
+    .merlin-email .em-email-associated-error:empty {
+      display: none !important;
+    }
 
-      .merlin-login .merlin-records-source-hidden,
-      .merlin-login .ml-flow-error.ml-format-error-hidden {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
+    .merlin-login .merlin-records-source-hidden,
+    .merlin-email .merlin-records-source-hidden,
+    .merlin-login .ml-flow-error.ml-format-error-hidden,
+    .merlin-email .em-flow-error.em-format-error-hidden,
+    .merlin-email [data-skcomponent='skerror'].em-format-error-hidden,
+    .merlin-login .ml-flow-error.ml-associated-error-hidden,
+    .merlin-email .em-flow-error.em-associated-error-hidden,
+    .merlin-email [data-skcomponent='skerror'].em-associated-error-hidden {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
 
-      .merlin-login .merlin-records-error {
-        display: grid !important;
-        grid-template-columns: 15px 1fr !important;
-        column-gap: 8px !important;
-        align-items: start !important;
-        width: 100% !important;
-        margin: 8px 0 0 !important;
-        padding: 12px 16px !important;
-        border-radius: 22px !important;
-        background: #FFFFFF !important;
-        border: 0 !important;
-        box-shadow: none !important;
-        color: #475569 !important;
-        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-        text-align: left !important;
-      }
+    .merlin-login .merlin-records-error,
+    .merlin-email .merlin-records-error {
+      display: grid !important;
+      grid-template-columns: 15px 1fr !important;
+      column-gap: 8px !important;
+      align-items: start !important;
+      width: 100% !important;
+      margin: 8px 0 0 !important;
+      padding: 12px 16px !important;
+      border-radius: 22px !important;
+      background: #FFFFFF !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      color: #475569 !important;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+      text-align: left !important;
+    }
 
-      .merlin-login .merlin-records-error::before,
-      .merlin-login .merlin-records-error::after,
-      .merlin-login .ml-flow-error.merlin-records-error::before,
-      .merlin-login .ml-flow-error.merlin-records-error::after,
-      .merlin-login .ml-flow-error[class*="mdi"].merlin-records-error::before,
-      .merlin-login .ml-flow-error[class*="mdi"].merlin-records-error::after {
-        content: none !important;
-        display: none !important;
-        width: 0 !important;
-        height: 0 !important;
-        font-size: 0 !important;
-        line-height: 0 !important;
-      }
+    .merlin-login .merlin-records-error::before,
+    .merlin-login .merlin-records-error::after,
+    .merlin-login .ml-flow-error.merlin-records-error::before,
+    .merlin-login .ml-flow-error.merlin-records-error::after,
+    .merlin-login .ml-flow-error[class*="mdi"].merlin-records-error::before,
+    .merlin-login .ml-flow-error[class*="mdi"].merlin-records-error::after,
+    .merlin-email .merlin-records-error::before,
+    .merlin-email .merlin-records-error::after,
+    .merlin-email .em-flow-error.merlin-records-error::before,
+    .merlin-email .em-flow-error.merlin-records-error::after,
+    .merlin-email .em-flow-error[class*="mdi"].merlin-records-error::before,
+    .merlin-email .em-flow-error[class*="mdi"].merlin-records-error::after {
+      content: none !important;
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      font-size: 0 !important;
+      line-height: 0 !important;
+    }
 
-      .merlin-records-error__icon {
-        width: 15px !important;
-        height: 13px !important;
-        margin-top: 1px !important;
-        display: block !important;
-      }
+    .merlin-records-error__icon {
+      width: 15px !important;
+      height: 13px !important;
+      margin-top: 1px !important;
+      display: block !important;
+    }
 
-      .merlin-records-error__title {
-        margin: 0 0 2px !important;
-        color: ${ERROR_RED} !important;
-        font-size: 12px !important;
-        font-weight: 400 !important;
-        line-height: 17px !important;
-      }
+    .merlin-records-error__title {
+      margin: 0 0 2px !important;
+      color: ${ERROR_RED} !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      line-height: 17px !important;
+    }
 
-      .merlin-records-error__body {
-        margin: 0 !important;
-        color: #475569 !important;
-        font-size: 14px !important;
-        font-weight: 400 !important;
-        line-height: 20px !important;
-      }
+    .merlin-records-error__body {
+      margin: 0 !important;
+      color: #475569 !important;
+      font-size: 14px !important;
+      font-weight: 400 !important;
+      line-height: 20px !important;
+    }
 
-      .merlin-error-ui-native-hidden {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-    `;
+    .merlin-error-ui-native-hidden {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+  `;
 
-    document.head.appendChild(style);
-  }
+  document.head.appendChild(style);
+}
 
   function getVerifyRoot() {
     return document.querySelector(".merlin-verify") || document.body;
@@ -461,7 +488,8 @@
   }
 
   function getLoginRoot() {
-    return document.querySelector(".merlin-login");
+    document.querySelector(".merlin-login") ||
+    document.querySelector(".merlin-email")
   }
 
   function getLoginEmailNodes() {
@@ -469,11 +497,29 @@
 
     if (!root) return {};
 
-    const input = root.querySelector("#userEmail");
-    const form = root.querySelector("#loginForm") || (input && input.closest("form"));
-    const label = input ? root.querySelector('label[for="' + input.id + '"]') : null;
-    const button = root.querySelector("#btnContinue");
-    const flowError = root.querySelector(".ml-flow-error");
+    const input =
+      root.querySelector("#userEmail") ||
+      root.querySelector("input[name='userEmail']") ||
+      root.querySelector("input[data-id='userEmail']") ||
+      root.querySelector("input[type='email']");
+
+    const form = root.querySelector("#loginForm") || root.querySelector("#emailForm") || (input && input.closest("form"));
+
+    const label = input && input.id
+      ? root.querySelector('label[for="' + input.id + '"]')
+      : Array.from(root.querySelectorAll("label")).find(function (candidate) {
+          return normalizeText(candidate.textContent) === "email";
+        });
+
+    const button =
+      root.querySelector("#btnContinue") ||
+      root.querySelector("#btnSubmitEmail") ||
+      root.querySelector("button[type='submit']");
+
+    const flowError =
+      root.querySelector(".ml-flow-error") ||
+      root.querySelector(".em-flow-error") ||
+      root.querySelector("[data-skcomponent='skerror']");
 
     return { root, form, input, label, button, flowError };
   }
@@ -582,7 +628,9 @@ function getEmailAssociatedErrorBox() {
   if (!emailAssociatedErrorBox) {
     emailAssociatedErrorBox = document.createElement("div");
     emailAssociatedErrorBox.id = "merlinEmailAssociatedError";
-    emailAssociatedErrorBox.className = "ml-email-associated-error";
+    emailAssociatedErrorBox.className = nodes.root.classList.contains("merlin-email")
+      ? "em-email-associated-error"
+      : "ml-email-associated-error";
     emailAssociatedErrorBox.setAttribute("role", "status");
     emailAssociatedErrorBox.setAttribute("aria-live", "polite");
     nodes.input.insertAdjacentElement("afterend", emailAssociatedErrorBox);
@@ -599,18 +647,22 @@ function showLoginEmailAssociatedError(sourceError) {
 
   clearLoginEmailFormatError();
 
+  const isEmailPage = nodes.root && nodes.root.classList.contains("merlin-email");
+  const labelClass = isEmailPage ? "em-has-associated-error" : "ml-has-associated-error";
+  const hiddenClass = isEmailPage ? "em-associated-error-hidden" : "ml-associated-error-hidden";
+
   if (nodes.label) {
-    nodes.label.classList.add("ml-has-associated-error");
+    nodes.label.classList.add(labelClass);
   }
 
-  nodes.input.classList.add("ml-has-associated-error");
+  nodes.input.classList.add(labelClass);
   nodes.input.setAttribute("aria-invalid", "true");
 
   box.textContent = EMAIL_ASSOCIATED_ERROR_TEXT;
   activeAssociatedEmailValue = String(nodes.input.value || "").trim();
 
   if (sourceError) {
-    sourceError.classList.add("ml-associated-error-hidden");
+    sourceError.classList.add(hiddenClass);
   }
 }
 
@@ -619,10 +671,12 @@ function clearLoginEmailAssociatedError() {
 
   if (nodes.label) {
     nodes.label.classList.remove("ml-has-associated-error");
+    nodes.label.classList.remove("em-has-associated-error");
   }
 
   if (nodes.input) {
     nodes.input.classList.remove("ml-has-associated-error");
+    nodes.input.classList.remove("em-has-associated-error");
 
     if (!nodes.input.classList.contains("ml-has-format-error")) {
       nodes.input.removeAttribute("aria-invalid");
@@ -633,8 +687,9 @@ function clearLoginEmailAssociatedError() {
     emailAssociatedErrorBox.textContent = "";
   }
 
-  document.querySelectorAll(".ml-associated-error-hidden").forEach(function (element) {
+  document.querySelectorAll(".ml-associated-error-hidden, .em-associated-error-hidden").forEach(function (element) {
     element.classList.remove("ml-associated-error-hidden");
+    element.classList.remove("em-associated-error-hidden");
     element.textContent = "";
   });
 
@@ -871,11 +926,15 @@ function clearAssociatedEmailIfValueChanged() {
 
   function applyRecordsErrors() {
     const root = getLoginRoot();
-    const flowError = root && root.querySelector(".ml-flow-error");
+    const flowError =
+      root &&
+      (
+        root.querySelector(".ml-flow-error") ||
+        root.querySelector(".em-flow-error") ||
+        root.querySelector("[data-skcomponent='skerror']")
+      );
 
     if (!root || !flowError || isRenderingRecords) return;
-    if (isLoginEmailInvalidFormat()) return;
-    if (flowError.dataset.merlinRecordsErrorType) return;
 
     const text = flowError.textContent;
 
@@ -884,6 +943,8 @@ function clearAssociatedEmailIfValueChanged() {
       return;
     }
 
+    if (isLoginEmailInvalidFormat()) return;
+    if (flowError.dataset.merlinRecordsErrorType) return;
 
     if (isEmailRecordsText(text)) {
       renderEmailRecordsUnderInput(flowError);
