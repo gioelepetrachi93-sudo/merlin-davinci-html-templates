@@ -236,6 +236,7 @@
 
     if (!value) return false;
     if (value.length > 180) return false;
+    if (value === "enter verification code") return true;
     if (value.includes("too many attempts")) return false;
     if (value.includes("valid for")) return false;
     if (value.includes("code expired")) return false;
