@@ -472,7 +472,6 @@
 
     if (!message.querySelector(".merlin-lock-error")) {
       message.innerHTML = `
-        <div class="merlin-lock-error">Invalid verification code</div>
         <div class="merlin-lock-timer">Too many attempts. Try again in <span id="${VERIFICATION_LOCK_SECONDS_ID}">${currentSeconds}</span>s.</div>
       `;
     }
