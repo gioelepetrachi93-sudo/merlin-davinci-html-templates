@@ -606,11 +606,10 @@ function isEmailAssociatedText(text) {
   const value = normalizeText(text);
 
   return (
-    value.includes("email address is associated with another account") ||
-    (
-      value.includes("associated with another account") &&
-      value.includes("retry with another")
-    )
+    value.includes("associated with another account") ||
+    value.includes("retry with another one") ||
+    value.includes("retry with another") ||
+    value.includes("another account")
   );
 }
 
@@ -925,36 +924,36 @@ function clearAssociatedEmailIfValueChanged() {
   }
 
   function applyRecordsErrors() {
-    const root = getLoginRoot();
-    const flowError =
-      root &&
-      (
-        root.querySelector(".ml-flow-error") ||
-        root.querySelector(".em-flow-error") ||
-        root.querySelector("[data-skcomponent='skerror']")
-      );
+  const root = getLoginRoot();
+  const flowError =
+    root &&
+    (
+      root.querySelector(".ml-flow-error") ||
+      root.querySelector(".em-flow-error") ||
+      root.querySelector("[data-skcomponent='skerror']")
+    );
 
-    if (!root || !flowError || isRenderingRecords) return;
+  if (!root || !flowError || isRenderingRecords) return;
 
-    const text = flowError.textContent;
+  const text = flowError.textContent;
 
-    if (isEmailAssociatedText(text)) {
-      showLoginEmailAssociatedError(flowError);
-      return;
-    }
-
-    if (isLoginEmailInvalidFormat()) return;
-    if (flowError.dataset.merlinRecordsErrorType) return;
-
-    if (isEmailRecordsText(text)) {
-      renderEmailRecordsUnderInput(flowError);
-      return;
-    }
-
-    if (isPhoneRecordsText(text)) {
-      renderRecordsCard(flowError, "phone");
-    }
+  if (isEmailAssociatedText(text)) {
+    showLoginEmailAssociatedError(flowError);
+    return;
   }
+
+  if (isLoginEmailInvalidFormat()) return;
+  if (flowError.dataset.merlinRecordsErrorType) return;
+
+  if (isEmailRecordsText(text)) {
+    renderEmailRecordsUnderInput(flowError);
+    return;
+  }
+
+  if (isPhoneRecordsText(text)) {
+    renderRecordsCard(flowError, "phone");
+  }
+}
 
   function scheduleRecordsCheck() {
     recordsTimers.forEach(clearTimeout);
