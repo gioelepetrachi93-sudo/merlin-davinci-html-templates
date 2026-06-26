@@ -12,6 +12,7 @@
   const CHECK_INTERVAL_MS = 300;
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const EMAIL_FORMAT_ERROR_TEXT = "Please check your email format (e.g. name@mail.com)";
+  const EMAIL_ASSOCIATED_ERROR_TEXT = "This email address is associated with another account. Please retry with another one.";
 
   const OTP_SELECTORS = [
     { wrapper: ".mv-otp-wrapper", cell: ".mv-otp-wrapper > .mv-otp-cell" },
@@ -21,6 +22,7 @@
   let timer = null;
   let dismissedOtpInvalid = false;
   let emailFormatErrorBox = null;
+  let activeAssociatedEmailValue = "";
   let emailFormatTimers = [];
   let recordsTimers = [];
   let recordsObserver = null;
@@ -115,6 +117,41 @@
         margin-top: 6px !important;
         min-height: 0 !important;
         text-align: left !important;
+      }
+
+            .merlin-login .ml-label.ml-has-associated-error {
+        color: ${ERROR_RED} !important;
+      }
+
+      .merlin-login .ml-input.ml-has-associated-error {
+        border-color: ${ERROR_RED} !important;
+        box-shadow: none !important;
+      }
+
+      .merlin-login .ml-input.ml-has-associated-error:focus {
+        border-color: ${ERROR_RED} !important;
+        box-shadow: 0 0 0 1px ${ERROR_RED} !important;
+      }
+
+      .merlin-login .ml-email-associated-error {
+        display: block !important;
+        color: ${ERROR_RED} !important;
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        line-height: 17px !important;
+        margin-top: 6px !important;
+        min-height: 0 !important;
+        text-align: left !important;
+      }
+
+      .merlin-login .ml-email-associated-error:empty {
+        display: none !important;
+      }
+
+      .merlin-login .ml-flow-error.ml-associated-error-hidden {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
       }
 
       .merlin-login .merlin-records-source-hidden,
@@ -496,25 +533,124 @@
   }
 
   function clearLoginEmailFormatError() {
-    const nodes = getLoginEmailNodes();
+  const nodes = getLoginEmailNodes();
 
-    if (nodes.label) {
-      nodes.label.classList.remove("ml-has-format-error");
-    }
+  if (nodes.label) {
+    nodes.label.classList.remove("ml-has-format-error");
+  }
 
-    if (nodes.input) {
-      nodes.input.classList.remove("ml-has-format-error");
+  if (nodes.input) {
+    nodes.input.classList.remove("ml-has-format-error");
+
+    if (!nodes.input.classList.contains("ml-has-associated-error")) {
       nodes.input.removeAttribute("aria-invalid");
     }
+  }
 
-    if (emailFormatErrorBox) {
-      emailFormatErrorBox.textContent = "";
-    }
+  if (emailFormatErrorBox) {
+    emailFormatErrorBox.textContent = "";
+  }
 
-    if (nodes.flowError) {
-      nodes.flowError.classList.remove("ml-format-error-hidden");
+  if (nodes.flowError) {
+    nodes.flowError.classList.remove("ml-format-error-hidden");
+  }
+}
+
+function isEmailAssociatedText(text) {
+  const value = normalizeText(text);
+
+  return (
+    value.includes("email address is associated with another account") ||
+    (
+      value.includes("associated with another account") &&
+      value.includes("retry with another")
+    )
+  );
+}
+
+function getEmailAssociatedErrorBox() {
+  const nodes = getLoginEmailNodes();
+
+  if (!nodes.input) return null;
+
+  if (emailAssociatedErrorBox && document.documentElement.contains(emailAssociatedErrorBox)) {
+    return emailAssociatedErrorBox;
+  }
+
+  emailAssociatedErrorBox = document.getElementById("merlinEmailAssociatedError");
+
+  if (!emailAssociatedErrorBox) {
+    emailAssociatedErrorBox = document.createElement("div");
+    emailAssociatedErrorBox.id = "merlinEmailAssociatedError";
+    emailAssociatedErrorBox.className = "ml-email-associated-error";
+    emailAssociatedErrorBox.setAttribute("role", "status");
+    emailAssociatedErrorBox.setAttribute("aria-live", "polite");
+    nodes.input.insertAdjacentElement("afterend", emailAssociatedErrorBox);
+  }
+
+  return emailAssociatedErrorBox;
+}
+
+function showLoginEmailAssociatedError(sourceError) {
+  const nodes = getLoginEmailNodes();
+  const box = getEmailAssociatedErrorBox();
+
+  if (!nodes.input || !box) return;
+
+  clearLoginEmailFormatError();
+
+  if (nodes.label) {
+    nodes.label.classList.add("ml-has-associated-error");
+  }
+
+  nodes.input.classList.add("ml-has-associated-error");
+  nodes.input.setAttribute("aria-invalid", "true");
+
+  box.textContent = EMAIL_ASSOCIATED_ERROR_TEXT;
+  activeAssociatedEmailValue = String(nodes.input.value || "").trim();
+
+  if (sourceError) {
+    sourceError.classList.add("ml-associated-error-hidden");
+  }
+}
+
+function clearLoginEmailAssociatedError() {
+  const nodes = getLoginEmailNodes();
+
+  if (nodes.label) {
+    nodes.label.classList.remove("ml-has-associated-error");
+  }
+
+  if (nodes.input) {
+    nodes.input.classList.remove("ml-has-associated-error");
+
+    if (!nodes.input.classList.contains("ml-has-format-error")) {
+      nodes.input.removeAttribute("aria-invalid");
     }
   }
+
+  if (emailAssociatedErrorBox) {
+    emailAssociatedErrorBox.textContent = "";
+  }
+
+  document.querySelectorAll(".ml-associated-error-hidden").forEach(function (element) {
+    element.classList.remove("ml-associated-error-hidden");
+    element.textContent = "";
+  });
+
+  activeAssociatedEmailValue = "";
+}
+
+function clearAssociatedEmailIfValueChanged() {
+  if (!activeAssociatedEmailValue) return;
+
+  const input = getEmailInput();
+  const value = String((input && input.value) || "").trim();
+
+  if (value !== activeAssociatedEmailValue) {
+    clearLoginEmailAssociatedError();
+  }
+}
 
   function validateLoginEmailFormat(show) {
     if (!isLoginEmailPage()) return true;
@@ -604,6 +740,7 @@
     if (event.target !== nodes.input) return;
 
     clearRecordsIfValueChanged();
+    clearAssociatedEmailIfValueChanged();
 
     if (isLoginEmailInvalidFormat()) {
       if (nodes.input.classList.contains("ml-has-format-error")) {
@@ -741,6 +878,12 @@
     if (flowError.dataset.merlinRecordsErrorType) return;
 
     const text = flowError.textContent;
+
+    if (isEmailAssociatedText(text)) {
+      showLoginEmailAssociatedError(flowError);
+      return;
+    }
+
 
     if (isEmailRecordsText(text)) {
       renderEmailRecordsUnderInput(flowError);
@@ -930,6 +1073,11 @@
     }
 
     clearLoginEmailFormatError();
+
+    if (emailAssociatedErrorBox) {
+      emailAssociatedErrorBox.remove();
+      emailAssociatedErrorBox = null;
+    }
 
     if (emailFormatErrorBox) {
       emailFormatErrorBox.remove();
