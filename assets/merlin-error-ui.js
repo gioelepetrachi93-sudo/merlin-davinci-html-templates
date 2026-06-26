@@ -76,7 +76,7 @@
 
       .merlin-verify .mv-otp-error {
         display: block !important;
-        margin: 8px 0 0 !important;
+        margin: 8px 0 8px !important;
         padding: 0 !important;
         color: ${ERROR_RED} !important;
         font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
