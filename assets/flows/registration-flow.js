@@ -9,9 +9,9 @@
 
   const MODULES = [
     "merlin-theme.js",
-    "merlin-otp-lock.js",
+    "merlin-contact.js",
     "merlin-error-ui.js",
-    "merlin-contact.js"
+    "merlin-otp-lock.js"
   ];
 
   const currentSrc =
