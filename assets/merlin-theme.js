@@ -338,6 +338,26 @@
     return DEFAULT_THEME_CODE;
   }
 
+  function setMerlinFavicon() {
+  const iconUrl =
+    "https://cdn.jsdelivr.net/gh/gioelepetrachi93-sudo/merlin-davinci-html-templates@main/assets/brand-logos/favicon.png?v=20260630-1";
+
+  document.querySelectorAll('link[rel*="icon"]').forEach(function (link) {
+    link.remove();
+  });
+
+  [
+    { rel: "shortcut icon", type: "image/png" },
+    { rel: "icon", type: "image/png" }
+  ].forEach(function (attrs) {
+    const link = document.createElement("link");
+    link.rel = attrs.rel;
+    link.type = attrs.type;
+    link.href = iconUrl;
+    document.head.appendChild(link);
+  });
+}
+
   function getLogoUrl(theme) {
     return CDN_BASE + theme.logoFile + "?" + ASSET_VERSION;
   }
@@ -1301,10 +1321,12 @@
 
     injectBaseStyle();
     applyTheme();
+    setMerlinFavicon();
     installLargeDesktopContentScale();
     scheduleFixedLeftScrollLayout();
     installEnterPrimaryAction();
     observeDavinciDomChanges();
+
 
     window.addEventListener("resize", function () {
       scheduleApplyTheme();
@@ -1316,6 +1338,10 @@
     setTimeout(applyTheme, 800);
     setTimeout(applyTheme, 1500);
     setTimeout(applyTheme, 3000);
+
+    setTimeout(setMerlinFavicon, 500);
+    setTimeout(setMerlinFavicon, 1500);
+    setTimeout(setMerlinFavicon, 3000);
 
     setTimeout(installLargeDesktopContentScale, 100);
     setTimeout(installLargeDesktopContentScale, 300);
