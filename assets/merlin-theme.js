@@ -1339,6 +1339,8 @@
     setTimeout(applyTheme, 1500);
     setTimeout(applyTheme, 3000);
 
+    setTimeout(setMerlinFavicon, 100);
+    setTimeout(setMerlinFavicon, 250);
     setTimeout(setMerlinFavicon, 500);
     setTimeout(setMerlinFavicon, 1500);
     setTimeout(setMerlinFavicon, 3000);
