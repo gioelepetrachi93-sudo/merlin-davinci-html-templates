@@ -338,39 +338,6 @@
     return DEFAULT_THEME_CODE;
   }
 
-  function setMerlinFavicon() {
-    const iconUrl =
-      "https://cdn.jsdelivr.net/gh/gioelepetrachi93-sudo/merlin-davinci-html-templates@main/assets/brand-logos/favicon.png?v=20260630-2";
-
-    if (!document.head) return;
-
-    document.querySelectorAll('link[rel*="icon"]').forEach(function (link) {
-      if (link.href !== iconUrl) {
-        link.remove();
-      }
-    });
-
-    if (!document.querySelector('link[rel="shortcut icon"][href="' + iconUrl + '"]')) {
-      const shortcut = document.createElement("link");
-      shortcut.rel = "shortcut icon";
-      shortcut.type = "image/png";
-      shortcut.href = iconUrl;
-      shortcut.setAttribute("data-merlin-favicon", "true");
-      document.head.appendChild(shortcut);
-    }
-
-    if (!document.querySelector('link[rel="icon"][href="' + iconUrl + '"]')) {
-      const icon = document.createElement("link");
-      icon.rel = "icon";
-      icon.type = "image/png";
-      icon.href = iconUrl;
-      icon.setAttribute("data-merlin-favicon", "true");
-      document.head.appendChild(icon);
-    }
-  }
-
-  setMerlinFavicon();
-
   function getLogoUrl(theme) {
     return CDN_BASE + theme.logoFile + "?" + ASSET_VERSION;
   }
@@ -1332,7 +1299,6 @@
     console.log("[Merlin Theme] loaded");
     console.log("[Merlin Theme] URL from:", getFromParam());
 
-    setMerlinFavicon();
     injectBaseStyle();
     applyTheme();
     installLargeDesktopContentScale();
@@ -1340,26 +1306,16 @@
     installEnterPrimaryAction();
     observeDavinciDomChanges();
 
-
     window.addEventListener("resize", function () {
       scheduleApplyTheme();
       scheduleFixedLeftScrollLayout();
     });
-
-
-    setTimeout(setMerlinFavicon, 100);
-    setTimeout(setMerlinFavicon, 250);
-    setTimeout(setMerlinFavicon, 500);
-    setTimeout(setMerlinFavicon, 1500);
-    setTimeout(setMerlinFavicon, 3000);
 
     setTimeout(applyTheme, 100);
     setTimeout(applyTheme, 300);
     setTimeout(applyTheme, 800);
     setTimeout(applyTheme, 1500);
     setTimeout(applyTheme, 3000);
-
-
 
     setTimeout(installLargeDesktopContentScale, 100);
     setTimeout(installLargeDesktopContentScale, 300);
@@ -1374,7 +1330,6 @@
     setTimeout(scheduleFixedLeftScrollLayout, 3000);
 
     const interval = setInterval(function () {
-      setMerlinFavicon();
       applyTheme();
       installLargeDesktopContentScale();
       scheduleFixedLeftScrollLayout();
