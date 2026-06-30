@@ -339,24 +339,37 @@
   }
 
   function setMerlinFavicon() {
-  const iconUrl =
-    "https://cdn.jsdelivr.net/gh/gioelepetrachi93-sudo/merlin-davinci-html-templates@main/assets/brand-logos/favicon.png?v=20260630-1";
+    const iconUrl =
+      "https://cdn.jsdelivr.net/gh/gioelepetrachi93-sudo/merlin-davinci-html-templates@main/assets/brand-logos/favicon.png?v=20260630-2";
 
-  document.querySelectorAll('link[rel*="icon"]').forEach(function (link) {
-    link.remove();
-  });
+    if (!document.head) return;
 
-  [
-    { rel: "shortcut icon", type: "image/png" },
-    { rel: "icon", type: "image/png" }
-  ].forEach(function (attrs) {
-    const link = document.createElement("link");
-    link.rel = attrs.rel;
-    link.type = attrs.type;
-    link.href = iconUrl;
-    document.head.appendChild(link);
-  });
-}
+    document.querySelectorAll('link[rel*="icon"]').forEach(function (link) {
+      if (link.href !== iconUrl) {
+        link.remove();
+      }
+    });
+
+    if (!document.querySelector('link[rel="shortcut icon"][href="' + iconUrl + '"]')) {
+      const shortcut = document.createElement("link");
+      shortcut.rel = "shortcut icon";
+      shortcut.type = "image/png";
+      shortcut.href = iconUrl;
+      shortcut.setAttribute("data-merlin-favicon", "true");
+      document.head.appendChild(shortcut);
+    }
+
+    if (!document.querySelector('link[rel="icon"][href="' + iconUrl + '"]')) {
+      const icon = document.createElement("link");
+      icon.rel = "icon";
+      icon.type = "image/png";
+      icon.href = iconUrl;
+      icon.setAttribute("data-merlin-favicon", "true");
+      document.head.appendChild(icon);
+    }
+  }
+
+  setMerlinFavicon();
 
   function getLogoUrl(theme) {
     return CDN_BASE + theme.logoFile + "?" + ASSET_VERSION;
@@ -1319,9 +1332,9 @@
     console.log("[Merlin Theme] loaded");
     console.log("[Merlin Theme] URL from:", getFromParam());
 
+    setMerlinFavicon();
     injectBaseStyle();
     applyTheme();
-    setMerlinFavicon();
     installLargeDesktopContentScale();
     scheduleFixedLeftScrollLayout();
     installEnterPrimaryAction();
@@ -1333,17 +1346,20 @@
       scheduleFixedLeftScrollLayout();
     });
 
-    setTimeout(applyTheme, 100);
-    setTimeout(applyTheme, 300);
-    setTimeout(applyTheme, 800);
-    setTimeout(applyTheme, 1500);
-    setTimeout(applyTheme, 3000);
 
     setTimeout(setMerlinFavicon, 100);
     setTimeout(setMerlinFavicon, 250);
     setTimeout(setMerlinFavicon, 500);
     setTimeout(setMerlinFavicon, 1500);
     setTimeout(setMerlinFavicon, 3000);
+
+    setTimeout(applyTheme, 100);
+    setTimeout(applyTheme, 300);
+    setTimeout(applyTheme, 800);
+    setTimeout(applyTheme, 1500);
+    setTimeout(applyTheme, 3000);
+
+
 
     setTimeout(installLargeDesktopContentScale, 100);
     setTimeout(installLargeDesktopContentScale, 300);
@@ -1358,6 +1374,7 @@
     setTimeout(scheduleFixedLeftScrollLayout, 3000);
 
     const interval = setInterval(function () {
+      setMerlinFavicon();
       applyTheme();
       installLargeDesktopContentScale();
       scheduleFixedLeftScrollLayout();
