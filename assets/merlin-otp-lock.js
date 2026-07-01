@@ -214,6 +214,7 @@
     const timerElement = findVerificationValidityElement();
 
     if (timerElement) {
+      timerElement.style.removeProperty("color");
       timerElement.textContent = "Valid for " + formatValidityTime(VERIFICATION_VALIDITY_SECONDS);
     }
   }
@@ -235,13 +236,15 @@
     verificationLastValiditySecond = remainingSeconds;
 
     if (remainingSeconds <= 0) {
-      timerElement.textContent = "Expired";
+      timerElement.textContent = "Code expired";
+      timerElement.style.setProperty("color", "#FF383C", "important");
 
       const continueButton = findVerificationContinueButton();
       setVerificationControlDisabled(continueButton, true);
       return;
     }
 
+    timerElement.style.removeProperty("color");
     timerElement.textContent = "Valid for " + formatValidityTime(remainingSeconds);
   }
 
