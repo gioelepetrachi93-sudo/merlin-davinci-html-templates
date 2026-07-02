@@ -158,7 +158,7 @@
       .merlin-records-error__icon {
         width: 15px !important;
         height: 13px !important;
-        margin-top: 1px !important;
+        margin-top: 3px !important;
         display: block !important;
       }
 
