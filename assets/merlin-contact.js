@@ -154,18 +154,38 @@
       }
 
       .merlin-contact-email {
-        font-size: 14px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-width: 40px;
+        height: 40px;
+        padding: 8px 16px;
+        gap: 8px;
+        margin: 8px 0 0;
+        border-radius: 24px;
+        background: #EDEEF8;
+        color: #571CFF;
+        font-size: 16px;
         font-weight: 600;
-        line-height: 20px;
+        line-height: 24px;
+        text-align: center;
+        text-decoration: none;
       }
 
-      .merlin-contact-phone:hover,
-      .merlin-contact-email:hover {
+      .merlin-contact-phone:hover {
         color: #571CFF;
         text-decoration: underline;
         text-decoration-thickness: 1px;
         text-decoration-color: #CDCDCE;
         text-underline-offset: 3px;
+      }
+
+      .merlin-contact-email:hover {
+        color: #571CFF;
+        background: #E6E8F6;
+        text-decoration: none;
       }
 
       @media (max-width: 767px) {
