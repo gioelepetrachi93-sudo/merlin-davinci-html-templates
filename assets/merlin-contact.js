@@ -51,10 +51,12 @@
 
       .merlin-contact-modal {
         position: relative;
-        width: min(524px, calc(100vw - 48px));
+        width: min(636px, calc(100vw - 32px));
         max-height: calc(100vh - 48px);
         overflow-y: auto;
-        padding: 20px;
+        overflow-x: hidden;
+        box-sizing: border-box;
+        padding: 14px 18px 22px;
         border-radius: 18px;
         background: #FFFFFF;
         color: #091464;
@@ -159,11 +161,13 @@
         justify-content: center;
         align-items: center;
         width: 100%;
-        min-width: 40px;
+        max-width: 100%;
+        min-width: 0;
         height: 40px;
         padding: 8px 16px;
         gap: 8px;
         margin: 8px 0 0;
+        box-sizing: border-box;
         border-radius: 24px;
         background: #EDEEF8;
         color: #571CFF;
@@ -172,6 +176,9 @@
         line-height: 24px;
         text-align: center;
         text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .merlin-contact-phone:hover {
@@ -199,6 +206,7 @@
           min-width: 0 !important;
           box-sizing: border-box !important;
           max-height: calc(100vh - 48px);
+          overflow-x: hidden !important;
           padding: 20px 18px !important;
           border-radius: 16px !important;
         }
