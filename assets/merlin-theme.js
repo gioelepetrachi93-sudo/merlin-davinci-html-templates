@@ -3,6 +3,7 @@
   const SESSION_KEY = "merlin_asset_theme_code";
   const STYLE_ID = "merlin-theme-style";
   const FIXED_LEFT_STYLE_ID = "merlin-fixed-left-scroll-style";
+  const IOS_ZOOM_FIX_STYLE_ID = "merlin-ios-zoom-fix-style";
   const SMALL_MERLIN_LOGO_CLASS = "merlin-small-brand-logo";
 
   const CDN_BASE =
@@ -448,6 +449,50 @@
     });
 
     TRACKED_ELEMENTS.clear();
+  }
+
+  function installIosZoomFix() {
+    var viewport = document.querySelector('meta[name="viewport"]');
+
+    if (!viewport) {
+      viewport = document.createElement("meta");
+      viewport.setAttribute("name", "viewport");
+      document.head.appendChild(viewport);
+    }
+
+    viewport.setAttribute(
+      "content",
+      "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    );
+
+    var style = document.getElementById(IOS_ZOOM_FIX_STYLE_ID);
+
+    if (!style) {
+      style = document.createElement("style");
+      style.id = IOS_ZOOM_FIX_STYLE_ID;
+      document.head.appendChild(style);
+    }
+
+    style.textContent = `
+      .merlin-login input:not([type="hidden"]),
+      .merlin-login select,
+      .merlin-login textarea,
+      .merlin-register input:not([type="hidden"]),
+      .merlin-register select,
+      .merlin-register textarea,
+      .merlin-verify input:not([type="hidden"]),
+      .merlin-verify select,
+      .merlin-verify textarea {
+        font-size: 16px !important;
+      }
+
+      .merlin-verify input[autocomplete="one-time-code"],
+      .merlin-verify .otp-input,
+      .merlin-verify .mv-otp-input,
+      .merlin-verify .mv-code-input {
+        font-size: 24px !important;
+      }
+    `;
   }
 
   function injectBaseStyle() {
@@ -1177,6 +1222,7 @@
 
   function observeDavinciDomChanges() {
     const observer = new MutationObserver(function () {
+      installIosZoomFix();
       scheduleApplyTheme();
       scheduleFixedLeftScrollLayout();
     });
@@ -1296,6 +1342,7 @@
   }
 
   function init() {
+    installIosZoomFix();
     console.log("[Merlin Theme] loaded");
     console.log("[Merlin Theme] URL from:", getFromParam());
 
