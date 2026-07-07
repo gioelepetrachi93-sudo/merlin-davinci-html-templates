@@ -37,6 +37,7 @@
   let cooldownContainer = null;
   let cooldownMessageElement = null;
   let cooldownHiddenElements = [];
+  let cooldownHiddenTextNodes = [];
 
   function getStoredUntil() {
     const value = Number(sessionStorage.getItem(STORAGE_KEY) || 0);
@@ -127,9 +128,9 @@
 
         const hasLeadText =
         text.includes("i didn't get my code") ||
-        text.includes("i didn’t get my code") ||
+        text.includes("i didn't get my code") ||
         text.includes("didn't get my code") ||
-        text.includes("didn’t get my code");
+        text.includes("didn't get my code");
 
         const hasResendText =
         text.includes("send another") ||
@@ -436,6 +437,46 @@
     }
   }
 
+  function hideCooldownTextNodes(container) {
+  cooldownHiddenTextNodes = [];
+
+  if (!container) return;
+
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+
+    if (
+      node.parentElement &&
+      node.parentElement.closest(".merlin-otp-cooldown-message")
+    ) {
+      continue;
+    }
+
+    const value = node.nodeValue;
+
+    if (!normalizeText(value)) continue;
+
+    cooldownHiddenTextNodes.push({
+      node: node,
+      value: value
+    });
+
+    node.nodeValue = "";
+  }
+}
+
+function restoreCooldownTextNodes() {
+  cooldownHiddenTextNodes.forEach(function (entry) {
+    entry.node.nodeValue = entry.value;
+  });
+
+  cooldownHiddenTextNodes = [];
+}
+
+
+
   function renderCooldownMessage() {
     if (!cooldownContainer) return;
 
@@ -458,6 +499,7 @@
         "</strong>";
 
       cooldownContainer.appendChild(cooldownMessageElement);
+        hideCooldownTextNodes(cooldownContainer);
     }
 
     updateCooldownTimer();
@@ -471,6 +513,8 @@
     cooldownHiddenElements.forEach(function (element) {
       element.style.removeProperty("display");
     });
+
+    restoreCooldownTextNodes();
 
     if (cooldownContainer) {
       cooldownContainer.classList.remove("merlin-otp-cooldown-active");
