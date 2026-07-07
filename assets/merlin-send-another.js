@@ -279,6 +279,17 @@
         font-weight: 500;
       }
 
+        @media (min-width: 768px) {
+        .merlin-otp-wait-modal {
+            width: 368px !important;
+            padding: 24px 24px 20px !important;
+        }
+
+        .merlin-otp-wait-copy {
+            max-width: 280px !important;
+        }
+        }
+
       @media (max-width: 767px) {
         .merlin-otp-wait-overlay {
           padding: 0 16px !important;
