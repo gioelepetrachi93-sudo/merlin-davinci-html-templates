@@ -336,7 +336,7 @@
 
         <h2 class="merlin-otp-wait-title" id="merlinOtpWaitTitle">Please wait a few minutes</h2>
         <p class="merlin-otp-wait-copy">
-          Before requesting a new code, please wait 15 minutes. If you're having trouble finding your code, check your Spam folder.
+          Before requesting a new code, please wait 2 minutes. If you're having trouble finding your code, check your Spam folder.
         </p>
 
         <div class="merlin-otp-wait-actions">
