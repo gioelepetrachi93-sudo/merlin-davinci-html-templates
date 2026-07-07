@@ -76,7 +76,6 @@
     const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = String(totalSeconds % 60).padStart(2, "0");
-
     return minutes + ":" + seconds;
   }
 
@@ -107,11 +106,9 @@
     if (!target || !target.closest) return null;
 
     const selectorMatch = target.closest(RESEND_SELECTORS.join(","));
-
     if (selectorMatch) return selectorMatch;
 
     const clickable = target.closest("a, button, [role='button'], input[type='submit']");
-
     if (clickable && isResendText(clickable)) {
       return clickable;
     }
@@ -264,15 +261,21 @@
         background: #4815E0;
       }
 
+      .merlin-otp-cooldown-active {
+        font-size: 0 !important;
+        line-height: 0 !important;
+        color: transparent !important;
+      }
+
       .merlin-otp-cooldown-message {
-        display: block;
+        display: block !important;
         width: 100%;
         margin: 0;
-        color: #091464;
+        color: #091464 !important;
         font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        font-size: 14px;
+        font-size: 14px !important;
         font-weight: 400;
-        line-height: 20px;
+        line-height: 20px !important;
         text-align: center;
       }
 
@@ -403,6 +406,8 @@
     if (!cooldownContainer) return;
 
     if (!cooldownMessageElement) {
+      cooldownContainer.classList.add("merlin-otp-cooldown-active");
+
       cooldownHiddenElements = Array.from(cooldownContainer.children);
 
       cooldownHiddenElements.forEach(function (element) {
@@ -432,6 +437,10 @@
     cooldownHiddenElements.forEach(function (element) {
       element.style.removeProperty("display");
     });
+
+    if (cooldownContainer) {
+      cooldownContainer.classList.remove("merlin-otp-cooldown-active");
+    }
 
     cooldownContainer = null;
     cooldownMessageElement = null;
