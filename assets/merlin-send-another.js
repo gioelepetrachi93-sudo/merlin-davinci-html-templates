@@ -35,7 +35,8 @@
 
   let cooldownInterval = null;
   let cooldownContainer = null;
-  let cooldownOriginalHtml = null;
+  let cooldownMessageElement = null;
+  let cooldownHiddenElements = [];
 
   function getStoredUntil() {
     const value = Number(sessionStorage.getItem(STORAGE_KEY) || 0);
@@ -279,16 +280,16 @@
         font-weight: 500;
       }
 
-        @media (min-width: 768px) {
+      @media (min-width: 768px) {
         .merlin-otp-wait-modal {
-            width: 368px !important;
-            padding: 24px 24px 20px !important;
+          width: 368px !important;
+          padding: 24px 24px 20px !important;
         }
 
         .merlin-otp-wait-copy {
-            max-width: 280px !important;
+          max-width: 280px !important;
         }
-        }
+      }
 
       @media (max-width: 767px) {
         .merlin-otp-wait-overlay {
@@ -401,26 +402,40 @@
   function renderCooldownMessage() {
     if (!cooldownContainer) return;
 
-    if (cooldownOriginalHtml === null) {
-      cooldownOriginalHtml = cooldownContainer.innerHTML;
-    }
+    if (!cooldownMessageElement) {
+      cooldownHiddenElements = Array.from(cooldownContainer.children);
 
-    cooldownContainer.innerHTML = `
-      <span class="merlin-otp-cooldown-message">
-        You can ask for a new code in <strong id="${TIMER_ID}">${formatRemaining(getRemainingMs())}</strong>
-      </span>
-    `;
+      cooldownHiddenElements.forEach(function (element) {
+        element.style.setProperty("display", "none", "important");
+      });
+
+      cooldownMessageElement = document.createElement("span");
+      cooldownMessageElement.className = "merlin-otp-cooldown-message";
+      cooldownMessageElement.innerHTML =
+        'You can ask for a new code in <strong id="' +
+        TIMER_ID +
+        '">' +
+        formatRemaining(getRemainingMs()) +
+        "</strong>";
+
+      cooldownContainer.appendChild(cooldownMessageElement);
+    }
 
     updateCooldownTimer();
   }
 
   function restoreCooldownMessage() {
-    if (cooldownContainer && cooldownOriginalHtml !== null) {
-      cooldownContainer.innerHTML = cooldownOriginalHtml;
+    if (cooldownMessageElement) {
+      cooldownMessageElement.remove();
     }
 
+    cooldownHiddenElements.forEach(function (element) {
+      element.style.removeProperty("display");
+    });
+
     cooldownContainer = null;
-    cooldownOriginalHtml = null;
+    cooldownMessageElement = null;
+    cooldownHiddenElements = [];
   }
 
   function updateCooldownTimer() {
@@ -494,7 +509,6 @@
     if (event.stopImmediatePropagation) event.stopImmediatePropagation();
 
     cooldownContainer = getCooldownContainer(trigger);
-    cooldownOriginalHtml = cooldownContainer ? cooldownContainer.innerHTML : null;
 
     startCooldown(cooldownContainer);
     openWaitModal();
