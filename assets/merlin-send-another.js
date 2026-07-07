@@ -116,18 +116,52 @@
     return null;
   }
 
-  function getCooldownContainer(trigger) {
+    function getCooldownContainer(trigger) {
     if (!trigger) return null;
 
+    let node = trigger.parentElement;
+    let bestMatch = null;
+
+    while (node && node !== document.body) {
+        const text = normalizeText(node.textContent);
+
+        const hasLeadText =
+        text.includes("i didn't get my code") ||
+        text.includes("i didn’t get my code") ||
+        text.includes("didn't get my code") ||
+        text.includes("didn’t get my code");
+
+        const hasResendText =
+        text.includes("send another") ||
+        text.includes("send a new code") ||
+        text.includes("resend") ||
+        text.includes("new code");
+
+        const looksTooLarge =
+        text.includes("terms and conditions") ||
+        text.includes("privacy policy") ||
+        text.includes("let's go") ||
+        text.includes("unable to access your account") ||
+        text.includes("unable to get in");
+
+        if (hasLeadText && hasResendText && !looksTooLarge) {
+        bestMatch = node;
+        break;
+        }
+
+        node = node.parentElement;
+    }
+
     return (
-      trigger.closest(".mv-resend-row") ||
-      trigger.closest(".mv-send-another-row") ||
-      trigger.closest(".mv-resend") ||
-      trigger.closest(".mv-send-another") ||
-      trigger.closest("p") ||
-      trigger.parentElement
+        bestMatch ||
+        trigger.closest(".mv-resend-row") ||
+        trigger.closest(".mv-send-another-row") ||
+        trigger.closest(".mv-resend") ||
+        trigger.closest(".mv-send-another") ||
+        trigger.closest("p") ||
+        trigger.parentElement
     );
-  }
+    }
 
   function removeExistingOtpWaitUi() {
     const overlay = document.getElementById(OVERLAY_ID);
