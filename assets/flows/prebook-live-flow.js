@@ -11,7 +11,8 @@
     "merlin-theme.js",
     "merlin-contact.js",
     "merlin-otp-lock.js",
-    "merlin-error-ui.js"
+    "merlin-error-ui.js",
+    "merlin-send-another.js"
   ];
 
   const currentSrc =
