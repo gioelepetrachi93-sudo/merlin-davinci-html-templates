@@ -1,6 +1,7 @@
 (function () {
   const DEFAULT_THEME_CODE = "000";
   const SESSION_KEY = "merlin_asset_theme_code";
+  const ATTRACTION_SESSION_KEY = "merlin_attraction_id";
   const STYLE_ID = "merlin-theme-style";
   const FIXED_LEFT_STYLE_ID = "merlin-fixed-left-scroll-style";
   const SMALL_MERLIN_LOGO_CLASS = "merlin-small-brand-logo";
@@ -273,6 +274,89 @@
     UKMTLON: "011"
   };
 
+  const ATTRACTION_LEGAL_LINKS = {
+    UKPKALT: {
+      terms: "https://www.altontowers.com/terms-and-conditions/",
+      privacy: "https://www.altontowers.com/privacy-notice/"
+    },
+    UKCWBIR: {
+      terms: "https://www.cadburyworld.co.uk/policies/terms-conditions/",
+      privacy: "https://support.cadburyworld.co.uk"
+    },
+    UKPKCWA: {
+      terms: "https://www.chessington.com/legal/terms-conditions/",
+      privacy: "https://www.chessington.com/legal/privacy-notice/"
+    },
+    UKDGEDI: {
+      terms: "https://www.thedungeons.com/edinburgh/policies/terms-conditions/",
+      privacy: "https://www.thedungeons.com/edinburgh/policies/privacy-policy/"
+    },
+    UKDGYOR: {
+      terms: "https://www.thedungeons.com/york/policies/terms-conditions/",
+      privacy: "https://www.thedungeons.com/york/policies/privacy-policy/"
+    },
+    UKGRBLA: {
+      terms: "https://www.gruffaloclubhouse.com/blackpool/policies/terms-conditions/",
+      privacy: "https://www.gruffaloclubhouse.com/blackpool/policies/privacy-policy/"
+    },
+    UKLLWIN: {
+      terms: "https://www.legoland.co.uk/security-privacy-legal/terms-conditions/",
+      privacy: "https://www.legoland.co.uk/security-privacy-legal/privacy-notice/"
+    },
+    UKSLBIR: {
+      terms: "https://www.visitsealife.com/birmingham/policies/terms-conditions/",
+      privacy: "https://www.visitsealife.com/birmingham/policies/privacy-policy/"
+    },
+    UKSLBLA: {
+      terms: "https://www.visitsealife.com/blackpool/policies/terms-conditions/",
+      privacy: "https://www.visitsealife.com/blackpool/policies/privacy-policy/"
+    },
+    UKSLBRI: {
+      terms: "https://www.visitsealife.com/brighton/policies/terms-conditions/",
+      privacy: "https://www.visitsealife.com/brighton/policies/privacy-policy/"
+    },
+    UKSLYAR: {
+      terms: "https://www.visitsealife.com/great-yarmouth/policies/terms-conditions/",
+      privacy: "https://www.visitsealife.com/great-yarmouth/policies/privacy-policy/"
+    },
+    UKSLHUN: {
+      terms: "https://www.visitsealife.com/hunstanton/policies/terms-conditions/",
+      privacy: "https://www.visitsealife.com/hunstanton/policies/privacy-policy/"
+    },
+    UKSLLOM: {
+      terms: "https://www.visitsealife.com/loch-lomond/policies/terms-conditions/",
+      privacy: "https://www.visitsealife.com/loch-lomond/policies/privacy-policy/"
+    },
+    UKSLMAN: {
+      terms: "https://www.visitsealife.com/manchester/policies/terms-conditions/#booking-tcs",
+      privacy: "https://www.visitsealife.com/manchester/policies/privacy-policy/"
+    },
+    UKSLSCA: {
+      terms: "https://www.visitsealife.com/scarborough/policies/terms-conditions/",
+      privacy: "https://www.visitsealife.com/scarborough/policies/privacy-policy/"
+    },
+    UKSLWEY: {
+      terms: "https://www.visitsealife.com/weymouth/policies/terms-conditions/",
+      privacy: "https://www.visitsealife.com/weymouth/policies/privacy-policy/"
+    },
+    UKPKTHO: {
+      terms: "https://www.thorpepark.com/terms-conditions/",
+      privacy: "https://www.thorpepark.com/privacy-notice/"
+    },
+    UKPKWAC: {
+      terms: "https://www.warwick-castle.com/security-privacy/terms-conditions/",
+      privacy: "https://www.warwick-castle.com/security-privacy/privacy-policy/"
+    },
+    UKEYLON: {
+      terms: "https://www.londoneye.com/security-privacy/terms-conditions/",
+      privacy: "https://www.londoneye.com/security-privacy/privacy-policy/"
+    },
+    UKMTLON: {
+      terms: "https://www.madametussauds.com/london/policies/terms-conditions/",
+      privacy: "https://www.madametussauds.com/london/policies/privacy-policy/"
+    }
+  };
+
   const FIXED_LEFT_LAYOUTS = [
     { root: ".merlin-login", shell: ".ml-shell", hero: ".ml-hero", body: ".ml-body", inner: ".ml-body-inner" },
     { root: ".merlin-register", shell: ".mr-shell", hero: ".mr-hero", body: ".mr-body", inner: ".mr-body-inner" },
@@ -358,6 +442,73 @@
     try {
       sessionStorage.setItem(SESSION_KEY, code);
     } catch (error) {}
+  }
+
+  function normalizeAttractionId(value) {
+    const attractionId = String(value || "").trim().toUpperCase();
+    return ATTRACTION_LEGAL_LINKS[attractionId] ? attractionId : null;
+  }
+
+  function getStoredAttractionId() {
+    try {
+      return normalizeAttractionId(sessionStorage.getItem(ATTRACTION_SESSION_KEY));
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function setStoredAttractionId(attractionId) {
+    try {
+      if (attractionId) {
+        sessionStorage.setItem(ATTRACTION_SESSION_KEY, attractionId);
+      } else {
+        sessionStorage.removeItem(ATTRACTION_SESSION_KEY);
+      }
+    } catch (error) {}
+  }
+
+  function resolveAttractionId() {
+    const from = getFromParam();
+
+    if (from !== null) {
+      const attractionId = normalizeAttractionId(from);
+      setStoredAttractionId(attractionId);
+      return attractionId;
+    }
+
+    return getStoredAttractionId();
+  }
+
+  function normalizeLinkText(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function applyLegalLinks() {
+    const attractionId = resolveAttractionId();
+    const links = ATTRACTION_LEGAL_LINKS[attractionId];
+
+    if (!links) return;
+
+    document.querySelectorAll("a").forEach(function (link) {
+      const text = normalizeLinkText(link.textContent);
+      const isTermsLink =
+        link.classList.contains("merlin-terms-link") ||
+        text.includes("terms and conditions") ||
+        text.includes("terms of use");
+      const isPrivacyLink =
+        link.classList.contains("merlin-privacy-link") ||
+        text.includes("privacy policy") ||
+        text.includes("privacy notice");
+
+      if (isTermsLink) {
+        link.setAttribute("href", links.terms);
+      } else if (isPrivacyLink) {
+        link.setAttribute("href", links.privacy);
+      }
+    });
   }
 
   function resolveThemeCode() {
@@ -1148,6 +1299,7 @@
       applyAssetTheme(THEMES[themeCode]);
       ensureSmallMerlinLogo();
     } finally {
+      applyLegalLinks();
       installLargeDesktopContentScale();
       scheduleFixedLeftScrollLayout();
 
