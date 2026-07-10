@@ -688,7 +688,8 @@
 
     const copy = type === "phone"
 
-      ? {
+ /*
+    ? {
           title: "We are getting your details ready in My Merlin",
           body: "Please try again in few hours.."
         }
@@ -697,7 +698,8 @@
           body: "Please try again in few hours."
         };
 
-/*
+*/
+
 
       ? {
           title: "This mobile number is not in our records",
@@ -708,7 +710,6 @@
           body: "We don't recognise this email address. Please check it's entered correctly, or try a different one."
         };
 
-*/
 
     if (type === "phone") {
       target.className = "ml-flow-error merlin-records-error";
@@ -723,7 +724,7 @@
     target.innerHTML =
       getRecordsIconSvg() +
       "<div>" +
-      '<p class="merlin-records-error__body">' + copy.title + "</p>" +
+      '<p class="merlin-records-error__title">' + copy.title + "</p>" +
       '<p class="merlin-records-error__body">' + copy.body + "</p>" +
       "</div>";
 
