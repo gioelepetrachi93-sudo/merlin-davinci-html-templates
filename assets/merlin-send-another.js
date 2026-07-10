@@ -273,16 +273,22 @@
 
       .merlin-otp-wait-actions {
         display: flex;
-        justify-content: flex-end;
+        justify-content: stretch;
+        width: 100%;
         margin-top: 22px;
       }
 
       .merlin-otp-wait-ok {
-        min-width: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 40px;
+        height: 40px;
         min-height: 40px;
         border: 0;
-        border-radius: 999px;
-        padding: 8px 18px;
+        border-radius: 24px;
+        padding: 8px 16px;
         background: #571CFF;
         color: #FFFFFF;
         font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
