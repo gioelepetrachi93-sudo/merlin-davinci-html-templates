@@ -12,6 +12,7 @@
   const CHECK_INTERVAL_MS = 300;
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const EMAIL_FORMAT_ERROR_TEXT = "Please check your email format (e.g. name@mail.com)";
+  const PHONE_MULTIPLE_ACCOUNTS_ERROR_TEXT = "This phone number is linked to more than one Merlin account, so it can't be used for login. Please try logging in with your email address instead, or contact us.";
 
   const OTP_SELECTORS = [
     { wrapper: ".mv-otp-wrapper", cell: ".mv-otp-wrapper > .mv-otp-cell" },
@@ -681,55 +682,63 @@
     return value === "something went wrong." || value === "something went wrong";
   }
 
-  function renderRecordsCard(target, type) {
-    if (!target || isRenderingRecords) return;
+  function isPhoneMultipleAccountsText(text) {
+  const value = normalizeText(text);
+  const expected = normalizeText(PHONE_MULTIPLE_ACCOUNTS_ERROR_TEXT);
 
-    isRenderingRecords = true;
+  return (
+    value === expected ||
+    (
+      value.includes(
+        "phone number is linked to more than one merlin account"
+      ) &&
+      value.includes("can't be used for login")
+    )
+  );
+}
 
-    const copy = type === "phone"
+function renderRecordsCard(target, type, customCopy) {
+  if (!target || isRenderingRecords) return;
 
- /*
-    ? {
-          title: "We are getting your details ready in My Merlin",
-          body: "Please try again in few hours.."
-        }
-      : {
-          title: "We are getting your details ready in My Merlin",
-          body: "Please try again in few hours."
-        };
+  isRenderingRecords = true;
 
-*/
+  const copy =
+    customCopy ||
+    (
+      type === "phone"
+        ? {
+            title: "This mobile number is not in our records",
+            body: "We don't recognise this mobile number. Please check it's entered correctly, or try a different one."
+          }
+        : {
+            title: "This email address is not in our records",
+            body: "We don't recognise this email address. Please check it's entered correctly, or try a different one."
+          }
+    );
 
-
-      ? {
-          title: "This mobile number is not in our records",
-          body: "We don't recognise this mobile number. Please check it's entered correctly, or try a different one."
-        }
-      : {
-          title: "This email address is not in our records",
-          body: "We don't recognise this email address. Please check it's entered correctly, or try a different one."
-        };
-
-
-    if (type === "phone") {
-      target.className = "ml-flow-error merlin-records-error";
-    } else {
-      target.classList.add("merlin-records-error");
-    }
-
-    target.dataset.merlinRecordsErrorType = type;
-    activeRecordsType = type;
-    activeRecordsValue = getCurrentRecordsValue(type);
-
-    target.innerHTML =
-      getRecordsIconSvg() +
-      "<div>" +
-      '<p class="merlin-records-error__title">' + copy.title + "</p>" +
-      '<p class="merlin-records-error__body">' + copy.body + "</p>" +
-      "</div>";
-
-    isRenderingRecords = false;
+  if (type === "phone") {
+    target.className = "ml-flow-error merlin-records-error";
+  } else {
+    target.classList.add("merlin-records-error");
   }
+
+  target.dataset.merlinRecordsErrorType = type;
+  activeRecordsType = type;
+  activeRecordsValue = getCurrentRecordsValue(type);
+
+  target.innerHTML =
+    getRecordsIconSvg() +
+    "<div>" +
+    '<p class="merlin-records-error__title">' +
+    copy.title +
+    "</p>" +
+    '<p class="merlin-records-error__body">' +
+    copy.body +
+    "</p>" +
+    "</div>";
+
+  isRenderingRecords = false;
+}
 
   function renderEmailRecordsUnderInput(flowError) {
     const input = getEmailInput();
@@ -748,25 +757,33 @@
     renderRecordsCard(box, "email");
   }
 
-  function applyRecordsErrors() {
-    const root = getLoginRoot();
-    const flowError = root && root.querySelector(".ml-flow-error");
+function applyRecordsErrors() {
+  const root = getLoginRoot();
+  const flowError = root && root.querySelector(".ml-flow-error");
 
-    if (!root || !flowError || isRenderingRecords) return;
-    if (isLoginEmailInvalidFormat()) return;
-    if (flowError.dataset.merlinRecordsErrorType) return;
+  if (!root || !flowError || isRenderingRecords) return;
+  if (isLoginEmailInvalidFormat()) return;
+  if (flowError.dataset.merlinRecordsErrorType) return;
 
-    const text = flowError.textContent;
+  const text = flowError.textContent;
 
-    if (isEmailRecordsText(text)) {
-      renderEmailRecordsUnderInput(flowError);
-      return;
-    }
-
-    if (isPhoneRecordsText(text)) {
-      renderRecordsCard(flowError, "phone");
-    }
+  if (isEmailRecordsText(text)) {
+    renderEmailRecordsUnderInput(flowError);
+    return;
   }
+
+  if (isPhoneMultipleAccountsText(text)) {
+    renderRecordsCard(flowError, "phone", {
+      title: "Multiple accounts found",
+      body: PHONE_MULTIPLE_ACCOUNTS_ERROR_TEXT
+    });
+    return;
+  }
+
+  if (isPhoneRecordsText(text)) {
+    renderRecordsCard(flowError, "phone");
+  }
+}
 
   function scheduleRecordsCheck() {
     recordsTimers.forEach(clearTimeout);
